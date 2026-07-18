@@ -1,6 +1,6 @@
 import { clearAuth, getStoredToken } from '../types/auth'
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 export class ApiError extends Error {
   status: number
