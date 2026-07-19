@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Clock, Coins, DollarSign, Plus, RefreshCw, Save, Shirt, Trash2 } from 'lucide-react'
+import { AlertTriangle, Clock, Coins, DollarSign, Plus, RefreshCw, Save, Shirt, Trash2 } from 'lucide-react'
 import { useFinanzas } from '../context/FinanzasContext'
 import { useAuth } from '../context/AuthContext'
-import type { PrecioReferencia } from '../api/finanzas'
+import { limpiarDatosTest, type PrecioReferencia } from '../api/finanzas'
 import { fmtMontoConDlls, getTipoCambioMxUsd } from '../utils/tipoCambio'
 
 function formatMoney(amount: number) {
@@ -35,6 +35,8 @@ export function FinanzasPage() {
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState<string | null>(null)
   const [errorLocal, setErrorLocal] = useState<string | null>(null)
+  const [limpiando, setLimpiando] = useState(false)
+  const [mensajeLimpieza, setMensajeLimpieza] = useState<string | null>(null)
 
   useEffect(() => {
     setTipoCambioEdit(String(tipoCambioUsd))
@@ -115,6 +117,24 @@ export function FinanzasPage() {
       setGuardando(false)
     }
   }, [tipoCambioEdit, multaPorDiaEdit, fondoFeriaEdit, preciosEdit, usarCodigosNuevosEdit, esTrajes, guardar])
+
+  const ejecutarLimpieza = useCallback(async () => {
+    if (!window.confirm('¿Eliminar TODAS las rentas, devoluciones y abonos? Esta acción no se puede deshacer.')) {
+      return
+    }
+    setLimpiando(true)
+    setMensajeLimpieza(null)
+    try {
+      const result = await limpiarDatosTest()
+      setMensajeLimpieza(
+        `Eliminados: ${result.rentas} rentas, ${result.devoluciones} devoluciones, ${result.abonos} abonos`
+      )
+    } catch {
+      setMensajeLimpieza('Error al limpiar datos')
+    } finally {
+      setLimpiando(false)
+    }
+  }, [])
 
   return (
     <div>
@@ -376,6 +396,41 @@ export function FinanzasPage() {
           </section>
         </div>
       )}
+
+      <section className="card mt-6 border-red-200 bg-red-50/30 p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wide text-red-800">
+              Herramientas de prueba
+            </h3>
+            <p className="text-xs text-red-600">Solo para desarrollo y testing</p>
+          </div>
+        </div>
+
+        {mensajeLimpieza && (
+          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            {mensajeLimpieza}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={ejecutarLimpieza}
+          disabled={limpiando}
+          className="rounded-lg border border-red-300 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+        >
+          <Trash2 className="mr-2 inline h-4 w-4" />
+          {limpiando ? 'Eliminando...' : 'Eliminar rentas, devoluciones y abonos'}
+        </button>
+
+        <p className="mt-3 text-xs text-red-600">
+          Esto elimina todos los registros de rentas, devoluciones y abonos de tu línea de negocio.
+          El inventario (piezas/prendas) no se afecta.
+        </p>
+      </section>
     </div>
   )
 }

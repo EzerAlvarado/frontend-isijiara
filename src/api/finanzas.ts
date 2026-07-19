@@ -49,3 +49,16 @@ export async function actualizarFinanzas(
   })
   return mapFinanzas(data)
 }
+
+export interface LimpiarDatosResult {
+  rentas: number
+  devoluciones: number
+  abonos: number
+}
+
+export async function limpiarDatosTest(categoria?: string): Promise<LimpiarDatosResult> {
+  return apiRequest<LimpiarDatosResult>('/test/limpiar/', {
+    method: 'POST',
+    body: JSON.stringify({ categoria }),
+  })
+}
