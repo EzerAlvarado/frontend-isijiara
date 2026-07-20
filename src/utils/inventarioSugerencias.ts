@@ -356,5 +356,73 @@ export function sugerenciasColorVestido(
     .slice(0, limite)
 }
 
+/** Valores únicos de detalles (nombre descriptivo) en inventario de trajes */
+export function sugerenciasDetalles(
+  piezas: Pieza[],
+  texto: string,
+  limite = 10,
+): string[] {
+  const q = normalizar(texto)
+  const valores = new Set<string>()
+
+  for (const p of piezas) {
+    if (p.estatus === 'mantenimiento') continue
+    const v = (p.detalles ?? '').trim()
+    if (!v) continue
+    const vNorm = normalizar(v)
+    if (!q || vNorm.includes(q) || q.split(/\s+/).every((palabra) => vNorm.includes(palabra))) {
+      valores.add(v.toUpperCase())
+    }
+  }
+
+  return [...valores]
+    .sort((a, b) => {
+      if (!q) return a.localeCompare(b, 'es')
+      const aNorm = normalizar(a)
+      const bNorm = normalizar(b)
+      const aStarts = aNorm.startsWith(q)
+      const bStarts = bNorm.startsWith(q)
+      if (aStarts !== bStarts) return aStarts ? -1 : 1
+      return a.localeCompare(b, 'es')
+    })
+    .slice(0, limite)
+}
+
+/** Busca pieza por detalles (nombre descriptivo) */
+export function buscarPiezaPorDetalles(
+  piezas: Pieza[],
+  tipo: TipoPieza,
+  detalles: string,
+): Pieza | undefined {
+  const d = normalizar(detalles)
+  if (!d) return undefined
+  return piezas.find(
+    (p) => p.tipo === tipo && p.estatus !== 'mantenimiento' && normalizar(p.detalles) === d,
+  )
+}
+
+/** Busca conjunto completo de piezas (saco, chaleco, pantalon) por campo detalles */
+export function buscarConjuntoPorDetalles(
+  piezas: Pieza[],
+  detalles: string,
+): { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza } {
+  const d = normalizar(detalles)
+  if (!d) return {}
+
+  const piezasCoincidentes = piezas.filter(
+    (p) => p.estatus !== 'mantenimiento' && normalizar(p.detalles) === d,
+  )
+
+  const saco = piezasCoincidentes.find((p) => p.tipo === 'saco')
+  const chaleco = piezasCoincidentes.find(
+    (p) => p.tipo === 'chaleco' && (!saco || p.conjunto === saco.conjunto),
+  )
+  const pantalon = piezasCoincidentes.find(
+    (p) => p.tipo === 'pantalon' && (!saco || p.conjunto === saco.conjunto),
+  )
+
+  return { saco, chaleco, pantalon }
+}
+
 /** @deprecated usar sugerenciasTalla */
 export type CampoPiezaInventario = 'saco' | 'chaleco' | 'pantalon'

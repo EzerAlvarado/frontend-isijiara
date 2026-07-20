@@ -3,17 +3,19 @@ import type { Pieza, TipoPieza } from '../../types/pieza'
 import {
   buscarPieza,
   buscarPiezaVestido,
+  buscarConjuntoPorDetalles,
   piezaValida,
   piezasVestidoCoincidentes,
   sugerenciasCodigo,
   sugerenciasColorMero,
   sugerenciasColorVestido,
+  sugerenciasDetalles,
   sugerenciasMarca,
   sugerenciasTalla,
 } from '../../utils/inventarioSugerencias'
 import { esTipoVestido } from '../../types/pieza'
 
-export type ModoInventarioAutocomplete = 'marca' | 'talla' | 'color' | 'codigo' | 'colorVestido'
+export type ModoInventarioAutocomplete = 'marca' | 'talla' | 'color' | 'codigo' | 'colorVestido' | 'detalles'
 
 interface InventarioAutocompleteProps {
   label: string
@@ -28,6 +30,8 @@ interface InventarioAutocompleteProps {
   piezas: Pieza[]
   onChange: (valor: string) => void
   onElegirPieza?: (pieza: Pieza) => void
+  /** Trajes: callback cuando se elige un detalle para autocompletar el conjunto */
+  onElegirConjunto?: (conjunto: { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza }) => void
   /** Vestidos: no exige color antes de sugerir marca/talla */
   sinRequisitoColor?: boolean
   /** Trajes pantalón: formato talla#código en sugerencias */
@@ -69,6 +73,7 @@ export function InventarioAutocomplete({
   piezas,
   onChange,
   onElegirPieza,
+  onElegirConjunto,
   sinRequisitoColor = false,
   usarCodigosNuevosPantalon = false,
 }: InventarioAutocompleteProps) {
@@ -78,6 +83,9 @@ export function InventarioAutocomplete({
 
   const sugerencias = useMemo(() => {
     const filtros = { color, marca, talla, codigo }
+    if (modo === 'detalles') {
+      return sugerenciasDetalles(piezas, value, 10)
+    }
     if (modo === 'color') {
       return sugerenciasColorMero(piezas, tipo, { marca, talla, codigo }, value)
     }
@@ -115,7 +123,12 @@ export function InventarioAutocomplete({
 
     onChange(valor)
 
-    if (esVestido) {
+    if (modo === 'detalles' && onElegirConjunto) {
+      const conjunto = buscarConjuntoPorDetalles(piezas, valor)
+      if (conjunto.saco || conjunto.chaleco || conjunto.pantalon) {
+        onElegirConjunto(conjunto)
+      }
+    } else if (esVestido) {
       intentarVincularVestido(
         piezas,
         tipo,
@@ -133,7 +146,7 @@ export function InventarioAutocomplete({
   }
 
   const mostrarHintColor =
-    !sinRequisitoColor && !color.trim() && modo !== 'color' && modo !== 'colorVestido' && !esVestido
+    !sinRequisitoColor && !color.trim() && modo !== 'color' && modo !== 'colorVestido' && modo !== 'detalles' && !esVestido
 
   return (
     <label className="block">

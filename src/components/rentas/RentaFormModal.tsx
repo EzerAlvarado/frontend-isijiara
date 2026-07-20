@@ -191,6 +191,7 @@ export function RentaFormModal({
   const { preciosReferencia, usarCodigosNuevosPantalon } = useFinanzas()
   const esVestidos = usuario?.lineaNegocio === 'vestidos'
   const [values, setValues] = useState<RentaFormValues>(crearFormularioVacio)
+  const [busquedaDetalles, setBusquedaDetalles] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmProximaSemana, setConfirmProximaSemana] = useState(false)
@@ -370,6 +371,7 @@ export function RentaFormModal({
         setValues(base)
       }
     }
+    setBusquedaDetalles('')
     setError(null)
     setConfirmProximaSemana(false)
   }, [open, renta, esVestidos, categoriaPerfil])
@@ -448,6 +450,41 @@ export function RentaFormModal({
       })
     },
     [esVestidos, piezasTodas, preciosReferencia, usarCodigosNuevosPantalon],
+  )
+
+  const aplicarConjuntoDesdeDetalles = useCallback(
+    (conjunto: { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza }) => {
+      setValues((prev) => {
+        const next = { ...prev }
+        if (conjunto.saco) {
+          next.color = conjunto.saco.color?.toUpperCase() ?? ''
+          next.marca = conjunto.saco.marca?.toUpperCase() ?? ''
+          next.saco = conjunto.saco.talla?.toUpperCase() ?? ''
+          next.piezaSacoId = conjunto.saco.id
+        }
+        if (conjunto.chaleco) {
+          next.colorChaleco = conjunto.chaleco.color?.toUpperCase() ?? ''
+          next.marcaChaleco = conjunto.chaleco.marca?.toUpperCase() ?? ''
+          next.chaleco = conjunto.chaleco.talla?.toUpperCase() ?? ''
+          next.piezaChalecoId = conjunto.chaleco.id
+        }
+        if (conjunto.pantalon) {
+          next.colorPantalon = conjunto.pantalon.color?.toUpperCase() ?? ''
+          next.marcaPantalon = conjunto.pantalon.marca?.toUpperCase() ?? ''
+          next.pantalon = usarCodigosNuevosPantalon && conjunto.pantalon.codigoNew
+            ? `${conjunto.pantalon.talla?.toUpperCase() ?? ''}#${conjunto.pantalon.codigoNew}`
+            : conjunto.pantalon.talla?.toUpperCase() ?? ''
+          next.piezaPantalonId = conjunto.pantalon.id
+        }
+        const ref = conjunto.saco
+        if (ref && !esPrecioOperacionManual(next.tipoOperacion)) {
+          const precio = calcularPrecioVestido(ref, next.tipoOperacion, preciosReferencia)
+          if (precio > 0) next.precio = String(precio)
+        }
+        return next
+      })
+    },
+    [preciosReferencia, usarCodigosNuevosPantalon],
   )
 
   const ejecutarGuardado = async () => {
@@ -811,9 +848,26 @@ export function RentaFormModal({
           ) : (
             <>
               <p className="mb-3 text-xs text-gray-500">
-                Cada prenda (saco, chaleco, pantalón) se elige por separado. No se sugieren piezas
-                ocupadas la misma semana; si alguna sale la próxima semana verás un aviso arriba.
+                Busca por nombre del traje o elige cada prenda (saco, chaleco, pantalón) por separado.
+                No se sugieren piezas ocupadas la misma semana; si alguna sale la próxima semana verás un aviso arriba.
               </p>
+              <div className="mb-4 max-w-md">
+                <InventarioAutocomplete
+                  label="Buscar por nombre del traje"
+                  modo="detalles"
+                  value={busquedaDetalles}
+                  tipo="saco"
+                  color=""
+                  marca=""
+                  talla=""
+                  piezas={inventario}
+                  onChange={setBusquedaDetalles}
+                  onElegirConjunto={aplicarConjuntoDesdeDetalles}
+                />
+                <span className="mt-0.5 block text-[11px] text-gray-500">
+                  Ej: "AZUL INDIGO", "NEGRO LISO" — autocompleta saco, chaleco y pantalón
+                </span>
+              </div>
               <div className="space-y-3">
                 <FilaPieza
                   titulo="Saco"
