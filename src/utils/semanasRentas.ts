@@ -116,10 +116,18 @@ export function inicioCatalogoDinamico(): string {
 }
 
 export const MESES_VENTANA_ADELANTE = 2
+export const SEMANAS_VENTANA_ATRAS = 4
 
-/** Semana actual + N meses hacia adelante (lunes a domingo) */
-export function semanasVentanaActual(mesesAdelante = MESES_VENTANA_ADELANTE): SemanaRenta[] {
-  const inicio = inicioDeSemana(new Date())
+/** Semanas pasadas + semana actual + N meses hacia adelante (lunes a domingo) */
+export function semanasVentanaActual(
+  mesesAdelante = MESES_VENTANA_ADELANTE,
+  semanasAtras = SEMANAS_VENTANA_ATRAS,
+): SemanaRenta[] {
+  const hoy = inicioDeSemana(new Date())
+  
+  const inicio = new Date(hoy)
+  inicio.setDate(inicio.getDate() - semanasAtras * 7)
+  
   const limite = new Date()
   limite.setMonth(limite.getMonth() + mesesAdelante)
   limite.setHours(23, 59, 59, 999)
@@ -141,15 +149,18 @@ export function semanasVentanaActual(mesesAdelante = MESES_VENTANA_ADELANTE): Se
   return semanas
 }
 
-/** ¿La fecha de salida cae en la ventana visible (semana actual → +2 meses)? */
+/** ¿La fecha de salida cae en la ventana visible (semanas atrás → +2 meses)? */
 export function estaEnVentanaActual(
   fechaSalida: string,
   mesesAdelante = MESES_VENTANA_ADELANTE,
+  semanasAtras = SEMANAS_VENTANA_ATRAS,
 ): boolean {
   const fecha = parseFechaDDMMYYYY(fechaSalida)
   if (!fecha) return false
 
-  const inicio = inicioDeSemana(new Date())
+  const hoy = inicioDeSemana(new Date())
+  const inicio = new Date(hoy)
+  inicio.setDate(inicio.getDate() - semanasAtras * 7)
   inicio.setHours(0, 0, 0, 0)
 
   const limite = new Date()
