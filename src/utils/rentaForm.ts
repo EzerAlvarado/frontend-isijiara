@@ -55,6 +55,7 @@ export interface RentaFormValues {
   detalles: string
   ajustes: string
   fechaSalida: string
+  fechaRegreso: string
   semanaInicio: string
   precio: string
   anticipo: string
@@ -80,6 +81,7 @@ export function hoyISO(): string {
 
 export function crearFormularioVacio(): RentaFormValues {
   const fechaSalida = hoyMX()
+  const fechaRegreso = sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
   return {
     color: '',
     marca: '',
@@ -103,6 +105,7 @@ export function crearFormularioVacio(): RentaFormValues {
     detalles: '',
     ajustes: '',
     fechaSalida,
+    fechaRegreso,
     semanaInicio: semanaKeyDesdeFechaSalida(fechaSalida) || hoyISO(),
     precio: '',
     anticipo: '',
@@ -138,6 +141,9 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     anticipo = ''
   }
 
+  const fechaSalida = renta.fechaSalida || renta.fechaCita.valor
+  const fechaRegreso = renta.fechaRegreso || sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
+
   return {
     color: renta.color.valor,
     marca: renta.marca ?? '',
@@ -160,7 +166,8 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     horario: horarioParaInput(renta.horario.valor),
     detalles: renta.detalles.valor,
     ajustes: renta.ajustes ?? '',
-    fechaSalida: renta.fechaSalida || renta.fechaCita.valor,
+    fechaSalida,
+    fechaRegreso,
     semanaInicio: renta.semanaInicio,
     precio: renta.fondo ? String(renta.fondo) : '',
     anticipo,
@@ -177,11 +184,11 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
 
 export function formularioAPayload(
   values: RentaFormValues,
-  fechaRegreso: string,
   piezasInventario: Pieza[] = [],
   lineaNegocio: LineaNegocio = 'trajes',
   usarCodigosNuevosPantalon = false,
 ): Omit<Renta, 'id'> {
+  const fechaRegreso = values.fechaRegreso || sumarDiasFecha(values.fechaSalida, DIAS_RENTA_DEFAULT)
   const semana =
     semanaKeyDesdeFechaSalida(values.fechaSalida) || values.semanaInicio || hoyISO()
 

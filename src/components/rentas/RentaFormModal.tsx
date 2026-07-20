@@ -5,12 +5,12 @@ import type { Pieza, TipoPieza } from '../../types/pieza'
 import { etiquetaTipoVestido } from '../../types/pieza'
 import {
   DIAS_RENTA_DEFAULT,
-  calcularFechaRegreso,
   crearFormularioVacio,
   formularioAPayload,
   rentaAFormulario,
   type RentaFormValues,
 } from '../../utils/rentaForm'
+import { sumarDiasFecha } from '../../utils/semanasRentas'
 import { calcularMultaAutomatica, getMultaPorDia } from '../../utils/multa'
 import { aMayusculas } from '../../utils/mayusculas'
 import { semanaKeyDesdeFechaSalida } from '../../utils/semanasRentas'
@@ -315,11 +315,6 @@ export function RentaFormModal({
     [preciosReferencia],
   )
 
-  const fechaRegreso = useMemo(
-    () => calcularFechaRegreso(values.fechaSalida),
-    [values.fechaSalida],
-  )
-
   const multaAuto = useMemo(
     () => calcularMultaAutomatica(values.fechaSalida),
     [values.fechaSalida],
@@ -409,6 +404,8 @@ export function RentaFormModal({
       if (key === 'fechaSalida') {
         const semana = semanaKeyDesdeFechaSalida(valor)
         if (semana) next.semanaInicio = semana
+        const nuevaFechaRegreso = sumarDiasFecha(valor, DIAS_RENTA_DEFAULT)
+        if (nuevaFechaRegreso) next.fechaRegreso = nuevaFechaRegreso
       }
       if (key === 'color') next.piezaSacoId = ''
       if (key === 'marca') next.piezaSacoId = ''
@@ -460,7 +457,6 @@ export function RentaFormModal({
       await onSubmit(
         formularioAPayload(
           values,
-          fechaRegreso,
           piezasTodas,
           usuario?.lineaNegocio ?? 'trajes',
           usarCodigosNuevosPantalon,
@@ -488,8 +484,8 @@ export function RentaFormModal({
       setError('El precio debe venir del inventario. Elige tipo renta, premier, venta o sesión de fotos.')
       return
     }
-    if (!fechaRegreso) {
-      setError('La fecha de salida debe tener formato dd/mm/aaaa.')
+    if (!values.fechaRegreso) {
+      setError('La fecha de regreso es obligatoria.')
       return
     }
 
@@ -555,10 +551,12 @@ export function RentaFormModal({
               required
             />
             <Field
-              label="Fecha regreso"
-              value={fechaRegreso || '—'}
-              readOnly
-              hint={`${DIAS_RENTA_DEFAULT} días después de la salida`}
+              label="Fecha regreso *"
+              value={values.fechaRegreso}
+              onChange={set('fechaRegreso')}
+              placeholder="dd/mm/aaaa"
+              required
+              hint={`Por defecto ${DIAS_RENTA_DEFAULT} días después`}
             />
             <Field label="Horario" type="time" value={values.horario} onChange={set('horario')} />
             <Field label="Ajustes" value={values.ajustes} onChange={set('ajustes')} placeholder="Ej. subir mangas, ensanchar cintura" />
