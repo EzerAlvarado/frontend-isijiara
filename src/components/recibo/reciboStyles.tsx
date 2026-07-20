@@ -2,16 +2,11 @@ import type { ReactNode } from 'react'
 
 function LogoIsijara() {
   return (
-    <div className="flex h-[52px] w-[44px] shrink-0 flex-col items-center justify-end gap-0.5 border border-gray-400 px-1 py-1">
-      <svg viewBox="0 0 24 32" className="h-7 w-5 fill-gray-900" aria-hidden>
-        <ellipse cx="12" cy="5" rx="4" ry="4.5" />
-        <path d="M6 11 L4 30 L20 30 L18 11 Z" />
-      </svg>
-      <svg viewBox="0 0 24 32" className="h-7 w-5 fill-gray-900" aria-hidden>
-        <ellipse cx="12" cy="5" rx="4.5" ry="4" />
-        <path d="M5 10 Q12 14 19 10 L21 30 L3 30 Z" />
-      </svg>
-    </div>
+    <img
+      src="/logo-isijara.png"
+      alt="Isijara Boutique"
+      className="h-[60px] w-auto shrink-0 object-contain"
+    />
   )
 }
 
