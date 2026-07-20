@@ -26,6 +26,10 @@ export function slugDesdeTipoVestido(tipo: TipoPiezaVestido): PerfilVestidoSlug 
   return 'noche'
 }
 
+export function categoriaBackendDesdeSlug(slug: PerfilVestidoSlug): string {
+  return tipoVestidoDesdeSlug(slug)
+}
+
 export function etiquetaPerfilSlug(slug: PerfilVestidoSlug): 'NOCHE' | 'XV' | 'NOVIA' {
   if (slug === 'xv') return 'XV'
   if (slug === 'novia') return 'NOVIA'

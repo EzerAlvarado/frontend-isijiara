@@ -25,11 +25,14 @@ import {
 } from '../api/corte'
 import { ConteoCajaModal } from '../components/corte/ConteoCajaModal'
 import { Modal } from '../components/ui/Modal'
+import { useAuth } from '../context/AuthContext'
 import { useFinanzas } from '../context/FinanzasContext'
+import { usePerfilVestido } from '../context/PerfilVestidoContext'
 import { METODOS_PAGO } from '../utils/metodoPago'
 import { calcularTotalesConteo } from '../utils/conteoCaja'
 import type { ConteoFisico } from '../utils/conteoCaja'
 import { conceptoBadgeClass, conceptoTransaccion } from '../utils/conceptoTransaccion'
+import { categoriaBackendDesdeSlug } from '../utils/perfilVestido'
 import { dllsAPesos, getTipoCambioMxUsd } from '../utils/tipoCambio'
 import type { MetodoPago, TurnoCorte } from '../types'
 
@@ -53,6 +56,8 @@ function formatMontoTransaccion(monto: number, pago: string) {
 
 export function CorteDiaPage() {
   const { fondoFeria } = useFinanzas()
+  const { lineaNegocio } = useAuth()
+  const { perfilSlug, etiquetaPerfil } = usePerfilVestido()
   const [fecha, setFecha] = useState(hoyISO)
   const [turno, setTurno] = useState<TurnoCorte | null>(null)
   const [corte, setCorte] = useState<CorteDiaResponse | null>(null)
@@ -69,6 +74,9 @@ export function CorteDiaPage() {
   const [gastoPago, setGastoPago] = useState<MetodoPago>('pesos')
   const [guardando, setGuardando] = useState(false)
 
+  const esVestidos = lineaNegocio === 'vestidos'
+  const categoriaBackend = esVestidos ? categoriaBackendDesdeSlug(perfilSlug) : undefined
+
   const turnoActivo = turno ?? corte?.turno ?? 'manana'
   const turnoRef = useRef(turno)
   turnoRef.current = turno
@@ -78,7 +86,7 @@ export function CorteDiaPage() {
     setCargando(true)
     setError(null)
     try {
-      const data = await fetchCorte(fecha, turnoSolicitado ?? undefined)
+      const data = await fetchCorte(fecha, turnoSolicitado ?? undefined, categoriaBackend)
       if (turnoRef.current !== turnoSolicitado) return
       setCorte(data)
       if (turnoSolicitado === null) {
@@ -93,7 +101,7 @@ export function CorteDiaPage() {
         setCargando(false)
       }
     }
-  }, [fecha, turno])
+  }, [fecha, turno, categoriaBackend])
 
   useEffect(() => {
     setTurno(null)
@@ -153,7 +161,7 @@ export function CorteDiaPage() {
     setFondoEdit(String(fondoConfigurado))
     setGuardando(true)
     try {
-      const data = await actualizarFondoInicial(fecha, fondoConfigurado, undefined, turnoActivo)
+      const data = await actualizarFondoInicial(fecha, fondoConfigurado, undefined, turnoActivo, categoriaBackend)
       setCorte(data)
     } catch {
       setError('No se pudo aplicar el fondo configurado.')
@@ -166,7 +174,7 @@ export function CorteDiaPage() {
     if (!corte || corte.cerrado) return
     setGuardando(true)
     try {
-      const data = await actualizarFondoInicial(fecha, Number(fondoEdit) || 0, undefined, turnoActivo)
+      const data = await actualizarFondoInicial(fecha, Number(fondoEdit) || 0, undefined, turnoActivo, categoriaBackend)
       setCorte(data)
     } catch {
       setError('No se pudo guardar el fondo inicial.')
@@ -186,12 +194,12 @@ export function CorteDiaPage() {
 
     setGuardando(true)
     try {
-      let data = await actualizarFondoInicial(fecha, fondoMxn, conteoFondo, turnoActivo)
+      let data = await actualizarFondoInicial(fecha, fondoMxn, conteoFondo, turnoActivo, categoriaBackend)
       const valesOrdenados = [...corte.valesPendientes].sort((a, b) => a.fecha.localeCompare(b.fecha))
       for (const vale of valesOrdenados) {
         if (montoAReponer <= 0.01) break
         if (vale.montoMxn <= montoAReponer + 0.01) {
-          data = await reponerVale(vale.id, fecha, true, turnoActivo)
+          data = await reponerVale(vale.id, fecha, true, turnoActivo, categoriaBackend)
           montoAReponer -= vale.montoMxn
         }
       }
@@ -221,7 +229,7 @@ export function CorteDiaPage() {
     }
     setGuardando(true)
     try {
-      const data = await cerrarCorte(fecha, conteoFondo, conteoCaja, empleado, turnoActivo)
+      const data = await cerrarCorte(fecha, conteoFondo, conteoCaja, empleado, turnoActivo, categoriaBackend)
       setCorte(data)
       setMostrarConteo(false)
     } catch (err) {
@@ -245,6 +253,7 @@ export function CorteDiaPage() {
         monto,
         pago: gastoPago,
         turno: turnoActivo,
+        categoria: categoriaBackend,
       })
       setCorte(data)
       setFondoEdit(String(data.fondoInicial))
@@ -262,7 +271,7 @@ export function CorteDiaPage() {
     if (!corte || corte.cerrado) return
     setGuardando(true)
     try {
-      const data = await reponerVale(valeId, fecha, false, turnoActivo)
+      const data = await reponerVale(valeId, fecha, false, turnoActivo, categoriaBackend)
       setCorte(data)
       setFondoEdit(String(data.fondoInicial))
     } catch {
@@ -278,7 +287,14 @@ export function CorteDiaPage() {
     <div id="corte-imprimible">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4 print:mb-4">
         <div>
-          <h2 className="text-2xl font-bold uppercase tracking-tight">Corte del Día</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold uppercase tracking-tight">Corte del Día</h2>
+            {esVestidos && (
+              <span className="rounded bg-brand-100 px-2 py-0.5 text-xs font-bold uppercase text-brand-800">
+                {etiquetaPerfil}
+              </span>
+            )}
+          </div>
           <div className="mt-3 flex flex-wrap gap-2 print:hidden">
             {(['manana', 'tarde'] as TurnoCorte[]).map((t) => {
               const estado = corte?.turnosDia.find((x) => x.turno === t)

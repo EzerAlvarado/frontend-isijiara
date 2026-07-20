@@ -17,6 +17,7 @@ export interface CorteDiaResponse {
   turnoLabel: string
   incluyeManana: boolean
   turnosDia: TurnoDiaEstado[]
+  categoriaVestido?: string | null
   fondoInicial: number
   fondoFeriaConfig?: number
   cerrado: boolean
@@ -136,14 +137,18 @@ function mapCorte(raw: CorteDiaResponse): CorteDiaResponse {
   }
 }
 
-function corteQuery(fecha: string, turno?: TurnoCorte) {
+function corteQuery(fecha: string, turno?: TurnoCorte, categoria?: string) {
   const params = new URLSearchParams({ fecha })
   if (turno) params.set('turno', turno)
+  if (categoria) params.set('categoria', categoria)
   return params.toString()
 }
 
-function corteBody(payload: Record<string, unknown>, turno?: TurnoCorte) {
-  return turno ? { ...payload, turno } : payload
+function corteBody(payload: Record<string, unknown>, turno?: TurnoCorte, categoria?: string) {
+  const body: Record<string, unknown> = { ...payload }
+  if (turno) body.turno = turno
+  if (categoria) body.categoria = categoria
+  return body
 }
 
 export function hoyISO(): string {
@@ -154,8 +159,8 @@ export function hoyISO(): string {
   return `${y}-${m}-${day}`
 }
 
-export async function fetchCorte(fecha: string, turno?: TurnoCorte): Promise<CorteDiaResponse> {
-  const data = await apiRequest<CorteDiaResponse>(`/corte/?${corteQuery(fecha, turno)}`)
+export async function fetchCorte(fecha: string, turno?: TurnoCorte, categoria?: string): Promise<CorteDiaResponse> {
+  const data = await apiRequest<CorteDiaResponse>(`/corte/?${corteQuery(fecha, turno, categoria)}`)
   return mapCorte(data)
 }
 
@@ -164,10 +169,11 @@ export async function actualizarFondoInicial(
   fondoInicial: number,
   conteoFondo?: ConteoFisico,
   turno?: TurnoCorte,
+  categoria?: string,
 ): Promise<CorteDiaResponse> {
-  const data = await apiRequest<CorteDiaResponse>(`/corte/?${corteQuery(fecha, turno)}`, {
+  const data = await apiRequest<CorteDiaResponse>(`/corte/?${corteQuery(fecha, turno, categoria)}`, {
     method: 'PATCH',
-    body: JSON.stringify(corteBody({ fondoInicial, ...(conteoFondo ? { conteoFondo } : {}) }, turno)),
+    body: JSON.stringify(corteBody({ fondoInicial, ...(conteoFondo ? { conteoFondo } : {}) }, turno, categoria)),
   })
   return mapCorte(data)
 }
@@ -178,11 +184,12 @@ export async function cerrarCorte(
   conteoCaja: ConteoFisico,
   empleado: string,
   turno?: TurnoCorte,
+  categoria?: string,
 ): Promise<CorteDiaResponse> {
   const data = await apiRequest<CorteDiaResponse>('/corte/cierre/', {
     method: 'POST',
     body: JSON.stringify(
-      corteBody({ fecha, conteoFondo, conteoCaja, empleado: empleado.trim() }, turno),
+      corteBody({ fecha, conteoFondo, conteoCaja, empleado: empleado.trim() }, turno, categoria),
     ),
   })
   return mapCorte(data)
@@ -194,13 +201,14 @@ export async function registrarGasto(payload: {
   monto: number
   pago?: MetodoPago
   turno?: TurnoCorte
+  categoria?: string
 }): Promise<CorteDiaResponse> {
-  const { turno, ...rest } = payload
+  const { turno, categoria, ...rest } = payload
   const data = await apiRequest<CorteDiaResponse & { transaccion?: Transaccion }>(
     '/corte/gasto/',
     {
       method: 'POST',
-      body: JSON.stringify(corteBody(rest, turno)),
+      body: JSON.stringify(corteBody(rest, turno, categoria)),
     },
   )
   return mapCorte(data)
@@ -211,10 +219,11 @@ export async function reponerVale(
   fecha: string,
   desdeConteo = false,
   turno?: TurnoCorte,
+  categoria?: string,
 ): Promise<CorteDiaResponse> {
   const data = await apiRequest<CorteDiaResponse>(`/corte/vales/${valeId}/reponer/`, {
     method: 'POST',
-    body: JSON.stringify(corteBody({ fecha, desdeConteo }, turno)),
+    body: JSON.stringify(corteBody({ fecha, desdeConteo }, turno, categoria)),
   })
   return mapCorte(data)
 }
