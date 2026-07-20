@@ -633,6 +633,13 @@ export function RentaFormModal({
                   : 'Precio − anticipo'
               }
             />
+            <Field
+              label="Depósito Reemb."
+              value={values.depositoReembolsable}
+              onChange={set('depositoReembolsable')}
+              placeholder="Ej: $500"
+              hint="Monto a devolver al cliente"
+            />
           </div>
 
           {esEfectivo && (

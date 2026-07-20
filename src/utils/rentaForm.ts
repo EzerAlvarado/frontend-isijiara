@@ -69,6 +69,8 @@ export interface RentaFormValues {
   categoriaVestido: TipoPiezaVestido
   /** Renta, venta o premier */
   tipoOperacion: TipoOperacionVestido
+  /** Depósito reembolsable */
+  depositoReembolsable: string
 }
 
 export function hoyMX(): string {
@@ -117,6 +119,7 @@ export function crearFormularioVacio(): RentaFormValues {
     piezaPantalonId: '',
     categoriaVestido: 'noche',
     tipoOperacion: 'renta',
+    depositoReembolsable: '',
   }
 }
 
@@ -179,6 +182,7 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     piezaPantalonId: renta.piezaPantalonId ?? '',
     categoriaVestido: (renta.categoriaVestido as TipoPiezaVestido) || 'noche',
     tipoOperacion,
+    depositoReembolsable: renta.depositoReembolsable ?? '',
   }
 }
 
@@ -306,6 +310,7 @@ export function formularioAPayload(
     categoriaVestido: esVestidos ? values.categoriaVestido : '',
     tipoOperacion,
     estatusFila: estatusAuto ?? ('' as Renta['estatusFila']),
+    depositoReembolsable: values.depositoReembolsable.trim(),
   }
 }
 

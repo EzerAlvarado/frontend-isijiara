@@ -231,7 +231,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
           : 'Recoger en boutique',
     accesorio: formatearAccesoriosNota(renta.cinto.valor, renta.accesorio.valor),
     ajustes: aMayusculas(renta.ajustes ?? ''),
-    depositoReembolsable: '',
+    depositoReembolsable: aMayusculas(renta.depositoReembolsable ?? ''),
     atendidaPor: celdaValor(renta.empleado),
     garantia: 0,
     total,

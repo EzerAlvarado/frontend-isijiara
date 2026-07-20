@@ -116,6 +116,8 @@ export interface Renta {
   restante?: number
   /** true cuando totalPagado >= totalCobrar */
   pagado?: boolean
+  /** Depósito reembolsable (texto descriptivo) */
+  depositoReembolsable?: string
   abonos?: Abono[]
 }
 

@@ -228,8 +228,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
 
           <div className="grid grid-cols-2 gap-1">
             <div className="border border-gray-900 px-1.5 py-1 text-center">
-              <p className="text-[8px] font-bold uppercase">Garantía</p>
-              <p className="text-sm font-bold">{fmt(doc.garantia)}</p>
+              <p className="text-[8px] font-bold uppercase">Depósito Reemb.</p>
+              <p className="text-sm font-bold">{doc.depositoReembolsable || '0.00'}</p>
             </div>
             <div
               className={`border border-gray-900 px-1.5 py-1 text-center ${
