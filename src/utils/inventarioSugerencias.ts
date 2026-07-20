@@ -123,6 +123,22 @@ export function buscarPieza(
   marca: string,
   talla: string,
 ): Pieza | undefined {
+  if (!talla?.trim()) return undefined
+
+  if (tipo === 'pantalon' && talla.includes('#')) {
+    const [tallaParte, codigoParte] = talla.split('#')
+    const tallaNorm = normalizar(tallaParte)
+    const codigoNorm = normalizar(codigoParte)
+    const pieza = piezas.find(
+      (p) =>
+        p.tipo === 'pantalon' &&
+        p.estatus !== 'mantenimiento' &&
+        normalizar(p.talla) === tallaNorm &&
+        (normalizar(p.codigoNew) === codigoNorm || normalizar(p.codigoOld) === codigoNorm),
+    )
+    if (pieza) return pieza
+  }
+
   const v = tipo === 'pantalon' ? normalizar(tallaSinCodigo(talla)) : normalizar(talla)
   if (!v) return undefined
   const pool = filtrarPool(piezas, tipo, color, marca)
@@ -356,7 +372,7 @@ export function sugerenciasColorVestido(
     .slice(0, limite)
 }
 
-/** Valores únicos de detalles (nombre descriptivo) en inventario de trajes */
+/** Valores únicos de detalles (nombre descriptivo) con código en inventario de trajes */
 export function sugerenciasDetalles(
   piezas: Pieza[],
   tipo: TipoPieza,
@@ -369,8 +385,10 @@ export function sugerenciasDetalles(
   for (const p of piezas) {
     if (p.tipo !== tipo) continue
     if (p.estatus === 'mantenimiento') continue
-    const v = (p.detalles ?? '').trim()
-    if (!v) continue
+    const detalles = (p.detalles ?? '').trim()
+    if (!detalles) continue
+    const codigo = p.conjunto || p.codigoNew || p.codigoOld || ''
+    const v = codigo ? `${detalles} [${codigo}]` : detalles
     const vNorm = normalizar(v)
     if (!q || vNorm.includes(q) || q.split(/\s+/).every((palabra) => vNorm.includes(palabra))) {
       valores.add(v.toUpperCase())
@@ -390,17 +408,23 @@ export function sugerenciasDetalles(
     .slice(0, limite)
 }
 
-/** Busca pieza por detalles (nombre descriptivo) */
+/** Busca pieza por detalles (nombre descriptivo), con o sin código */
 export function buscarPiezaPorDetalles(
   piezas: Pieza[],
   tipo: TipoPieza,
-  detalles: string,
+  detallesConCodigo: string,
 ): Pieza | undefined {
-  const d = normalizar(detalles)
+  const d = normalizar(detallesConCodigo)
   if (!d) return undefined
-  return piezas.find(
-    (p) => p.tipo === tipo && p.estatus !== 'mantenimiento' && normalizar(p.detalles) === d,
-  )
+
+  return piezas.find((p) => {
+    if (p.tipo !== tipo) return false
+    if (p.estatus === 'mantenimiento') return false
+    const detalles = (p.detalles ?? '').trim()
+    const codigo = p.conjunto || p.codigoNew || p.codigoOld || ''
+    const conCodigo = codigo ? `${detalles} [${codigo}]` : detalles
+    return normalizar(conCodigo) === d || normalizar(detalles) === d
+  })
 }
 
 /** @deprecated usar sugerenciasTalla */

@@ -127,6 +127,7 @@ function FilaPieza({
   detalles,
   tipo,
   piezas,
+  onColor,
   onMarca,
   onTalla,
   onDetalles,
@@ -140,6 +141,7 @@ function FilaPieza({
   detalles: string
   tipo: TipoPieza
   piezas: Pieza[]
+  onColor: (v: string) => void
   onMarca: (v: string) => void
   onTalla: (v: string) => void
   onDetalles: (v: string) => void
@@ -149,8 +151,8 @@ function FilaPieza({
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-700">{titulo}</p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="sm:col-span-2 lg:col-span-2">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+        <div className="col-span-2">
           <InventarioAutocomplete
             label="Detalles"
             modo="detalles"
@@ -164,6 +166,7 @@ function FilaPieza({
             onElegirPieza={onElegirPieza}
           />
         </div>
+        <Field label="Color" value={color} onChange={onColor} placeholder="NEGRO" />
         <InventarioAutocomplete
           label="Marca"
           modo="marca"
@@ -844,6 +847,7 @@ export function RentaFormModal({
                   detalles={detallesSaco}
                   tipo="saco"
                   piezas={piezasPorTipo('saco')}
+                  onColor={set('color')}
                   onMarca={set('marca')}
                   onTalla={set('saco')}
                   onDetalles={setDetallesSaco}
@@ -857,6 +861,7 @@ export function RentaFormModal({
                   detalles={detallesChaleco}
                   tipo="chaleco"
                   piezas={piezasPorTipo('chaleco')}
+                  onColor={set('colorChaleco')}
                   onMarca={set('marcaChaleco')}
                   onTalla={set('chaleco')}
                   onDetalles={setDetallesChaleco}
@@ -870,6 +875,7 @@ export function RentaFormModal({
                   detalles={detallesPantalon}
                   tipo="pantalon"
                   piezas={piezasPorTipo('pantalon')}
+                  onColor={set('colorPantalon')}
                   onMarca={set('marcaPantalon')}
                   onTalla={set('pantalon')}
                   onDetalles={setDetallesPantalon}
