@@ -124,11 +124,12 @@ function FilaPieza({
   color,
   marca,
   talla,
+  detalles,
   tipo,
   piezas,
-  onColor,
   onMarca,
   onTalla,
+  onDetalles,
   onElegirPieza,
   usarCodigosNuevosPantalon,
 }: {
@@ -136,19 +137,33 @@ function FilaPieza({
   color: string
   marca: string
   talla: string
+  detalles: string
   tipo: TipoPieza
   piezas: Pieza[]
-  onColor: (v: string) => void
   onMarca: (v: string) => void
   onTalla: (v: string) => void
+  onDetalles: (v: string) => void
   onElegirPieza: (pieza: Pieza) => void
   usarCodigosNuevosPantalon?: boolean
 }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-700">{titulo}</p>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Field label="Color" value={color} onChange={onColor} placeholder="NEGRO" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="sm:col-span-2 lg:col-span-2">
+          <InventarioAutocomplete
+            label="Detalles"
+            modo="detalles"
+            value={detalles}
+            tipo={tipo}
+            color={color}
+            marca={marca}
+            talla={talla}
+            piezas={piezas}
+            onChange={onDetalles}
+            onElegirPieza={onElegirPieza}
+          />
+        </div>
         <InventarioAutocomplete
           label="Marca"
           modo="marca"
@@ -191,7 +206,9 @@ export function RentaFormModal({
   const { preciosReferencia, usarCodigosNuevosPantalon } = useFinanzas()
   const esVestidos = usuario?.lineaNegocio === 'vestidos'
   const [values, setValues] = useState<RentaFormValues>(crearFormularioVacio)
-  const [busquedaDetalles, setBusquedaDetalles] = useState('')
+  const [detallesSaco, setDetallesSaco] = useState('')
+  const [detallesChaleco, setDetallesChaleco] = useState('')
+  const [detallesPantalon, setDetallesPantalon] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmProximaSemana, setConfirmProximaSemana] = useState(false)
@@ -371,7 +388,9 @@ export function RentaFormModal({
         setValues(base)
       }
     }
-    setBusquedaDetalles('')
+    setDetallesSaco('')
+    setDetallesChaleco('')
+    setDetallesPantalon('')
     setError(null)
     setConfirmProximaSemana(false)
   }, [open, renta, esVestidos, categoriaPerfil])
@@ -450,41 +469,6 @@ export function RentaFormModal({
       })
     },
     [esVestidos, piezasTodas, preciosReferencia, usarCodigosNuevosPantalon],
-  )
-
-  const aplicarConjuntoDesdeDetalles = useCallback(
-    (conjunto: { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza }) => {
-      setValues((prev) => {
-        const next = { ...prev }
-        if (conjunto.saco) {
-          next.color = conjunto.saco.color?.toUpperCase() ?? ''
-          next.marca = conjunto.saco.marca?.toUpperCase() ?? ''
-          next.saco = conjunto.saco.talla?.toUpperCase() ?? ''
-          next.piezaSacoId = conjunto.saco.id
-        }
-        if (conjunto.chaleco) {
-          next.colorChaleco = conjunto.chaleco.color?.toUpperCase() ?? ''
-          next.marcaChaleco = conjunto.chaleco.marca?.toUpperCase() ?? ''
-          next.chaleco = conjunto.chaleco.talla?.toUpperCase() ?? ''
-          next.piezaChalecoId = conjunto.chaleco.id
-        }
-        if (conjunto.pantalon) {
-          next.colorPantalon = conjunto.pantalon.color?.toUpperCase() ?? ''
-          next.marcaPantalon = conjunto.pantalon.marca?.toUpperCase() ?? ''
-          next.pantalon = usarCodigosNuevosPantalon && conjunto.pantalon.codigoNew
-            ? `${conjunto.pantalon.talla?.toUpperCase() ?? ''}#${conjunto.pantalon.codigoNew}`
-            : conjunto.pantalon.talla?.toUpperCase() ?? ''
-          next.piezaPantalonId = conjunto.pantalon.id
-        }
-        const ref = conjunto.saco
-        if (ref && !esPrecioOperacionManual(next.tipoOperacion)) {
-          const precio = calcularPrecioVestido(ref, next.tipoOperacion, preciosReferencia)
-          if (precio > 0) next.precio = String(precio)
-        }
-        return next
-      })
-    },
-    [preciosReferencia, usarCodigosNuevosPantalon],
   )
 
   const ejecutarGuardado = async () => {
@@ -848,37 +832,21 @@ export function RentaFormModal({
           ) : (
             <>
               <p className="mb-3 text-xs text-gray-500">
-                Busca por nombre del traje o elige cada prenda (saco, chaleco, pantalón) por separado.
-                No se sugieren piezas ocupadas la misma semana; si alguna sale la próxima semana verás un aviso arriba.
+                Cada prenda (saco, chaleco, pantalón) se elige por separado. Puedes buscar por detalles
+                (ej: "TUX NEGRO") y se autocompleta marca y talla.
               </p>
-              <div className="mb-4 max-w-md">
-                <InventarioAutocomplete
-                  label="Buscar por nombre del traje"
-                  modo="detalles"
-                  value={busquedaDetalles}
-                  tipo="saco"
-                  color=""
-                  marca=""
-                  talla=""
-                  piezas={inventario}
-                  onChange={setBusquedaDetalles}
-                  onElegirConjunto={aplicarConjuntoDesdeDetalles}
-                />
-                <span className="mt-0.5 block text-[11px] text-gray-500">
-                  Ej: "AZUL INDIGO", "NEGRO LISO" — autocompleta saco, chaleco y pantalón
-                </span>
-              </div>
               <div className="space-y-3">
                 <FilaPieza
                   titulo="Saco"
                   color={values.color}
                   marca={values.marca}
                   talla={values.saco}
+                  detalles={detallesSaco}
                   tipo="saco"
                   piezas={piezasPorTipo('saco')}
-                  onColor={set('color')}
                   onMarca={set('marca')}
                   onTalla={set('saco')}
+                  onDetalles={setDetallesSaco}
                   onElegirPieza={aplicarPieza}
                 />
                 <FilaPieza
@@ -886,11 +854,12 @@ export function RentaFormModal({
                   color={values.colorChaleco}
                   marca={values.marcaChaleco}
                   talla={values.chaleco}
+                  detalles={detallesChaleco}
                   tipo="chaleco"
                   piezas={piezasPorTipo('chaleco')}
-                  onColor={set('colorChaleco')}
                   onMarca={set('marcaChaleco')}
                   onTalla={set('chaleco')}
+                  onDetalles={setDetallesChaleco}
                   onElegirPieza={aplicarPieza}
                 />
                 <FilaPieza
@@ -898,11 +867,12 @@ export function RentaFormModal({
                   color={values.colorPantalon}
                   marca={values.marcaPantalon}
                   talla={values.pantalon}
+                  detalles={detallesPantalon}
                   tipo="pantalon"
                   piezas={piezasPorTipo('pantalon')}
-                  onColor={set('colorPantalon')}
                   onMarca={set('marcaPantalon')}
                   onTalla={set('pantalon')}
+                  onDetalles={setDetallesPantalon}
                   onElegirPieza={aplicarPieza}
                   usarCodigosNuevosPantalon={usarCodigosNuevosPantalon}
                 />

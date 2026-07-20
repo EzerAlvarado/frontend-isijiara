@@ -3,7 +3,7 @@ import type { Pieza, TipoPieza } from '../../types/pieza'
 import {
   buscarPieza,
   buscarPiezaVestido,
-  buscarConjuntoPorDetalles,
+  buscarPiezaPorDetalles,
   piezaValida,
   piezasVestidoCoincidentes,
   sugerenciasCodigo,
@@ -30,8 +30,6 @@ interface InventarioAutocompleteProps {
   piezas: Pieza[]
   onChange: (valor: string) => void
   onElegirPieza?: (pieza: Pieza) => void
-  /** Trajes: callback cuando se elige un detalle para autocompletar el conjunto */
-  onElegirConjunto?: (conjunto: { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza }) => void
   /** Vestidos: no exige color antes de sugerir marca/talla */
   sinRequisitoColor?: boolean
   /** Trajes pantalón: formato talla#código en sugerencias */
@@ -73,7 +71,6 @@ export function InventarioAutocomplete({
   piezas,
   onChange,
   onElegirPieza,
-  onElegirConjunto,
   sinRequisitoColor = false,
   usarCodigosNuevosPantalon = false,
 }: InventarioAutocompleteProps) {
@@ -84,7 +81,7 @@ export function InventarioAutocomplete({
   const sugerencias = useMemo(() => {
     const filtros = { color, marca, talla, codigo }
     if (modo === 'detalles') {
-      return sugerenciasDetalles(piezas, value, 10)
+      return sugerenciasDetalles(piezas, tipo, value, 10)
     }
     if (modo === 'color') {
       return sugerenciasColorMero(piezas, tipo, { marca, talla, codigo }, value)
@@ -123,10 +120,10 @@ export function InventarioAutocomplete({
 
     onChange(valor)
 
-    if (modo === 'detalles' && onElegirConjunto) {
-      const conjunto = buscarConjuntoPorDetalles(piezas, valor)
-      if (conjunto.saco || conjunto.chaleco || conjunto.pantalon) {
-        onElegirConjunto(conjunto)
+    if (modo === 'detalles') {
+      const pieza = buscarPiezaPorDetalles(piezas, tipo, valor)
+      if (pieza && onElegirPieza) {
+        onElegirPieza(pieza)
       }
     } else if (esVestido) {
       intentarVincularVestido(

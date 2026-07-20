@@ -20,13 +20,25 @@ export function valoresDesdePieza(
     }
   }
   if (pieza.tipo === 'saco') {
-    return { piezaSacoId: pieza.id, saco: pieza.talla }
+    return {
+      piezaSacoId: pieza.id,
+      color: pieza.color ?? '',
+      marca: pieza.marca ?? '',
+      saco: pieza.talla ?? '',
+    }
   }
   if (pieza.tipo === 'chaleco') {
-    return { piezaChalecoId: pieza.id, chaleco: pieza.talla }
+    return {
+      piezaChalecoId: pieza.id,
+      colorChaleco: pieza.color ?? '',
+      marcaChaleco: pieza.marca ?? '',
+      chaleco: pieza.talla ?? '',
+    }
   }
   return {
     piezaPantalonId: pieza.id,
+    colorPantalon: pieza.color ?? '',
+    marcaPantalon: pieza.marca ?? '',
     pantalon: formatearPantalonTraje(pieza.talla, pieza, usarCodigosNuevosPantalon),
   }
 }

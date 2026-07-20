@@ -359,6 +359,7 @@ export function sugerenciasColorVestido(
 /** Valores únicos de detalles (nombre descriptivo) en inventario de trajes */
 export function sugerenciasDetalles(
   piezas: Pieza[],
+  tipo: TipoPieza,
   texto: string,
   limite = 10,
 ): string[] {
@@ -366,6 +367,7 @@ export function sugerenciasDetalles(
   const valores = new Set<string>()
 
   for (const p of piezas) {
+    if (p.tipo !== tipo) continue
     if (p.estatus === 'mantenimiento') continue
     const v = (p.detalles ?? '').trim()
     if (!v) continue
@@ -399,29 +401,6 @@ export function buscarPiezaPorDetalles(
   return piezas.find(
     (p) => p.tipo === tipo && p.estatus !== 'mantenimiento' && normalizar(p.detalles) === d,
   )
-}
-
-/** Busca conjunto completo de piezas (saco, chaleco, pantalon) por campo detalles */
-export function buscarConjuntoPorDetalles(
-  piezas: Pieza[],
-  detalles: string,
-): { saco?: Pieza; chaleco?: Pieza; pantalon?: Pieza } {
-  const d = normalizar(detalles)
-  if (!d) return {}
-
-  const piezasCoincidentes = piezas.filter(
-    (p) => p.estatus !== 'mantenimiento' && normalizar(p.detalles) === d,
-  )
-
-  const saco = piezasCoincidentes.find((p) => p.tipo === 'saco')
-  const chaleco = piezasCoincidentes.find(
-    (p) => p.tipo === 'chaleco' && (!saco || p.conjunto === saco.conjunto),
-  )
-  const pantalon = piezasCoincidentes.find(
-    (p) => p.tipo === 'pantalon' && (!saco || p.conjunto === saco.conjunto),
-  )
-
-  return { saco, chaleco, pantalon }
 }
 
 /** @deprecated usar sugerenciasTalla */
