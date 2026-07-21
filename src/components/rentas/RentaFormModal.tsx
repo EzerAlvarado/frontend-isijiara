@@ -491,18 +491,25 @@ export function RentaFormModal({
     }
   }
 
+  const tieneAccesorios = Boolean(
+    values.camisa.trim() ||
+    values.corbataMono.trim() ||
+    values.cinto.trim() ||
+    values.accesorio.trim()
+  )
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!values.cliente.trim()) {
       setError('El nombre del cliente es obligatorio.')
       return
     }
-    if (esVestidos && !esEdicion && !piezaVestidoVinculada) {
-      setError('Selecciona un vestido del inventario usando las sugerencias de color o marca.')
+    if (esVestidos && !esEdicion && !piezaVestidoVinculada && !tieneAccesorios) {
+      setError('Selecciona un vestido del inventario o ingresa al menos un accesorio.')
       return
     }
-    if (esVestidos && !esPatrocinio(values.tipoOperacion) && !(Number(values.precio) > 0)) {
-      setError('El precio debe venir del inventario. Elige tipo renta, premier, venta o sesión de fotos.')
+    if (esVestidos && !piezaVestidoVinculada && !tieneAccesorios && !esPatrocinio(values.tipoOperacion) && !(Number(values.precio) > 0)) {
+      setError('Ingresa el precio manualmente para rentas de solo accesorios.')
       return
     }
     if (!values.fechaRegreso) {
@@ -510,20 +517,22 @@ export function RentaFormModal({
       return
     }
 
-    const errorDisponibilidad = esVestidos
-      ? validarPiezasParaRenta(
-          piezasVinculadasIds,
-          values.fechaSalida,
-          rentasActivas,
-          renta?.id,
-        )
-      : validarTrajeParaRenta(
-          values,
-          piezasTodas,
-          values.fechaSalida,
-          rentasActivas,
-          renta?.id,
-        )
+    const errorDisponibilidad = piezasVinculadasIds.length > 0
+      ? esVestidos
+        ? validarPiezasParaRenta(
+            piezasVinculadasIds,
+            values.fechaSalida,
+            rentasActivas,
+            renta?.id,
+          )
+        : validarTrajeParaRenta(
+            values,
+            piezasTodas,
+            values.fechaSalida,
+            rentasActivas,
+            renta?.id,
+          )
+      : null
     if (errorDisponibilidad) {
       setError(errorDisponibilidad)
       return
