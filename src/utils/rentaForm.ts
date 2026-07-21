@@ -42,6 +42,12 @@ export interface RentaFormValues {
   saco: string
   chaleco: string
   pantalon: string
+  /** Detalles/nombre del saco para búsqueda */
+  detallesSaco: string
+  /** Detalles/nombre del chaleco para búsqueda */
+  detallesChaleco: string
+  /** Detalles/nombre del pantalón para búsqueda */
+  detallesPantalon: string
   camisa: string
   corbataMono: string
   cinto: string
@@ -94,6 +100,9 @@ export function crearFormularioVacio(): RentaFormValues {
     saco: '',
     chaleco: '',
     pantalon: '',
+    detallesSaco: '',
+    detallesChaleco: '',
+    detallesPantalon: '',
     camisa: '',
     corbataMono: '',
     cinto: '',

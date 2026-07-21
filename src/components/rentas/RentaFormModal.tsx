@@ -64,6 +64,9 @@ const CAMPOS_MAYUS: (keyof RentaFormValues)[] = [
   'saco',
   'chaleco',
   'pantalon',
+  'detallesSaco',
+  'detallesChaleco',
+  'detallesPantalon',
   'camisa',
   'corbataMono',
   'cinto',
@@ -209,9 +212,6 @@ export function RentaFormModal({
   const { preciosReferencia, usarCodigosNuevosPantalon } = useFinanzas()
   const esVestidos = usuario?.lineaNegocio === 'vestidos'
   const [values, setValues] = useState<RentaFormValues>(crearFormularioVacio)
-  const [detallesSaco, setDetallesSaco] = useState('')
-  const [detallesChaleco, setDetallesChaleco] = useState('')
-  const [detallesPantalon, setDetallesPantalon] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmProximaSemana, setConfirmProximaSemana] = useState(false)
@@ -391,9 +391,6 @@ export function RentaFormModal({
         setValues(base)
       }
     }
-    setDetallesSaco('')
-    setDetallesChaleco('')
-    setDetallesPantalon('')
     setError(null)
     setConfirmProximaSemana(false)
   }, [open, renta, esVestidos, categoriaPerfil])
@@ -844,13 +841,13 @@ export function RentaFormModal({
                   color={values.color}
                   marca={values.marca}
                   talla={values.saco}
-                  detalles={detallesSaco}
+                  detalles={values.detallesSaco}
                   tipo="saco"
                   piezas={piezasPorTipo('saco')}
                   onColor={set('color')}
                   onMarca={set('marca')}
                   onTalla={set('saco')}
-                  onDetalles={setDetallesSaco}
+                  onDetalles={set('detallesSaco')}
                   onElegirPieza={aplicarPieza}
                 />
                 <FilaPieza
@@ -858,13 +855,13 @@ export function RentaFormModal({
                   color={values.colorChaleco}
                   marca={values.marcaChaleco}
                   talla={values.chaleco}
-                  detalles={detallesChaleco}
+                  detalles={values.detallesChaleco}
                   tipo="chaleco"
                   piezas={piezasPorTipo('chaleco')}
                   onColor={set('colorChaleco')}
                   onMarca={set('marcaChaleco')}
                   onTalla={set('chaleco')}
-                  onDetalles={setDetallesChaleco}
+                  onDetalles={set('detallesChaleco')}
                   onElegirPieza={aplicarPieza}
                 />
                 <FilaPieza
@@ -872,13 +869,13 @@ export function RentaFormModal({
                   color={values.colorPantalon}
                   marca={values.marcaPantalon}
                   talla={values.pantalon}
-                  detalles={detallesPantalon}
+                  detalles={values.detallesPantalon}
                   tipo="pantalon"
                   piezas={piezasPorTipo('pantalon')}
                   onColor={set('colorPantalon')}
                   onMarca={set('marcaPantalon')}
                   onTalla={set('pantalon')}
-                  onDetalles={setDetallesPantalon}
+                  onDetalles={set('detallesPantalon')}
                   onElegirPieza={aplicarPieza}
                   usarCodigosNuevosPantalon={usarCodigosNuevosPantalon}
                 />
