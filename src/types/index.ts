@@ -96,6 +96,12 @@ export interface Renta {
   colorChaleco?: string
   /** Color del pantalón si difiere del saco */
   colorPantalon?: string
+  /** Detalles/nombre descriptivo del saco */
+  detallesSaco?: string
+  /** Detalles/nombre descriptivo del chaleco */
+  detallesChaleco?: string
+  /** Detalles/nombre descriptivo del pantalón */
+  detallesPantalon?: string
   /** Piezas de inventario vinculadas (saco, chaleco, pantalón por separado) */
   piezaSacoId?: string | null
   piezaChalecoId?: string | null
