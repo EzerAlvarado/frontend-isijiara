@@ -512,7 +512,8 @@ export function RentaFormModal({
       setError('Ingresa el precio manualmente para rentas de solo accesorios.')
       return
     }
-    if (!values.fechaRegreso) {
+    const esVenta = values.tipoOperacion === 'venta'
+    if (!esVenta && !values.fechaRegreso) {
       setError('La fecha de regreso es obligatoria.')
       return
     }
@@ -581,12 +582,12 @@ export function RentaFormModal({
               required
             />
             <Field
-              label="Fecha regreso *"
+              label={values.tipoOperacion === 'venta' ? 'Fecha regreso' : 'Fecha regreso *'}
               value={values.fechaRegreso}
               onChange={set('fechaRegreso')}
               placeholder="dd/mm/aaaa"
-              required
-              hint={`Por defecto ${DIAS_RENTA_DEFAULT} días después`}
+              required={values.tipoOperacion !== 'venta'}
+              hint={values.tipoOperacion === 'venta' ? 'Opcional en ventas' : `Por defecto ${DIAS_RENTA_DEFAULT} días después`}
             />
             <Field label="Horario" type="time" value={values.horario} onChange={set('horario')} />
             <Field label="Ajustes" value={values.ajustes} onChange={set('ajustes')} placeholder="Ej. subir mangas, ensanchar cintura" />
