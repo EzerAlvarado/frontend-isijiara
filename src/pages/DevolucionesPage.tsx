@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AlertCircle, Archive, CheckCircle2, RefreshCw } from 'lucide-react'
 import {
   esDevolucionPendiente,
   fechaLimiteDevolucionDisplay,
@@ -13,6 +14,28 @@ import type { Devolucion } from '../types'
 import { detalleMultaDevolucion, multaDevolucion } from '../utils/multa'
 import { useAuth } from '../context/AuthContext'
 import { usePerfilVestido } from '../context/PerfilVestidoContext'
+import { rutaVestidos } from '../utils/perfilVestido'
+
+const SEMANAS_RECIENTES = 2
+const MS_POR_DIA = 24 * 60 * 60 * 1000
+
+/** Devuelve true si la devolución debe mostrarse en la vista principal */
+function esDevolucionReciente(d: Devolucion): boolean {
+  // Pendientes siempre se muestran
+  if (esDevolucionPendiente(d.estatus)) return true
+
+  // Regresadas: solo si la fecha límite es de las últimas 2 semanas
+  if (d.estatus === 'regresado') {
+    const fechaLimite = new Date(d.fechaLimite)
+    const hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
+    const limiteDias = SEMANAS_RECIENTES * 7
+    const diffDias = Math.floor((hoy.getTime() - fechaLimite.getTime()) / MS_POR_DIA)
+    return diffDias <= limiteDias
+  }
+
+  return true
+}
 
 function formatMoney(amount: number) {
   return amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
@@ -20,8 +43,11 @@ function formatMoney(amount: number) {
 
 export function DevolucionesPage() {
   const { usuario } = useAuth()
-  const { tipoVestido } = usePerfilVestido()
+  const { perfilSlug, tipoVestido } = usePerfilVestido()
   const esVestidos = usuario?.lineaNegocio === 'vestidos'
+  const rutaArchivo = esVestidos
+    ? rutaVestidos(perfilSlug, 'archivo-devoluciones')
+    : '/archivo-devoluciones'
   const [devoluciones, setDevoluciones] = useState<Devolucion[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,16 +78,30 @@ export function DevolucionesPage() {
     cargar()
   }, [cargar])
 
+  // Separar recientes (se muestran) de archivadas
+  const { recientes, archivadas } = useMemo(() => {
+    const rec: Devolucion[] = []
+    const arch: Devolucion[] = []
+    for (const d of devoluciones) {
+      if (esDevolucionReciente(d)) {
+        rec.push(d)
+      } else {
+        arch.push(d)
+      }
+    }
+    return { recientes: rec, archivadas: arch }
+  }, [devoluciones])
+
   const filtradas = useMemo(() => {
     const q = search.toLowerCase()
-    if (!q) return devoluciones
-    return devoluciones.filter((d) =>
+    if (!q) return recientes
+    return recientes.filter((d) =>
       [d.id, d.rentaId, d.cliente, d.prendaNombre, d.prendaId ?? '', d.estatus]
         .join(' ')
         .toLowerCase()
         .includes(q),
     )
-  }, [devoluciones, search])
+  }, [recientes, search])
 
   const retrasadas = useMemo(
     () => filtradas.filter((d) => d.estatus === 'retrasado'),
@@ -127,17 +167,28 @@ export function DevolucionesPage() {
         <div>
           <h2 className="text-2xl font-bold uppercase tracking-tight">Devoluciones</h2>
           <p className="mt-1 text-sm text-gray-500">
-            {cargando ? 'Cargando…' : `${filtradas.length} devoluciones registradas`}
+            {cargando ? 'Cargando…' : `${filtradas.length} devoluciones recientes`}
             {retrasadas.length > 0 && (
               <span className="ml-2 font-medium text-red-600">
                 · {retrasadas.length} retrasada{retrasadas.length !== 1 ? 's' : ''}
               </span>
             )}
+            {archivadas.length > 0 && (
+              <span className="ml-2 text-gray-400">
+                · {archivadas.length} en archivo
+              </span>
+            )}
           </p>
         </div>
-        <button type="button" onClick={cargar} disabled={cargando} className="btn-secondary">
-          <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex gap-2">
+          <Link to={rutaArchivo} className="btn-secondary">
+            <Archive className="h-4 w-4" />
+            <span className="hidden sm:inline">Archivo</span>
+          </Link>
+          <button type="button" onClick={cargar} disabled={cargando} className="btn-secondary">
+            <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {error && (

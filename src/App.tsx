@@ -5,6 +5,7 @@ import { LineaNegocioRedirect } from './components/auth/LineaNegocioRedirect'
 import { HomeRedirect } from './components/auth/HomeRedirect'
 import { AppLayout } from './components/layout/AppLayout'
 import { ArchivoRentasPage } from './pages/ArchivoRentasPage'
+import { ArchivoDevolucionesPage } from './pages/ArchivoDevolucionesPage'
 import { RentasPage } from './pages/RentasPage'
 import { DevolucionesPage } from './pages/DevolucionesPage'
 import { InventarioPage } from './pages/InventarioPage'
@@ -44,11 +45,14 @@ export default function App() {
             }
           />
           <Route path="devoluciones" element={<DevolucionesPage />} />
+          <Route path="archivo-devoluciones" element={<ArchivoDevolucionesPage />} />
           <Route path="corte" element={<CorteDiaPage />} />
           <Route path="finanzas" element={<FinanzasPage />} />
           <Route path="vestidos/:perfil" element={<VestidosProfileGate />}>
             <Route path="rentas" element={<RentasPage />} />
             <Route path="archivo-rentas" element={<ArchivoRentasPage />} />
+            <Route path="devoluciones" element={<DevolucionesPage />} />
+            <Route path="archivo-devoluciones" element={<ArchivoDevolucionesPage />} />
             <Route path="inventario" element={<InventarioPage />} />
           </Route>
         </Route>

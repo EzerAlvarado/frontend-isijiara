@@ -2,7 +2,12 @@ import { etiquetaTipoVestido, type TipoPiezaVestido } from '../types/pieza'
 
 export type PerfilVestidoSlug = 'noche' | 'xv' | 'novia'
 
-export type PaginaPerfilVestido = 'rentas' | 'inventario' | 'archivo-rentas'
+export type PaginaPerfilVestido =
+  | 'rentas'
+  | 'inventario'
+  | 'archivo-rentas'
+  | 'devoluciones'
+  | 'archivo-devoluciones'
 
 export const PERFIL_VESTIDO_DEFAULT: PerfilVestidoSlug = 'noche'
 
@@ -45,7 +50,9 @@ export function rutaVestidos(perfil: PerfilVestidoSlug, pagina: PaginaPerfilVest
 }
 
 export function paginaPerfilDesdePath(pathname: string): PaginaPerfilVestido | null {
-  const match = pathname.match(/^\/vestidos\/[^/]+\/(rentas|inventario|archivo-rentas)/)
+  const match = pathname.match(
+    /^\/vestidos\/[^/]+\/(rentas|inventario|archivo-rentas|devoluciones|archivo-devoluciones)/,
+  )
   if (!match) return null
   return match[1] as PaginaPerfilVestido
 }
