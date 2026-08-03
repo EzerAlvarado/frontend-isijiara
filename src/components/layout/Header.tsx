@@ -12,6 +12,7 @@ import {
   etiquetaPerfilLegible,
   paginaPerfilDesdePath,
   rutaVestidos,
+  type PaginaPerfilVestido,
   type PerfilVestidoSlug,
 } from '../../utils/perfilVestido'
 
@@ -94,7 +95,7 @@ function PerfilVestidoSwitcher({
   paginaActual,
 }: {
   perfilActivo: PerfilVestidoSlug
-  paginaActual: 'rentas' | 'inventario' | 'archivo-rentas'
+  paginaActual: PaginaPerfilVestido
 }) {
   return (
     <nav
