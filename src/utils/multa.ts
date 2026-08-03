@@ -94,6 +94,15 @@ export function detalleMultaDevolucion(
   if (devolucion.estatus === 'revisar_salida') return null
 
   const tarifa = getMultaPorDia()
+
+  // Si ya está regresado, usar la penalización fija guardada (no recalcular)
+  if (devolucion.estatus === 'regresado') {
+    if (devolucion.penalizacion <= 0) return null
+    const diasDerivados = Math.max(1, Math.round(devolucion.penalizacion / tarifa))
+    return { monto: devolucion.penalizacion, dias: diasDerivados, tarifa }
+  }
+
+  // Para devoluciones pendientes, calcular días desde hoy
   let dias = diasRetrasoDesdeLimite(devolucion.fechaLimite)
 
   if (dias <= 0 && devolucion.estatus === 'retrasado') {
