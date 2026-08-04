@@ -41,12 +41,15 @@
 
   #nota-venta-print,
   #nota-venta-print *,
+  #recibo-abono-print,
+  #recibo-abono-print *,
   #corte-imprimible,
   #corte-imprimible * {
     visibility: visible;
   }
 
   #nota-venta-print,
+  #recibo-abono-print,
   #corte-imprimible {
     position: absolute;
     left: 0;
