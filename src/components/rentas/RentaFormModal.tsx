@@ -671,6 +671,13 @@ export function RentaFormModal({
               placeholder="Ej: $500"
               hint="Monto a devolver al cliente"
             />
+            <Field
+              label="Pagaré"
+              value={values.pagare}
+              onChange={set('pagare')}
+              placeholder="0.00"
+              hint="Bueno por $ en pagaré"
+            />
           </div>
 
           {esEfectivo && (

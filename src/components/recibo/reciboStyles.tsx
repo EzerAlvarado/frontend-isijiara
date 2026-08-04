@@ -21,7 +21,7 @@ export function EncabezadoIsijara() {
         <p>Ave. Colima y 26 · San Luis Río Colorado, Son.</p>
         <p className="font-medium">Tel. (653) 291-2297 · (653) 690-7058 · (653) 130-3882</p>
         <p className="italic text-gray-600">
-          Horario: Lun–Sáb 10:00 a.m. – 7:00 p.m. · Dom 10:00 a.m. – 2:00 p.m.
+          Horario: Lun–Vie 10:00 a.m. – 8:00 p.m. · Sáb 10:00 a.m. – 7:00 p.m. · Dom 12:00 p.m. – 5:00 p.m.
         </p>
         <p className="text-gray-600">Facebook: Isijara Boutique · Instagram: @IsijaraBoutique</p>
       </div>

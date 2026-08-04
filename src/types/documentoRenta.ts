@@ -64,10 +64,9 @@ export interface DocumentoRenta {
 
 export const TERMINOS_RENTA = [
   'Las prendas deben manejarse con sumo cuidado, ya que son confeccionadas con telas y materiales delicados.',
-  'Se recomienda no utilizar perfumes ni desodorantes en las áreas que entren en contacto directo con la prenda.',
   'En caso de manchas, no intente removerlas por su cuenta; acuda a la boutique para recibir asesoría.',
-  'La renta incluye el tiempo acordado. La entrega debe realizarse en la fecha indicada.',
+  'La entrega debe realizarse en la fecha indicada. En caso de no entregarse se cobrarán $100 pesos por día.',
   'En caso de no recoger la prenda en la fecha acordada, se aplicará un cargo adicional por almacenaje.',
-  'Se requiere identificación oficial al momento de la renta y entrega.',
-  'Cualquier daño, rotura o pérdida será evaluado y se aplicará un cargo de $100 a $500 MXN según corresponda.',
+  'Se requiere identificación oficial al momento de recoger.',
+  'Cualquier daño, rotura o pérdida será evaluado y se aplicará un cargo de $100 a $500 MXN según correspondan los daños.',
 ]

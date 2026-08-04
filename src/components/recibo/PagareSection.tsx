@@ -22,7 +22,7 @@ export function PagareSection({ doc }: PagareSectionProps) {
       </div>
 
       <p className="mt-2">
-        En <span className="font-bold uppercase">{pagaré.estado}</span> a{' '}
+        En <span className="font-bold uppercase">{pagaré.estado}</span>,{' '}
         <span className="font-bold">{pagaré.fechaEmision}</span>
       </p>
 
@@ -48,11 +48,11 @@ export function PagareSection({ doc }: PagareSectionProps) {
       </div>
 
       <p className="mt-2 text-[8px] leading-tight text-justify text-gray-700">
-        Este pagaré forma parte de una serie numerada del No. 1 al No. ____ y todos están sujetos
-        a la condición de que al primer pagaré que no sea pagado a su vencimiento, serán exigibles
-        todos los que le sigan en número, además de los ya vencidos, desde la fecha de vencimiento
-        de este documento hasta el día de su liquidación, causará intereses moratorios al tipo de
-        3% mensual, pagadero en esta ciudad juntamente con el principal.
+        El importe consignado en el presente pagaré garantiza el cumplimiento del pago por el valor
+        total o la reparación de la(s) prenda(s) entregada(s) en calidad de renta. El cliente reconoce
+        y acepta que, en caso de que la(s) prenda(s) sufran cualquier daño, deterioro parcial, pérdida
+        o destrucción total mientras se encuentren bajo su resguardo, este pagaré se hará efectivo de
+        forma inmediata por el monto acordado para cubrir el costo de reparación o reposición correspondiente.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2">

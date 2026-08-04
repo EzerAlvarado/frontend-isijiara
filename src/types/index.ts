@@ -124,6 +124,8 @@ export interface Renta {
   pagado?: boolean
   /** Depósito reembolsable (texto descriptivo) */
   depositoReembolsable?: string
+  /** Monto del pagaré (BUENO POR $) */
+  pagare?: number
   abonos?: Abono[]
 }
 

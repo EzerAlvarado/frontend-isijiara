@@ -77,6 +77,8 @@ export interface RentaFormValues {
   tipoOperacion: TipoOperacionVestido
   /** Depósito reembolsable */
   depositoReembolsable: string
+  /** Monto del pagaré (BUENO POR $) */
+  pagare: string
 }
 
 export function hoyMX(): string {
@@ -129,6 +131,7 @@ export function crearFormularioVacio(): RentaFormValues {
     categoriaVestido: 'noche',
     tipoOperacion: 'renta',
     depositoReembolsable: '',
+    pagare: '',
   }
 }
 
@@ -195,6 +198,7 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     categoriaVestido: (renta.categoriaVestido as TipoPiezaVestido) || 'noche',
     tipoOperacion,
     depositoReembolsable: renta.depositoReembolsable ?? '',
+    pagare: renta.pagare != null ? String(renta.pagare) : '',
   }
 }
 
@@ -326,6 +330,7 @@ export function formularioAPayload(
     tipoOperacion,
     estatusFila: estatusAuto ?? ('' as Renta['estatusFila']),
     depositoReembolsable: values.depositoReembolsable.trim(),
+    pagare: values.pagare ? parseFloat(values.pagare) : 0,
   }
 }
 

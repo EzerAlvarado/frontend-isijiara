@@ -104,10 +104,28 @@ export function numeroALetras(monto: number): string {
   return `${texto} PESOS ${String(centavos).padStart(2, '0')}/100 M.N.`
 }
 
+const MESES_LARGO = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+
+const DIAS_SEMANA = [
+  'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado',
+]
+
 export function fechaLarga(fecha: string): string {
   const d = parseFechaDDMMYYYY(fecha)
   if (!d) return fecha
-  return `${d.getDate()} de ${d.getMonth() + 1} de ${d.getFullYear()}`
+  const mes = MESES_LARGO[d.getMonth()]
+  return `${d.getDate()} de ${mes} de ${d.getFullYear()}`
+}
+
+export function fechaConDiaSemana(fecha: string): string {
+  const d = parseFechaDDMMYYYY(fecha)
+  if (!d) return fecha
+  const diaSemana = DIAS_SEMANA[d.getDay()]
+  const mes = MESES_LARGO[d.getMonth()]
+  return `${diaSemana} ${d.getDate()} de ${mes}`
 }
 
 function celdaValor(c: { valor: string }): string {
@@ -125,7 +143,7 @@ function fechaISO(fecha: string): string {
   return `${y}-${m}-${day}`
 }
 
-function lineasPrenda(renta: Renta): { descripcion: string }[] {
+function lineasPrendaTraje(renta: Renta): { descripcion: string }[] {
   const piezas: [string, string][] = [
     ['Color', celdaValor(renta.color)],
     ['Saco', celdaValor(renta.saco)],
@@ -137,7 +155,22 @@ function lineasPrenda(renta: Renta): { descripcion: string }[] {
   return piezas.filter(([, v]) => v).map(([label, v]) => ({ descripcion: `${label}: ${v}` }))
 }
 
-function descripcionArticulo(renta: Renta): string {
+function lineasPrendaVestido(renta: Renta): { descripcion: string }[] {
+  const piezas: [string, string][] = [
+    ['Color', celdaValor(renta.color)],
+    ['Vestido', celdaValor(renta.chaleco)],
+    ['Código', celdaValor(renta.saco)],
+    ['Talla', celdaValor(renta.pantalon)],
+    ['Marca', renta.marca ?? ''],
+  ]
+  return piezas.filter(([, v]) => v).map(([label, v]) => ({ descripcion: `${label}: ${v}` }))
+}
+
+function lineasPrenda(renta: Renta, esVestidos: boolean): { descripcion: string }[] {
+  return esVestidos ? lineasPrendaVestido(renta) : lineasPrendaTraje(renta)
+}
+
+function descripcionArticuloTraje(renta: Renta): string {
   const partes = [
     celdaValor(renta.color),
     celdaValor(renta.saco) && `Saco ${celdaValor(renta.saco)}`,
@@ -147,6 +180,21 @@ function descripcionArticulo(renta: Renta): string {
     celdaValor(renta.corbataMono),
   ].filter(Boolean)
   return partes.join(' — ') || 'Renta de traje'
+}
+
+function descripcionArticuloVestido(renta: Renta): string {
+  const partes = [
+    celdaValor(renta.color),
+    celdaValor(renta.chaleco),
+    celdaValor(renta.saco) && `Código ${celdaValor(renta.saco)}`,
+    celdaValor(renta.pantalon) && `Talla ${celdaValor(renta.pantalon)}`,
+    renta.marca,
+  ].filter(Boolean)
+  return partes.join(' — ') || 'Renta de vestido'
+}
+
+function descripcionArticulo(renta: Renta, esVestidos: boolean): string {
+  return esVestidos ? descripcionArticuloVestido(renta) : descripcionArticuloTraje(renta)
 }
 
 export function rentaADocumento(renta: Renta): DocumentoRenta {
@@ -166,7 +214,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   const tipoOperacion = tipoOperacionDesdeRenta(renta, esVestidos)
   const etiquetaOperacion = etiquetaTipoOperacionVestido(tipoOperacion)
 
-  const lineasDetalle = lineasPrenda(renta)
+  const lineasDetalle = lineasPrenda(renta, esVestidos)
   if (detalleExtra) lineasDetalle.push({ descripcion: detalleExtra })
 
   return {
@@ -218,7 +266,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
       {
         cantidad: 1,
         tipo: etiquetaOperacion,
-        descripcion: descripcionArticulo(renta),
+        descripcion: descripcionArticulo(renta, esVestidos),
         importe: total,
       },
     ],
@@ -241,13 +289,13 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
     pagoEfectivoUsd: pagoUsd,
     feriaMxn: feria,
     pagaré: {
-      estado: 'SONORA',
+      estado: 'San Luis Río Colorado',
       fechaEmision: fechaLarga(renta.fechaSalida),
       ordenDe: 'ISIJARA BOUTIQUE',
-      lugarPago: 'San Luis Río Colorado, Son.',
-      fechaPago: fechaLarga(renta.fechaRegreso),
-      cantidadLetra: numeroALetras(resta),
-      buenoPor: resta,
+      lugarPago: 'SLRC',
+      fechaPago: fechaConDiaSemana(renta.fechaRegreso),
+      cantidadLetra: numeroALetras(renta.pagare ?? 0),
+      buenoPor: renta.pagare ?? 0,
     },
     pagado,
   }

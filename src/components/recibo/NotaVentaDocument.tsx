@@ -65,8 +65,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
           </div>
           {(
             [
-              ['Fecha de Evento', doc.fechas.evento],
               ['Fecha de Entrega', doc.fechas.entrega],
+              ['Fecha de Evento', doc.fechas.evento],
               ['Fecha de Regreso', doc.fechas.regreso],
               ['Fecha de Cita', doc.fechas.cita ?? ''],
             ] as const
