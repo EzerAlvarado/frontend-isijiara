@@ -293,8 +293,8 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
       ordenDe: 'ISIJARA BOUTIQUE',
       lugarPago: 'SLRC',
       fechaPago: fechaConDiaSemana(renta.fechaRegreso),
-      cantidadLetra: numeroALetras(renta.pagare ?? 0),
-      buenoPor: renta.pagare ?? 0,
+      cantidadLetra: numeroALetras(Number(renta.pagare) || 0),
+      buenoPor: Number(renta.pagare) || 0,
     },
     pagado,
   }
