@@ -60,6 +60,8 @@ export interface DocumentoRenta {
     buenoPor: number
   }
   pagado?: boolean
+  /** Si es venta, no mostrar pagaré ni términos */
+  esVenta?: boolean
 }
 
 export const TERMINOS_RENTA = [

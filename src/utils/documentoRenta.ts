@@ -297,5 +297,6 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
       buenoPor: Number(renta.pagare) || 0,
     },
     pagado,
+    esVenta: tipoOperacion === 'venta',
   }
 }

@@ -249,15 +249,17 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
         </div>
       </div>
 
-      {/* Términos */}
-      <div className="mt-2 border border-gray-900 px-2 py-1.5">
-        <p className="mb-1 text-[8px] font-bold uppercase">Términos y condiciones</p>
-        <ul className="list-disc space-y-0.5 pl-4 text-[7.5px] leading-snug text-gray-800">
-          {TERMINOS_RENTA.map((t, i) => (
-            <li key={i}>{t}</li>
-          ))}
-        </ul>
-      </div>
+      {/* Términos - solo para rentas, no ventas */}
+      {!doc.esVenta && (
+        <div className="mt-2 border border-gray-900 px-2 py-1.5">
+          <p className="mb-1 text-[8px] font-bold uppercase">Términos y condiciones</p>
+          <ul className="list-disc space-y-0.5 pl-4 text-[7.5px] leading-snug text-gray-800">
+            {TERMINOS_RENTA.map((t, i) => (
+              <li key={i}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="mt-3 flex justify-end">
         <div className="w-48 border-t border-gray-900 pt-0.5 text-center text-[8px] font-bold">
@@ -265,7 +267,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
         </div>
       </div>
 
-      <PagareSection doc={doc} />
+      {/* Pagaré - solo para rentas, no ventas */}
+      {!doc.esVenta && <PagareSection doc={doc} />}
     </div>
   )
 }
