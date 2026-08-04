@@ -170,8 +170,8 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
       </div>
 
       {/* Firma */}
-      <div className="mt-6 mx-auto w-64">
-        <div className="border-t border-gray-900 pt-1 text-center text-[9px] font-bold">
+      <div className="mt-6 flex justify-center">
+        <div className="w-56 border-t border-gray-900 pt-1 text-center text-[9px] font-bold">
           Firma del Cliente
         </div>
       </div>
