@@ -258,14 +258,13 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               <li key={i}>{t}</li>
             ))}
           </ul>
+          <div className="mt-3 flex justify-end">
+            <div className="w-48 border-t border-gray-900 pt-0.5 text-center text-[8px] font-bold">
+              Firma
+            </div>
+          </div>
         </div>
       )}
-
-      <div className="mt-3 flex justify-end">
-        <div className="w-48 border-t border-gray-900 pt-0.5 text-center text-[8px] font-bold">
-          Firma
-        </div>
-      </div>
 
       {/* Pagaré - solo para rentas, no ventas */}
       {!doc.esVenta && <PagareSection doc={doc} />}

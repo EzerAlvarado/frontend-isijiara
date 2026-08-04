@@ -169,13 +169,10 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
         </div>
       </div>
 
-      {/* Firmas */}
-      <div className="mt-6 grid grid-cols-2 gap-8">
+      {/* Firma */}
+      <div className="mt-6 mx-auto w-64">
         <div className="border-t border-gray-900 pt-1 text-center text-[9px] font-bold">
           Firma del Cliente
-        </div>
-        <div className="border-t border-gray-900 pt-1 text-center text-[9px] font-bold">
-          Firma de la Boutique
         </div>
       </div>
 
