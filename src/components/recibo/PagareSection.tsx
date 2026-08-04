@@ -58,7 +58,7 @@ export function PagareSection({ doc }: PagareSectionProps) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="border border-gray-900">
           <p className="border-b border-gray-900 bg-gray-100 px-1.5 py-0.5 text-[8px] font-bold uppercase">
-            Datos del deudor
+            Datos del cliente
           </p>
           <div className="space-y-0.5 p-1.5">
             <p>
@@ -68,10 +68,6 @@ export function PagareSection({ doc }: PagareSectionProps) {
             <p>
               <span className="font-bold">Dirección: </span>
               {cliente.direccion || '___________________________'}
-            </p>
-            <p>
-              <span className="font-bold">Población: </span>
-              {cliente.direccion}
             </p>
             <p>
               <span className="font-bold">Tel: </span>
