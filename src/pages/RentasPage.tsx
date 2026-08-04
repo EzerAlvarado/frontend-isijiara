@@ -4,6 +4,7 @@ import { Plus, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
 import { cancelRenta, createRenta, fetchRentas, registrarAbono, updateRenta } from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
+import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
 import { AbonoModal } from '../components/rentas/AbonoModal'
 import { RentaFormModal } from '../components/rentas/RentaFormModal'
 import { SearchInput } from '../components/ui/SearchInput'
@@ -71,6 +72,7 @@ export function RentasPage() {
   const [rentaEditando, setRentaEditando] = useState<Renta | null>(null)
   const [rentaAbono, setRentaAbono] = useState<Renta | null>(null)
   const [docImpresion, setDocImpresion] = useState<DocumentoRenta | null>(null)
+  const [rentaReciboAbono, setRentaReciboAbono] = useState<Renta | null>(null)
   const [notaModal, setNotaModal] = useState<{
     notaInicial: string
     resolve: (nota: string | null) => void
@@ -267,6 +269,10 @@ export function RentasPage() {
     setDocImpresion(rentaADocumento(renta))
   }
 
+  const abrirReciboAbono = (renta: Renta) => {
+    setRentaReciboAbono(renta)
+  }
+
   const abrirAbono = (renta: Renta) => {
     setRentaAbono(renta)
   }
@@ -321,6 +327,7 @@ export function RentasPage() {
     onEditar: abrirEditar,
     onAbono: abrirAbono,
     onImprimir: abrirImprimir,
+    onReciboAbono: abrirReciboAbono,
     onCancelar: cancelarRentaHandler,
   }
 
@@ -378,6 +385,14 @@ export function RentasPage() {
           open={!!docImpresion}
           onClose={() => setDocImpresion(null)}
           doc={docImpresion}
+        />
+      )}
+
+      {rentaReciboAbono && (
+        <ReciboAbonoPreview
+          open={!!rentaReciboAbono}
+          onClose={() => setRentaReciboAbono(null)}
+          renta={rentaReciboAbono}
         />
       )}
 

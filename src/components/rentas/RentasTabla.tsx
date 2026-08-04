@@ -1,4 +1,4 @@
-import { Ban, Banknote, Paintbrush, Pencil, Printer } from 'lucide-react'
+import { Ban, Banknote, FileText, Paintbrush, Pencil, Printer } from 'lucide-react'
 import type { CampoRentaCelda, CeldaRenta, EstatusCelda, Renta } from '../../types'
 import { RentasCell } from './RentasCell'
 import type { ModoPintar } from './PaintToolbar'
@@ -74,6 +74,7 @@ export interface FilaRentaHandlers {
   onEditar?: (renta: Renta) => void
   onAbono?: (renta: Renta) => void
   onImprimir: (renta: Renta) => void
+  onReciboAbono?: (renta: Renta) => void
   onCancelar?: (renta: Renta) => void
 }
 
@@ -95,6 +96,7 @@ export function FilaRenta({
   onEditar,
   onAbono,
   onImprimir,
+  onReciboAbono,
   onCancelar,
 }: FilaRentaProps) {
   const soloLectura = variant === 'archivo'
@@ -139,14 +141,26 @@ export function FilaRenta({
         </td>
       )}
       <td className="border border-gray-300 bg-gray-50 px-1 py-1.5 text-center">
-        <button
-          type="button"
-          onClick={() => onImprimir(renta)}
-          title="Imprimir nota y pagaré"
-          className="rounded p-1 text-gray-600 transition-colors hover:bg-brand-100 hover:text-brand-700"
-        >
-          <Printer className="mx-auto h-4 w-4" />
-        </button>
+        <div className="flex items-center justify-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => onImprimir(renta)}
+            title="Imprimir nota y pagaré"
+            className="rounded p-1 text-gray-600 transition-colors hover:bg-brand-100 hover:text-brand-700"
+          >
+            <Printer className="mx-auto h-4 w-4" />
+          </button>
+          {(renta.abonos?.length ?? 0) > 0 && onReciboAbono && (
+            <button
+              type="button"
+              onClick={() => onReciboAbono(renta)}
+              title="Ver recibo de abonos"
+              className="rounded p-1 text-gray-600 transition-colors hover:bg-blue-100 hover:text-blue-700"
+            >
+              <FileText className="mx-auto h-4 w-4" />
+            </button>
+          )}
+        </div>
       </td>
       <td
         className={`border border-gray-300 px-2 py-1.5 text-xs font-semibold ${estatusCeldaBg[estatusRenta]} ${textoTipoOperacion}`}

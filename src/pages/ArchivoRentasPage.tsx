@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
 import { fetchRentas } from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
+import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
 import { SearchInput } from '../components/ui/SearchInput'
 import { BloqueSemana, totalColumnasRentas } from '../components/rentas/RentasTabla'
 import { useAuth } from '../context/AuthContext'
@@ -77,6 +78,7 @@ export function ArchivoRentasPage() {
   const [errorCarga, setErrorCarga] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [docImpresion, setDocImpresion] = useState<DocumentoRenta | null>(null)
+  const [rentaReciboAbono, setRentaReciboAbono] = useState<Renta | null>(null)
 
   const mesSeleccionado = useMemo(
     () => (mesParam ? parseMesArchivo(mesParam) : null),
@@ -193,6 +195,7 @@ export function ArchivoRentasPage() {
     esVestidos,
     variant: 'archivo' as const,
     onImprimir: (renta: Renta) => setDocImpresion(rentaADocumento(renta)),
+    onReciboAbono: (renta: Renta) => setRentaReciboAbono(renta),
   }
 
   return (
@@ -268,6 +271,14 @@ export function ArchivoRentasPage() {
           open={!!docImpresion}
           onClose={() => setDocImpresion(null)}
           doc={docImpresion}
+        />
+      )}
+
+      {rentaReciboAbono && (
+        <ReciboAbonoPreview
+          open={!!rentaReciboAbono}
+          onClose={() => setRentaReciboAbono(null)}
+          renta={rentaReciboAbono}
         />
       )}
 
