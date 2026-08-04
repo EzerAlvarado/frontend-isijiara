@@ -5,7 +5,7 @@ import { formatearHorario } from './horario'
 import { aMayusculas } from './mayusculas'
 import { etiquetaMetodoPago } from './metodoPago'
 import { multaEfectiva } from './multa'
-import { rentaEstaPagada, restanteRenta } from './pagoRenta'
+import { rentaEstaPagada } from './pagoRenta'
 import { anticipoEnPesos } from './tipoCambio'
 import { parseFechaDDMMYYYY } from './semanasRentas'
 import {
@@ -205,7 +205,6 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   const pagoMxn = renta.pagoEfectivoMxn ?? 0
   const pagoUsd = renta.pagoEfectivoUsd ?? 0
   const feria = renta.feriaMxn ?? 0
-  const resta = restanteRenta(renta)
   const pagado = rentaEstaPagada(renta)
   const hora = formatearHorario(renta.horario.valor)
   const fechaRenta = hora ? `${renta.fechaSalida} ${hora}` : renta.fechaSalida
