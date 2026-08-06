@@ -30,12 +30,12 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
   return (
     <div
       id={id}
-      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-3 font-recibo text-[11px] font-semibold uppercase leading-snug text-black shadow-lg print:max-w-none print:w-full print:border-none print:p-0 print:shadow-none"
+      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-2 font-recibo text-[10px] font-semibold uppercase leading-tight text-black shadow-lg print:max-w-none print:w-full print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 
       {/* 3 columnas alineadas: cliente | fechas | pagos */}
-      <div className="mt-2 grid grid-cols-3 gap-1.5">
+      <div className="mt-1 grid grid-cols-3 gap-1">
         <div className="space-y-0.5">
           <div className="border border-black px-1.5 py-0.5">
             <span className="font-black">Folio: </span>
@@ -112,8 +112,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
       </div>
 
       {/* Tabla artículos */}
-      <div className="mt-2 border border-black">
-        <div className="grid grid-cols-[48px_70px_1fr_90px] border-b border-black bg-gray-100 text-[8.5px] font-black uppercase">
+      <div className="mt-1 border border-black">
+        <div className="grid grid-cols-[40px_60px_1fr_80px] border-b border-black bg-gray-100 text-[8px] font-black uppercase">
           <div className="border-r border-black px-1 py-0.5 text-center">Cant.</div>
           <div className="border-r border-black px-1 py-0.5 text-center">Tipo</div>
           <div className="border-r border-black px-1 py-0.5">Descripción</div>
@@ -122,29 +122,29 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
         {doc.articulos.map((a, i) => (
           <div
             key={i}
-            className="grid grid-cols-[48px_70px_1fr_90px] border-b border-black/30 text-[9.5px] last:border-b-0"
+            className="grid grid-cols-[40px_60px_1fr_80px] border-b border-black/30 text-[9px] last:border-b-0"
           >
-            <div className="border-r border-black/30 px-1 py-1 text-center">{a.cantidad}</div>
-            <div className="border-r border-black/30 px-1 py-1 text-center">{a.tipo}</div>
-            <div className="border-r border-black/30 px-1 py-1">{a.descripcion}</div>
-            <div className="px-1 py-1 text-right font-bold">{fmt(a.importe)}</div>
+            <div className="border-r border-black/30 px-1 py-0.5 text-center">{a.cantidad}</div>
+            <div className="border-r border-black/30 px-1 py-0.5 text-center">{a.tipo}</div>
+            <div className="border-r border-black/30 px-1 py-0.5">{a.descripcion}</div>
+            <div className="px-1 py-0.5 text-right font-bold">{fmt(a.importe)}</div>
           </div>
         ))}
-        <div className="grid grid-cols-[48px_70px_1fr_90px] border-t border-black font-black">
+        <div className="grid grid-cols-[40px_60px_1fr_80px] border-t border-black font-black">
           <div className="col-span-3 border-r border-black px-1 py-0.5 text-right">Total</div>
           <div className="px-1 py-0.5 text-right">{fmt(doc.total)}</div>
         </div>
       </div>
 
       {/* Detalle (2 cols) + totales (1 col) — misma grilla de 3 */}
-      <div className="mt-2 grid grid-cols-3 gap-1.5">
-        <div className="col-span-2 space-y-1">
+      <div className="mt-1 grid grid-cols-3 gap-1">
+        <div className="col-span-2 space-y-0.5">
           <div className="border border-black">
-            <div className="border-b border-black bg-gray-100 px-1.5 py-0.5 text-[8.5px] font-black uppercase">
+            <div className="border-b border-black bg-gray-100 px-1.5 py-0.5 text-[8px] font-black uppercase">
               Detalle de renta
             </div>
             {doc.lineasDetalle.map((l, i) => (
-              <div key={i} className="border-b border-black/20 px-2 py-0.5 last:border-b-0">
+              <div key={i} className="border-b border-black/20 px-1.5 py-0.5 last:border-b-0">
                 {l.descripcion}
                 {l.precio != null && (
                   <span className="float-right font-bold">${l.precio}</span>
@@ -153,54 +153,54 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             ))}
           </div>
 
-          <div className="flex border border-black px-2 py-1">
+          <div className="flex border border-black px-1.5 py-0.5">
             <span className="font-black uppercase">Recogerá: </span>
             <span className="ml-1 flex-1 font-bold">{doc.recogera}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-1 text-[9px]">
-            <div className="grid grid-cols-[90px_1fr] border border-black">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-0.5 font-black uppercase">
+          <div className="grid grid-cols-2 gap-0.5 text-[8.5px]">
+            <div className="grid grid-cols-[80px_1fr] border border-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 font-black uppercase">
                 Accesorio
               </span>
-              <span className="px-1.5 py-0.5">{doc.accesorio || '—'}</span>
+              <span className="px-1 py-0.5">{doc.accesorio || '—'}</span>
             </div>
-            <div className="grid grid-cols-[70px_1fr] border border-black">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-0.5 font-black uppercase">
+            <div className="grid grid-cols-[60px_1fr] border border-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 font-black uppercase">
                 Ajustes
               </span>
-              <span className="px-1.5 py-0.5">{doc.ajustes || '—'}</span>
+              <span className="px-1 py-0.5">{doc.ajustes || '—'}</span>
             </div>
-            <div className="grid grid-cols-[90px_1fr] border border-black">
-              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-[8px] font-black uppercase">
+            <div className="grid grid-cols-[80px_1fr] border border-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-[7.5px] font-black uppercase">
                 Depósito reemb.
               </span>
-              <span className="px-1.5 py-0.5">{doc.depositoReembolsable || '—'}</span>
+              <span className="px-1 py-0.5">{doc.depositoReembolsable || '—'}</span>
             </div>
-            <div className="grid grid-cols-[90px_1fr] border border-black">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-0.5 font-black uppercase">
+            <div className="grid grid-cols-[80px_1fr] border border-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 font-black uppercase">
                 Atendida por
               </span>
-              <span className="px-1.5 py-0.5 font-bold">{doc.atendidaPor}</span>
+              <span className="px-1 py-0.5 font-bold">{doc.atendidaPor}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5">
           <div className="border border-black">
             <div className="grid grid-cols-[1fr_1fr] border-b border-black">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-1 text-right font-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                 Total $
               </span>
-              <span className="px-1.5 py-1 text-right text-[9px] font-black leading-tight">
+              <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
                 {fmtMontoConDlls(doc.total)}
               </span>
             </div>
             <div className="grid grid-cols-[1fr_1fr] border-b border-black">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-1 text-right font-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                 Anticipo
               </span>
-              <span className="px-1.5 py-1 text-right text-[9px] font-black leading-tight">
+              <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
                 {metodoPago === 'mixto' && (doc.pagoEfectivoMxn || doc.pagoEfectivoUsd)
                   ? [
                       doc.pagoEfectivoMxn ? `${doc.pagoEfectivoMxn} MXN` : '',
@@ -213,21 +213,21 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             </div>
             {(doc.feriaMxn ?? 0) > 0 && (
               <div className="grid grid-cols-[1fr_1fr] border-b border-black">
-                <span className="border-r border-black bg-gray-100 px-1.5 py-1 text-right font-black">
+                <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                   Feria
                 </span>
-                <span className="px-1.5 py-1 text-right text-[9px] font-black leading-tight">
+                <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
                   {fmt(doc.feriaMxn!)}
                 </span>
               </div>
             )}
             <div className="grid grid-cols-[1fr_1fr]">
-              <span className="border-r border-black bg-gray-100 px-1.5 py-1 text-right font-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                 Resta $
               </span>
-              <span className="px-1.5 py-1 text-right text-[9px] font-black leading-tight">
+              <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
                 {doc.pagado ? (
-                  <span className="rounded bg-green-600 px-2 py-0.5 text-white">PAGADO</span>
+                  <span className="rounded bg-green-600 px-1.5 py-0.5 text-white">PAGADO</span>
                 ) : (
                   fmtMontoConDlls(montoResta)
                 )}
@@ -235,18 +235,18 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1">
-            <div className="border border-black px-1 py-1 text-center">
-              <p className="text-[8px] font-black uppercase">Depósito Reemb.</p>
-              <p className="text-sm font-black">{doc.depositoReembolsable || '0.00'}</p>
+          <div className="grid grid-cols-2 gap-0.5">
+            <div className="border border-black px-1 py-0.5 text-center">
+              <p className="text-[7.5px] font-black uppercase">Depósito Reemb.</p>
+              <p className="text-xs font-black">{doc.depositoReembolsable || '0.00'}</p>
             </div>
             <div
-              className={`border border-black px-1 py-1 text-center ${
+              className={`border border-black px-1 py-0.5 text-center ${
                 doc.pagado ? 'bg-green-100' : ''
               }`}
             >
-              <p className="text-[8px] font-black uppercase">Monto Resta</p>
-              <p className="text-[9px] font-black leading-tight">
+              <p className="text-[7.5px] font-black uppercase">Monto Resta</p>
+              <p className="text-[8.5px] font-black leading-tight">
                 {doc.pagado ? (
                   <span className="text-green-800">PAGADO</span>
                 ) : (
@@ -260,15 +260,15 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
 
       {/* Términos - solo para rentas, no ventas */}
       {!doc.esVenta && (
-        <div className="mt-2 border border-black px-2 py-1.5">
-          <p className="mb-1 text-[9px] font-black uppercase">Términos y condiciones</p>
-          <ul className="list-disc space-y-0.5 pl-4 text-[9px] font-semibold leading-snug text-black">
+        <div className="mt-1 border border-black px-1.5 py-1">
+          <p className="mb-0.5 text-[8px] font-black uppercase">Términos y condiciones</p>
+          <ul className="list-disc space-y-0 pl-3.5 text-[8px] font-semibold leading-snug text-black">
             {TERMINOS_RENTA.map((t, i) => (
               <li key={i}>{t}</li>
             ))}
           </ul>
-          <div className="mt-3 flex justify-end">
-            <div className="w-48 border-t-2 border-black pt-0.5 text-center text-[10px] font-black">
+          <div className="mt-1.5 flex justify-end">
+            <div className="w-40 border-t border-black pt-0.5 text-center text-[9px] font-black">
               Firma
             </div>
           </div>

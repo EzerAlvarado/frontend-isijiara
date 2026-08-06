@@ -37,7 +37,7 @@
 /* Hoja carta (Letter): 8.5 × 11 in */
 @page {
   size: letter portrait;
-  margin: 0.45in;
+  margin: 0.35in;
 }
 
 @media print {
