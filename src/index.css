@@ -36,17 +36,16 @@
 
 /* Hoja carta (Letter): 8.5 × 11 in */
 @page {
-  size: letter;
-  margin: 0.55in;
+  size: letter portrait;
+  margin: 0.5in;
 }
 
 @media print {
   html,
   body {
-    width: 8.5in;
-    height: 11in;
-    margin: 0;
-    padding: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
   }
 
@@ -63,17 +62,19 @@
     visibility: visible;
   }
 
+  /* Ocupa todo el ancho útil de la hoja (los márgenes los pone @page) */
   #nota-venta-print,
   #recibo-abono-print,
   #corte-imprimible {
     position: absolute;
     left: 0;
+    right: 0;
     top: 0;
-    width: 7.4in; /* 8.5in − márgenes 0.55in × 2 */
-    max-width: 7.4in;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+    margin: 0 auto !important;
+    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
     background: white;

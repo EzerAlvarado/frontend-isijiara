@@ -30,7 +30,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
   return (
     <div
       id={id}
-      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-3 font-recibo text-[11px] font-semibold uppercase leading-snug text-black shadow-lg print:max-w-[7.4in] print:border-none print:p-0 print:shadow-none"
+      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-3 font-recibo text-[11px] font-semibold uppercase leading-snug text-black shadow-lg print:max-w-none print:w-full print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 

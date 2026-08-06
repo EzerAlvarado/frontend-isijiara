@@ -16,8 +16,8 @@ export function NotaVentaPreview({ open, onClose, doc }: NotaVentaPreviewProps) 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 print:bg-white print:p-0">
-      <div className="relative my-4 w-full max-w-[8.5in] print:my-0 print:max-w-none">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 print:static print:block print:overflow-visible print:bg-white print:p-0">
+      <div className="relative my-4 w-full max-w-[8.5in] print:my-0 print:w-full print:max-w-none">
         <div className="mb-4 flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow-lg print:hidden">
           <div>
             <h3 className="font-semibold text-gray-900">Recibo y Pagaré — Folio #{doc.folio}</h3>
