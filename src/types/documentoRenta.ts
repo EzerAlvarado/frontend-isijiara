@@ -68,7 +68,7 @@ export const TERMINOS_RENTA = [
   'Las prendas deben manejarse con sumo cuidado, ya que son confeccionadas con telas y materiales delicados.',
   'En caso de manchas, no intente removerlas por su cuenta; acuda a la boutique para recibir asesoría.',
   'La entrega debe realizarse en la fecha indicada. En caso de no entregarse se cobrarán $100 pesos por día.',
-  'En caso de no recoger la prenda en la fecha acordada, se aplicará un cargo adicional por almacenaje.',
-  'Se requiere identificación oficial al momento de recoger.',
+  'Acepto que en caso de cancelaciones no hay devoluciones.',
+  'Se requiere identificación oficial y vigente al momento de recoger.',
   'Cualquier daño, rotura o pérdida será evaluado y se aplicará un cargo de $100 a $500 MXN según correspondan los daños.',
 ]
