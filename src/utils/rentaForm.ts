@@ -163,9 +163,11 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     anticipo = ''
   }
 
-  const fechaSalida = renta.fechaSalida || renta.fechaCita.valor
+  const fechaSalida = renta.fechaSalida || ''
   const fechaEvento = renta.fechaEvento || fechaSalida
-  const fechaCita = renta.fechaCita?.valor ?? ''
+  // No rellenar cita con la entrega (antes se sincronizaba sola)
+  const citaGuardada = (renta.fechaCita?.valor ?? '').trim()
+  const fechaCita = citaGuardada && citaGuardada !== fechaSalida ? citaGuardada : ''
   const fechaRegreso = renta.fechaRegreso || sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
 
   return {

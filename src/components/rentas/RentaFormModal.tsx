@@ -381,7 +381,7 @@ export function RentaFormModal({
 
   useEffect(() => {
     if (!open) return
-    if (renta) {
+    if (renta?.id) {
       setValues(rentaAFormulario(renta, esVestidos))
     } else {
       const base = crearFormularioVacio()
@@ -393,7 +393,8 @@ export function RentaFormModal({
     }
     setError(null)
     setConfirmProximaSemana(false)
-  }, [open, renta, esVestidos, categoriaPerfil])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al abrir o cambiar de folio
+  }, [open, renta?.id, esVestidos, categoriaPerfil])
 
   useEffect(() => {
     if (!open) return

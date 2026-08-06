@@ -18,7 +18,8 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        recibo: ['"Times New Roman"', 'Times', 'Arial', 'Georgia', 'serif'],
+        // Arial imprime más nítido/oscuro que Times en muchas impresoras
+        recibo: ['Arial', 'Helvetica', '"Times New Roman"', 'sans-serif'],
       },
     },
   },

@@ -8,16 +8,16 @@ export function PagareSection({ doc }: PagareSectionProps) {
   const { pagaré, folio, cliente } = doc
 
   return (
-    <div className="mt-4 border-[3px] border-gray-900 p-2 text-[9px] leading-snug">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-1 border-b border-gray-900 pb-1">
-        <div className="flex items-center justify-center border border-gray-900 px-2 py-1 text-xs font-black uppercase">
+    <div className="mt-4 border-[3px] border-black p-2 text-[10px] font-semibold leading-snug text-black">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-1 border-b-2 border-black pb-1">
+        <div className="flex items-center justify-center border-2 border-black px-2 py-1 text-sm font-black uppercase">
           Pagaré
         </div>
-        <div className="flex items-center justify-center border border-gray-900 px-4 py-1 text-xs font-bold">
+        <div className="flex items-center justify-center border-2 border-black px-4 py-1 text-sm font-black">
           No. {folio}
         </div>
-        <div className="flex items-center justify-center border border-gray-900 px-2 py-1 text-xs font-bold">
-          BUENO POR $ {pagaré.buenoPor.toFixed(2)}
+        <div className="flex items-center justify-center border-2 border-black px-2 py-1 text-sm font-black">
+          BUENO POR $ {Number(pagaré.buenoPor).toFixed(2)}
         </div>
       </div>
 

@@ -76,7 +76,16 @@
     border: none !important;
     box-shadow: none !important;
     background: white;
+    color: #000 !important;
+    font-weight: 600;
     page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  #nota-venta-print *,
+  #recibo-abono-print * {
+    color: #000 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

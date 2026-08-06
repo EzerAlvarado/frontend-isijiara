@@ -30,7 +30,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
   return (
     <div
       id={id}
-      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-3 font-recibo text-[10px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
+      className="mx-auto w-full max-w-[8.5in] border border-black bg-white p-3 font-recibo text-[11.5px] font-semibold uppercase leading-snug text-black shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 
@@ -60,7 +60,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
         </div>
 
         <div className="border border-gray-900">
-          <div className="border-b border-gray-900 bg-gray-100 px-1 py-0.5 text-center text-[8px] font-bold uppercase">
+          <div className="border-b border-black bg-gray-100 px-1 py-0.5 text-center text-[9px] font-black uppercase">
             Fechas
           </div>
           {(
@@ -71,24 +71,24 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               ['Fecha de Cita', doc.fechas.cita ?? ''],
             ] as const
           ).map(([label, val]) => (
-            <div key={label} className="flex border-b border-gray-300 last:border-b-0">
-              <span className="w-[92px] shrink-0 border-r border-gray-300 px-1 py-0.5 text-[7.5px] font-bold">
+            <div key={label} className="flex border-b border-black/40 last:border-b-0">
+              <span className="w-[92px] shrink-0 border-r border-black/40 px-1 py-0.5 text-[8.5px] font-black">
                 {label}
               </span>
-              <span className="flex-1 px-1 py-0.5 text-[8px] normal-case leading-snug">{val}</span>
+              <span className="flex-1 px-1 py-0.5 text-[9.5px] font-bold normal-case leading-snug">{val}</span>
             </div>
           ))}
         </div>
 
         <div className="border border-gray-900">
-          <div className="grid grid-cols-3 border-b border-gray-900 bg-gray-100 text-[7px] font-bold uppercase">
-            <div className="border-r border-gray-900 px-0.5 py-0.5 text-center">FechaPago</div>
-            <div className="border-r border-gray-900 px-0.5 py-0.5 text-center">Pago</div>
+          <div className="grid grid-cols-3 border-b border-black bg-gray-100 text-[8px] font-black uppercase">
+            <div className="border-r border-black px-0.5 py-0.5 text-center">FechaPago</div>
+            <div className="border-r border-black px-0.5 py-0.5 text-center">Pago</div>
             <div className="px-0.5 py-0.5 text-center">Forma de Pago</div>
           </div>
           {doc.pagos.map((p, i) => (
-            <div key={i} className="grid grid-cols-3 border-b border-gray-300 text-[7.5px]">
-              <div className="border-r border-gray-300 px-0.5 py-0.5 normal-case leading-snug">{p.fecha}</div>
+            <div key={i} className="grid grid-cols-3 border-b border-black/40 text-[8.5px] font-bold">
+              <div className="border-r border-black/40 px-0.5 py-0.5 normal-case leading-snug">{p.fecha}</div>
               <div className="border-r border-gray-300 px-0.5 py-0.5 text-right">
                 {p.formaPago.toUpperCase() === 'DLLS' ? `${fmt(p.monto)} USD` : fmt(p.monto)}
               </div>
@@ -253,13 +253,13 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
       {!doc.esVenta && (
         <div className="mt-2 border border-gray-900 px-2 py-1.5">
           <p className="mb-1 text-[8px] font-bold uppercase">Términos y condiciones</p>
-          <ul className="list-disc space-y-0.5 pl-4 text-[7.5px] leading-snug text-gray-800">
+          <ul className="list-disc space-y-0.5 pl-4 text-[9px] font-semibold leading-snug text-black">
             {TERMINOS_RENTA.map((t, i) => (
               <li key={i}>{t}</li>
             ))}
           </ul>
           <div className="mt-3 flex justify-end">
-            <div className="w-48 border-t border-gray-900 pt-0.5 text-center text-[8px] font-bold">
+            <div className="w-48 border-t-2 border-black pt-0.5 text-center text-[10px] font-black">
               Firma
             </div>
           </div>
