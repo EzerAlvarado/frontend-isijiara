@@ -396,27 +396,39 @@ export function RentaFormModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al abrir o cambiar de folio
   }, [open, renta?.id, esVestidos, categoriaPerfil])
 
+  // Solo en renta NUEVA: sugiere precio del inventario.
+  // En edición se respeta el precio guardado (ej. 1400 aunque el vestido valga 1900).
   useEffect(() => {
-    if (!open) return
+    if (!open || renta) return
     if (esPatrocinio(values.tipoOperacion)) {
       setValues((prev) => (prev.precio === '0' ? prev : { ...prev, precio: '0' }))
       return
     }
     if (esPrecioOperacionManual(values.tipoOperacion)) return
     aplicarPrecioOperacion(piezaPrecioReferencia, values.tipoOperacion)
-  }, [open, piezaPrecioReferencia, values.tipoOperacion, aplicarPrecioOperacion])
+  }, [open, renta, piezaPrecioReferencia, values.tipoOperacion, aplicarPrecioOperacion])
 
   const cambiarTipoOperacion = (tipo: TipoOperacion) => {
-    setValues((prev) => ({
-      ...prev,
-      tipoOperacion: tipo,
-      tipoEntrega: tipo === 'premier' ? 'premier' : 'recoger',
-      ...(esPatrocinio(tipo)
-        ? { precio: '0', anticipo: '', pagoPesos: '', pagoDlls: '' }
-        : esPrecioOperacionManual(tipo)
-          ? { precio: '' }
-          : {}),
-    }))
+    setValues((prev) => {
+      const next: RentaFormValues = {
+        ...prev,
+        tipoOperacion: tipo,
+        tipoEntrega: tipo === 'premier' ? 'premier' : 'recoger',
+      }
+      if (esPatrocinio(tipo)) {
+        next.precio = '0'
+        next.anticipo = ''
+        next.pagoPesos = ''
+        next.pagoDlls = ''
+      } else if (esPrecioOperacionManual(tipo)) {
+        // Mantener el precio actual al editar; vaciar solo si no había
+        if (!renta && !prev.precio) next.precio = ''
+      } else {
+        const precio = calcularPrecioVestido(piezaPrecioReferencia, tipo, preciosReferencia)
+        if (precio > 0) next.precio = String(precio)
+      }
+      return next
+    })
   }
 
   const set = (key: keyof RentaFormValues) => (v: string) => {

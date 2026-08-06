@@ -165,9 +165,8 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
 
   const fechaSalida = renta.fechaSalida || ''
   const fechaEvento = renta.fechaEvento || fechaSalida
-  // No rellenar cita con la entrega (antes se sincronizaba sola)
-  const citaGuardada = (renta.fechaCita?.valor ?? '').trim()
-  const fechaCita = citaGuardada && citaGuardada !== fechaSalida ? citaGuardada : ''
+  // Exactamente lo guardado (vacío si no hay cita)
+  const fechaCita = (renta.fechaCita?.valor ?? '').trim()
   const fechaRegreso = renta.fechaRegreso || sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
 
   return {
