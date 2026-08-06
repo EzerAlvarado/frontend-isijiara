@@ -116,7 +116,7 @@ export function inicioCatalogoDinamico(): string {
 }
 
 export const MESES_VENTANA_ADELANTE = 2
-export const SEMANAS_VENTANA_ATRAS = 4
+export const SEMANAS_VENTANA_ATRAS = 1
 
 /** Semanas pasadas + semana actual + N meses hacia adelante (lunes a domingo) */
 export function semanasVentanaActual(
