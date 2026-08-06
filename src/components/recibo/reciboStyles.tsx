@@ -20,9 +20,9 @@ function IconoWhatsApp({ className = 'h-3 w-3' }: { className?: string }) {
 
 export function EncabezadoIsijara() {
   return (
-    <div className="flex gap-2 border-b border-black pb-1">
+    <div className="flex gap-2 border-b border-black pb-1.5">
       <LogoIsijara />
-      <div className="flex-1 text-center text-[9px] font-semibold leading-tight text-black">
+      <div className="flex-1 text-center text-[9px] font-semibold leading-snug text-black">
         <h1 className="text-base font-black tracking-wide text-black">ISIJARA BOUTIQUE</h1>
         <p className="font-bold uppercase">Vestidos de Gala, XV &amp; Tuxedos</p>
         <p className="font-semibold">Campestre, Ave. Colima y calle 26, Plaza Elisa · San Luis Río Colorado, Son.</p>

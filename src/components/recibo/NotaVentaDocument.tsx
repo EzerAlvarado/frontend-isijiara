@@ -30,12 +30,12 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
   return (
     <div
       id={id}
-      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-2 font-recibo text-[10px] font-semibold uppercase leading-tight text-black shadow-lg print:max-w-none print:w-full print:border-none print:p-0 print:shadow-none"
+      className="mx-auto box-border w-full max-w-[8.5in] border border-black bg-white p-2.5 font-recibo text-[10px] font-semibold uppercase leading-snug text-black shadow-lg print:max-w-none print:w-full print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 
       {/* 3 columnas alineadas: cliente | fechas | pagos */}
-      <div className="mt-1 grid grid-cols-3 gap-1">
+      <div className="mt-2 grid grid-cols-3 gap-1.5">
         <div className="space-y-0.5">
           <div className="border border-black px-1.5 py-0.5">
             <span className="font-black">Folio: </span>
@@ -112,7 +112,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
       </div>
 
       {/* Tabla artículos */}
-      <div className="mt-1 border border-black">
+      <div className="mt-2 border border-black">
         <div className="grid grid-cols-[40px_60px_1fr_80px] border-b border-black bg-gray-100 text-[8px] font-black uppercase">
           <div className="border-r border-black px-1 py-0.5 text-center">Cant.</div>
           <div className="border-r border-black px-1 py-0.5 text-center">Tipo</div>
@@ -137,8 +137,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
       </div>
 
       {/* Detalle (2 cols) + totales (1 col) — misma grilla de 3 */}
-      <div className="mt-1 grid grid-cols-3 gap-1">
-        <div className="col-span-2 space-y-0.5">
+      <div className="mt-2 grid grid-cols-3 gap-1.5">
+        <div className="col-span-2 space-y-1">
           <div className="border border-black">
             <div className="border-b border-black bg-gray-100 px-1.5 py-0.5 text-[8px] font-black uppercase">
               Detalle de renta
@@ -186,7 +186,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-1">
           <div className="border border-black">
             <div className="grid grid-cols-[1fr_1fr] border-b border-black">
               <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
@@ -260,14 +260,14 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
 
       {/* Términos - solo para rentas, no ventas */}
       {!doc.esVenta && (
-        <div className="mt-1 border border-black px-1.5 py-1">
-          <p className="mb-0.5 text-[8px] font-black uppercase">Términos y condiciones</p>
-          <ul className="list-disc space-y-0 pl-3.5 text-[8px] font-semibold leading-snug text-black">
+        <div className="mt-2 border border-black px-2 py-1.5">
+          <p className="mb-1 text-[8px] font-black uppercase">Términos y condiciones</p>
+          <ul className="list-disc space-y-0.5 pl-3.5 text-[8px] font-semibold leading-snug text-black">
             {TERMINOS_RENTA.map((t, i) => (
               <li key={i}>{t}</li>
             ))}
           </ul>
-          <div className="mt-1.5 flex justify-end">
+          <div className="mt-2 flex justify-end">
             <div className="w-40 border-t border-black pt-0.5 text-center text-[9px] font-black">
               Firma
             </div>
