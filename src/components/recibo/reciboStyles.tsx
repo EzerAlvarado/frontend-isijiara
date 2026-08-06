@@ -19,7 +19,7 @@ export function EncabezadoIsijara() {
         <p className="font-semibold uppercase">Vestidos de Gala, XV &amp; Tuxedos</p>
         <p>Campestre, Ave. Colima y calle 26, Plaza Elisa</p>
         <p>Ave. Colima y 26 · San Luis Río Colorado, Son.</p>
-        <p className="font-medium">Tel. (653) 291-2297 · (653) 690-7058 · (653) 130-3882</p>
+        <p className="font-medium">Tel. (653) 145-0263 · (653) 130-3882 · (653) 175-4283</p>
         <p className="italic text-gray-600">
           Horario: Lun–Vie 10:00 a.m. – 8:00 p.m. · Sáb 10:00 a.m. – 7:00 p.m. · Dom 12:00 p.m. – 5:00 p.m.
         </p>
