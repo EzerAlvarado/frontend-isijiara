@@ -43,7 +43,7 @@ export const COLUMNAS_INFO: ColumnaRentaInfo[] = [
   {
     kind: 'celda',
     key: 'fechaCita',
-    label: 'Fecha',
+    label: 'Entrega',
     minW: 'w-[88px] min-w-0 max-w-[100px]',
   },
   { kind: 'celda', key: 'horario', label: 'Horario', minW: 'min-w-[72px]' },

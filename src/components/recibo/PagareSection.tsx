@@ -23,7 +23,7 @@ export function PagareSection({ doc }: PagareSectionProps) {
 
       <p className="mt-2">
         En <span className="font-bold uppercase">{pagaré.estado}</span>,{' '}
-        <span className="font-bold">{pagaré.fechaEmision}</span>
+        <span className="font-bold normal-case">{pagaré.fechaEmision}</span>
       </p>
 
       <p className="mt-2 text-justify">
@@ -36,7 +36,7 @@ export function PagareSection({ doc }: PagareSectionProps) {
           {pagaré.lugarPago}
         </span>{' '}
         el{' '}
-        <span className="inline-block min-w-[80px] border-b border-gray-900 font-medium">
+        <span className="inline-block min-w-[80px] border-b border-gray-900 font-medium normal-case">
           {pagaré.fechaPago}
         </span>
         .

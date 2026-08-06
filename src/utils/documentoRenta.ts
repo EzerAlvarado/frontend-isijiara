@@ -112,34 +112,40 @@ const DIAS_SEMANA = [
   'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado',
 ]
 
-export function fechaLarga(fecha: string): string {
-  const d = parseFechaDDMMYYYY(fecha)
-  if (!d) return fecha
-  const mes = MESES_LARGO[d.getMonth()]
-  return `${d.getDate()} de ${mes} de ${d.getFullYear()}`
+function parseFechaFlexible(fecha: string): Date | null {
+  const mx = parseFechaDDMMYYYY(fecha.trim())
+  if (mx) return mx
+  // YYYY-MM-DD o ISO datetime
+  const iso = fecha.trim().match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]), 12, 0, 0)
+  return null
 }
 
+/** Ej: "08 de agosto del 2026" */
+export function fechaLarga(fecha: string): string {
+  if (!fecha?.trim()) return ''
+  const d = parseFechaFlexible(fecha)
+  if (!d) return fecha
+  const dia = String(d.getDate()).padStart(2, '0')
+  const mes = MESES_LARGO[d.getMonth()]
+  return `${dia} de ${mes} del ${d.getFullYear()}`
+}
+
+/** Ej: "lunes 08 de agosto" */
 export function fechaConDiaSemana(fecha: string): string {
-  const d = parseFechaDDMMYYYY(fecha)
+  if (!fecha?.trim()) return ''
+  const d = parseFechaFlexible(fecha)
   if (!d) return fecha
   const diaSemana = DIAS_SEMANA[d.getDay()]
+  const dia = String(d.getDate()).padStart(2, '0')
   const mes = MESES_LARGO[d.getMonth()]
-  return `${diaSemana} ${d.getDate()} de ${mes}`
+  return `${diaSemana} ${dia} de ${mes}`
 }
 
 function celdaValor(c: { valor: string }): string {
   const v = c.valor?.trim()
   if (!v || v === '—' || v.toUpperCase() === 'X' || v.toUpperCase() === 'NO') return ''
   return aMayusculas(v)
-}
-
-function fechaISO(fecha: string): string {
-  const d = parseFechaDDMMYYYY(fecha)
-  if (!d) return ''
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
 }
 
 function lineasPrendaTraje(renta: Renta): { descripcion: string }[] {
@@ -206,7 +212,8 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   const feria = renta.feriaMxn ?? 0
   const pagado = rentaEstaPagada(renta)
   const hora = formatearHorario(renta.horario.valor)
-  const fechaRenta = hora ? `${renta.fechaSalida} ${hora}` : renta.fechaSalida
+  const fechaEntregaLarga = fechaLarga(renta.fechaSalida)
+  const fechaRenta = hora ? `${fechaEntregaLarga} ${hora}` : fechaEntregaLarga
   const detalleExtra = celdaValor(renta.detalles)
   const esVestidos = Boolean(renta.categoriaVestido)
   const tipoOperacion = tipoOperacionDesdeRenta(renta, esVestidos)
@@ -224,13 +231,14 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
       direccion: aMayusculas(renta.direccion ?? ''),
     },
     fechas: {
-      evento: renta.fechaSalida,
-      entrega: renta.fechaSalida,
-      regreso: renta.fechaRegreso,
+      entrega: fechaEntregaLarga,
+      evento: fechaLarga(renta.fechaEvento || renta.fechaSalida),
+      regreso: fechaLarga(renta.fechaRegreso),
+      cita: fechaLarga(renta.fechaCita?.valor || ''),
     },
     pagos: (() => {
       const filas: { fecha: string; monto: number; formaPago: string }[] = []
-      const f = fechaISO(renta.fechaSalida)
+      const f = fechaLarga(renta.fechaSalida)
       if (metodo === 'mixto' && (pagoMxn > 0 || pagoUsd > 0)) {
         if (pagoMxn > 0) filas.push({ fecha: f, monto: pagoMxn, formaPago: 'Pesos' })
         if (pagoUsd > 0) filas.push({ fecha: f, monto: pagoUsd, formaPago: 'DLLS' })
@@ -242,7 +250,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
         })
       }
       for (const abono of renta.abonos ?? []) {
-        const fechaAbono = abono.creadoEn.slice(0, 10).split('-').reverse().join('/')
+        const fechaAbono = fechaLarga(abono.creadoEn)
         if (abono.metodoPago === 'mixto' && (abono.pagoEfectivoMxn || abono.pagoEfectivoUsd)) {
           if (abono.pagoEfectivoMxn) {
             filas.push({ fecha: fechaAbono, monto: abono.pagoEfectivoMxn, formaPago: 'Pesos' })

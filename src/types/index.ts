@@ -71,7 +71,10 @@ export interface Renta {
   estatusFila?: EstatusCelda
   /** Inicio de semana (lunes) en formato YYYY-MM-DD */
   semanaInicio: string
+  /** Fecha de entrega (antes “fecha de salida”) */
   fechaSalida: string
+  /** Fecha del evento (recibo) */
+  fechaEvento?: string
   fechaRegreso: string
   /** Fecha en que el cliente recogió el traje (al marcar salió) */
   fechaSalioReal?: string | null

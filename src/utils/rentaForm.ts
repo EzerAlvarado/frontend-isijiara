@@ -60,7 +60,12 @@ export interface RentaFormValues {
   horario: string
   detalles: string
   ajustes: string
+  /** Fecha de entrega */
   fechaSalida: string
+  /** Fecha del evento */
+  fechaEvento: string
+  /** Fecha de cita (recibo / celda) */
+  fechaCita: string
   fechaRegreso: string
   semanaInicio: string
   precio: string
@@ -118,6 +123,8 @@ export function crearFormularioVacio(): RentaFormValues {
     detalles: '',
     ajustes: '',
     fechaSalida,
+    fechaEvento: fechaSalida,
+    fechaCita: '',
     fechaRegreso,
     semanaInicio: semanaKeyDesdeFechaSalida(fechaSalida) || hoyISO(),
     precio: '',
@@ -157,6 +164,8 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
   }
 
   const fechaSalida = renta.fechaSalida || renta.fechaCita.valor
+  const fechaEvento = renta.fechaEvento || fechaSalida
+  const fechaCita = renta.fechaCita?.valor ?? ''
   const fechaRegreso = renta.fechaRegreso || sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
 
   return {
@@ -185,6 +194,8 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     detalles: renta.detalles.valor,
     ajustes: renta.ajustes ?? '',
     fechaSalida,
+    fechaEvento,
+    fechaCita,
     fechaRegreso,
     semanaInicio: renta.semanaInicio,
     precio: renta.fondo ? String(renta.fondo) : '',
@@ -301,7 +312,7 @@ export function formularioAPayload(
     cliente: celda(values.cliente),
     telefono: aMayusculas(values.telefono.trim()),
     direccion: aMayusculas(values.direccion.trim()),
-    fechaCita: celda(values.fechaSalida),
+    fechaCita: celda(values.fechaCita.trim()),
     horario: celda(horarioDesdeInput(values.horario)),
     detalles: celda(values.detalles),
     ajustes: aMayusculas(values.ajustes.trim()),
@@ -315,6 +326,7 @@ export function formularioAPayload(
     detallesPantalon: aMayusculas(values.detallesPantalon.trim()),
     semanaInicio: semana,
     fechaSalida: values.fechaSalida,
+    fechaEvento: values.fechaEvento.trim() || values.fechaSalida,
     fechaRegreso,
     fondo: precio,
     anticipo,

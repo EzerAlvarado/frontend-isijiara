@@ -1,5 +1,6 @@
 import type { Renta } from '../../types'
 import { EncabezadoIsijara } from './reciboStyles'
+import { fechaLarga } from '../../utils/documentoRenta'
 import { totalCobrarRenta, restanteRenta } from '../../utils/pagoRenta'
 
 interface ReciboAbonoDocumentProps {
@@ -12,17 +13,14 @@ function fmt(n: number) {
 }
 
 function formatFecha(fechaISO: string): string {
+  const base = fechaLarga(fechaISO)
   try {
     const d = new Date(fechaISO)
-    return d.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    if (Number.isNaN(d.getTime())) return base
+    const hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+    return `${base} ${hora}`
   } catch {
-    return fechaISO
+    return base
   }
 }
 
@@ -48,7 +46,7 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
   return (
     <div
       id={id}
-      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-4 font-serif text-[11px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
+      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-4 font-recibo text-[11px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 
@@ -73,12 +71,16 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
         </div>
         <div className="space-y-1">
           <div className="border border-gray-900 px-2 py-1">
-            <span className="font-bold">Fecha Salida: </span>
-            {renta.fechaSalida}
+            <span className="font-bold">Fecha Entrega: </span>
+            <span className="normal-case">{fechaLarga(renta.fechaSalida)}</span>
+          </div>
+          <div className="border border-gray-900 px-2 py-1">
+            <span className="font-bold">Fecha Evento: </span>
+            <span className="normal-case">{fechaLarga(renta.fechaEvento || renta.fechaSalida)}</span>
           </div>
           <div className="border border-gray-900 px-2 py-1">
             <span className="font-bold">Fecha Regreso: </span>
-            {renta.fechaRegreso}
+            <span className="normal-case">{fechaLarga(renta.fechaRegreso)}</span>
           </div>
           <div className="border border-gray-900 px-2 py-1">
             <span className="font-bold">Total a Cobrar: </span>
@@ -119,7 +121,7 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
             {abonos.map((abono, i) => (
               <tr key={abono.id} className="border-b border-gray-200">
                 <td className="border-r border-gray-200 px-2 py-1">{i + 1}</td>
-                <td className="border-r border-gray-200 px-2 py-1">{formatFecha(abono.creadoEn)}</td>
+                <td className="border-r border-gray-200 px-2 py-1 normal-case">{formatFecha(abono.creadoEn)}</td>
                 <td className="border-r border-gray-200 px-2 py-1">
                   {etiquetaMetodoPago(abono.metodoPago)}
                 </td>

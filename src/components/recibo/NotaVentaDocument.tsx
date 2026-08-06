@@ -30,12 +30,12 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
   return (
     <div
       id={id}
-      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-3 font-serif text-[10px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
+      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-3 font-recibo text-[10px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 
       {/* Info cliente + fechas + pagos */}
-      <div className="mt-2 grid grid-cols-[1fr_200px_180px] gap-1">
+      <div className="mt-2 grid grid-cols-[1.1fr_1.2fr_1fr] gap-1">
         <div className="space-y-0.5">
           <div className="border border-gray-900 px-1.5 py-0.5">
             <span className="font-bold">Folio: </span>
@@ -43,7 +43,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
           </div>
           <div className="border border-gray-900 px-1.5 py-0.5">
             <span className="font-bold">Fecha Renta: </span>
-            {doc.fechaRenta}
+            <span className="normal-case">{doc.fechaRenta}</span>
           </div>
           <div className="border border-gray-900 px-1.5 py-0.5">
             <span className="font-bold">Cliente: </span>
@@ -72,10 +72,10 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             ] as const
           ).map(([label, val]) => (
             <div key={label} className="flex border-b border-gray-300 last:border-b-0">
-              <span className="w-[90px] shrink-0 border-r border-gray-300 px-1 py-0.5 text-[8px] font-bold">
+              <span className="w-[92px] shrink-0 border-r border-gray-300 px-1 py-0.5 text-[7.5px] font-bold">
                 {label}
               </span>
-              <span className="flex-1 px-1 py-0.5">{val}</span>
+              <span className="flex-1 px-1 py-0.5 text-[8px] normal-case leading-snug">{val}</span>
             </div>
           ))}
         </div>
@@ -87,8 +87,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             <div className="px-0.5 py-0.5 text-center">Forma de Pago</div>
           </div>
           {doc.pagos.map((p, i) => (
-            <div key={i} className="grid grid-cols-3 border-b border-gray-300 text-[8px]">
-              <div className="border-r border-gray-300 px-0.5 py-0.5">{p.fecha}</div>
+            <div key={i} className="grid grid-cols-3 border-b border-gray-300 text-[7.5px]">
+              <div className="border-r border-gray-300 px-0.5 py-0.5 normal-case leading-snug">{p.fecha}</div>
               <div className="border-r border-gray-300 px-0.5 py-0.5 text-right">
                 {p.formaPago.toUpperCase() === 'DLLS' ? `${fmt(p.monto)} USD` : fmt(p.monto)}
               </div>

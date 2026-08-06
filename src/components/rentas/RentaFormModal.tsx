@@ -427,6 +427,10 @@ export function RentaFormModal({
         if (semana) next.semanaInicio = semana
         const nuevaFechaRegreso = sumarDiasFecha(valor, DIAS_RENTA_DEFAULT)
         if (nuevaFechaRegreso) next.fechaRegreso = nuevaFechaRegreso
+        // Si evento estaba vacío o igual a la entrega anterior, lo sincroniza
+        if (!prev.fechaEvento || prev.fechaEvento === prev.fechaSalida) {
+          next.fechaEvento = valor
+        }
       }
       if (key === 'color') next.piezaSacoId = ''
       if (key === 'marca') next.piezaSacoId = ''
@@ -504,6 +508,14 @@ export function RentaFormModal({
       setError('El nombre del cliente es obligatorio.')
       return
     }
+    if (!values.fechaSalida.trim()) {
+      setError('La fecha de entrega es obligatoria.')
+      return
+    }
+    if (!values.fechaEvento.trim()) {
+      setError('La fecha de evento es obligatoria.')
+      return
+    }
     if (esVestidos && !esEdicion && !piezaVestidoVinculada && !tieneAccesorios) {
       setError('Selecciona un vestido del inventario o ingresa al menos un accesorio.')
       return
@@ -575,11 +587,24 @@ export function RentaFormModal({
             <Field label="Dirección" value={values.direccion} onChange={set('direccion')} />
             <Field label="Empleado" value={values.empleado} onChange={set('empleado')} />
             <Field
-              label="Fecha salida *"
+              label="Fecha de entrega *"
               value={values.fechaSalida}
               onChange={set('fechaSalida')}
               placeholder="dd/mm/aaaa"
               required
+            />
+            <Field
+              label="Fecha de evento *"
+              value={values.fechaEvento}
+              onChange={set('fechaEvento')}
+              placeholder="dd/mm/aaaa"
+              required
+            />
+            <Field
+              label="Fecha de cita"
+              value={values.fechaCita}
+              onChange={set('fechaCita')}
+              placeholder="dd/mm/aaaa"
             />
             <Field
               label={values.tipoOperacion === 'venta' ? 'Fecha regreso' : 'Fecha regreso *'}
