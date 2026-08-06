@@ -344,7 +344,7 @@ export function RentasPage() {
           <p className="mt-1 text-sm text-gray-500">
             {primeraSemana?.label} — {ultimaSemana?.label}
             <span className="ml-1 text-xs">
-              (semana actual + {MESES_VENTANA_ADELANTE} meses)
+              (1 semana atrás + actual + {MESES_VENTANA_ADELANTE} meses)
             </span>
           </p>
         </div>
