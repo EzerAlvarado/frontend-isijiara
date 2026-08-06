@@ -48,7 +48,7 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
   return (
     <div
       id={id}
-      className="mx-auto w-full max-w-[816px] border border-gray-400 bg-white p-4 font-serif text-[11px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-none print:border-none print:p-2 print:shadow-none"
+      className="mx-auto w-full max-w-[8.5in] border border-gray-400 bg-white p-4 font-serif text-[11px] uppercase leading-tight text-gray-900 shadow-lg print:max-w-[7.7in] print:border-none print:p-0 print:shadow-none"
     >
       <EncabezadoIsijara />
 

@@ -190,8 +190,8 @@ export async function exportarRentasReportePdf(
   const analytics = analizarRentasParaReporte(rentas, linea)
   const tabLabel = etiquetaExportTab(tab, linea)
 
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-  const margen = 14
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
+  const margen = 12.7 // ~0.5 in, márgenes típicos carta
   let y = margen
 
   doc.setFont('helvetica', 'bold')

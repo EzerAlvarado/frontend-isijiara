@@ -14,10 +14,9 @@ import {
 } from './precioVestido'
 
 export function calcularResta(
-  doc: Pick<DocumentoRenta, 'total' | 'anticipo' | 'metodoPago' | 'pagado' | 'pagaré'>,
+  doc: Pick<DocumentoRenta, 'total' | 'anticipo' | 'metodoPago' | 'pagado'>,
 ): number {
   if (doc.pagado) return 0
-  if (doc.pagaré?.buenoPor != null) return doc.pagaré.buenoPor
   return Math.max(0, doc.total - anticipoEnPesos(doc.anticipo, doc.metodoPago ?? 'pesos'))
 }
 
