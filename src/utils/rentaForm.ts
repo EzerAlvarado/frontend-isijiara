@@ -163,10 +163,12 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     anticipo = ''
   }
 
-  const fechaSalida = renta.fechaSalida || ''
-  const fechaEvento = renta.fechaEvento || fechaSalida
-  // Exactamente lo guardado (vacío si no hay cita)
-  const fechaCita = (renta.fechaCita?.valor ?? '').trim()
+  const fechaSalida = (renta.fechaSalida || '').trim()
+  const fechaEvento = (renta.fechaEvento || fechaSalida).trim() || fechaSalida
+  // Vacío si no hay cita. Si es igual a entrega, es dato viejo (antes se copiaba sola).
+  const citaGuardada = (renta.fechaCita?.valor ?? '').trim()
+  const fechaCita =
+    citaGuardada && citaGuardada !== fechaSalida ? citaGuardada : ''
   const fechaRegreso = renta.fechaRegreso || sumarDiasFecha(fechaSalida, DIAS_RENTA_DEFAULT)
 
   return {
@@ -313,6 +315,7 @@ export function formularioAPayload(
     cliente: celda(values.cliente),
     telefono: aMayusculas(values.telefono.trim()),
     direccion: aMayusculas(values.direccion.trim()),
+    // Vacío se guarda vacío (nunca rellenar con fecha de entrega)
     fechaCita: celda(values.fechaCita.trim()),
     horario: celda(horarioDesdeInput(values.horario)),
     detalles: celda(values.detalles),

@@ -234,10 +234,12 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
       entrega: fechaEntregaLarga,
       evento: fechaLarga(renta.fechaEvento || renta.fechaSalida),
       regreso: fechaLarga(renta.fechaRegreso),
-      // Sin cita → guion (no rellenar con entrega)
+      // Sin cita (o cita = entrega por datos viejos) → guion
       cita: (() => {
         const cita = (renta.fechaCita?.valor || '').trim()
-        return cita ? fechaLarga(cita) : '-'
+        const entrega = (renta.fechaSalida || '').trim()
+        if (!cita || cita === entrega) return '-'
+        return fechaLarga(cita)
       })(),
     },
     pagos: (() => {
