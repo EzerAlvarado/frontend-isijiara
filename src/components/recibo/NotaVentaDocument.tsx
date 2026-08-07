@@ -102,7 +102,10 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               </div>
             ))
           )}
-          <div className="grid grid-cols-[1.3fr_0.7fr_0.9fr] border-t border-black bg-gray-50 font-black text-red-600">
+          <div
+            className="grid grid-cols-[1.3fr_0.7fr_0.9fr] border-t border-black bg-gray-50 text-[11px] text-red-600"
+            style={{ fontWeight: 900, WebkitTextStroke: '0.35px currentColor' }}
+          >
             <div className="border-r border-black px-0.5 py-0.5 text-right">Total</div>
             <div className="col-span-2 px-0.5 py-0.5 text-right">{fmt(totalPagos)}</div>
           </div>
@@ -221,9 +224,9 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             )}
           </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center border border-black px-2 py-3 text-center">
-            <p className="text-[8px] font-black uppercase">Depósito Reembolsable</p>
-            <p className="mt-1 text-sm font-black leading-tight">
+          <div className="border border-black px-2 py-1 text-center">
+            <p className="text-[7.5px] font-black uppercase leading-tight">Depósito Reembolsable</p>
+            <p className="text-[11px] font-black leading-tight">
               {doc.depositoReembolsable || '0.00'}
             </p>
           </div>

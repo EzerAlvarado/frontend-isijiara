@@ -5,7 +5,7 @@ function LogoIsijara() {
     <img
       src="/logo-isijara.png"
       alt="Isijara"
-      className="h-[92px] w-auto shrink-0 object-contain self-center print:h-[88px]"
+      className="h-[92px] w-auto shrink-0 object-contain object-left self-center print:h-[88px]"
     />
   )
 }
@@ -27,9 +27,9 @@ export function formatearTelefonoRecibo(digitos: string): string {
 
 export function EncabezadoIsijara() {
   return (
-    <div className="flex items-center gap-2 border-b border-black pb-1.5">
+    <div className="flex items-center gap-0 border-b border-black pb-1.5">
       <LogoIsijara />
-      <div className="flex-1 text-center text-[9px] font-semibold leading-snug text-black">
+      <div className="min-w-0 flex-1 text-center text-[9px] font-semibold leading-snug text-black -ml-3">
         <h1 className="text-base font-black tracking-wide text-black">ISIJARA</h1>
         <p className="font-bold uppercase">Vestidos de Gala, XV &amp; Tuxedos</p>
         <p className="font-semibold">
