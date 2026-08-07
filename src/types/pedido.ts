@@ -10,7 +10,7 @@ export type EstatusPedido =
   | 'entregado'
   | 'cancelado'
 
-export type ServicioPedido = 'renta' | 'venta' | 'premier'
+export type ServicioPedido = 'venta' | 'premier'
 
 export interface Pedido {
   id: string
@@ -46,7 +46,6 @@ export const ESTATUS_PEDIDO: { value: EstatusPedido; label: string; className: s
 ]
 
 export const SERVICIOS_PEDIDO: { value: ServicioPedido; label: string }[] = [
-  { value: 'renta', label: 'RENTA' },
   { value: 'venta', label: 'VENTA' },
   { value: 'premier', label: 'PREMIER' },
 ]

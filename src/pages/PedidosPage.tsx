@@ -38,10 +38,14 @@ const FORM_VACIO: FormState = {
   tipoPedido: 'tuxedo',
   estatus: 'pendiente',
   estiloPiezas: '',
-  servicio: 'renta',
+  servicio: 'venta',
   fechaEntrega: '',
   comentarios: '',
   mesEtiqueta: '',
+}
+
+function colorTextoServicio(servicio: ServicioPedido): string {
+  return servicio === 'premier' ? 'text-violet-700' : 'text-blue-700'
 }
 
 function pedidoAForm(p: Pedido): FormState {
@@ -50,7 +54,7 @@ function pedidoAForm(p: Pedido): FormState {
     tipoPedido: p.tipoPedido,
     estatus: p.estatus,
     estiloPiezas: p.estiloPiezas,
-    servicio: p.servicio,
+    servicio: p.servicio === 'premier' ? 'premier' : 'venta',
     fechaEntrega: p.fechaEntrega,
     comentarios: p.comentarios,
     mesEtiqueta: p.mesEtiqueta,
@@ -261,9 +265,13 @@ export function PedidosPage() {
                       {mes}
                     </td>
                   </tr>
-                  {items.map((p) => (
+                  {items.map((p) => {
+                    const colorTxt = colorTextoServicio(
+                      p.servicio === 'premier' ? 'premier' : 'venta',
+                    )
+                    return (
                     <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50/80">
-                      <td className="px-3 py-2 font-semibold uppercase text-blue-800">
+                      <td className={`px-3 py-2 font-semibold uppercase ${colorTxt}`}>
                         {p.cliente}
                       </td>
                       <td className="px-3 py-2">
@@ -284,16 +292,17 @@ export function PedidosPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="max-w-[280px] px-3 py-2 text-xs font-medium uppercase text-violet-800">
+                      <td className={`max-w-[280px] px-3 py-2 text-xs font-medium uppercase ${colorTxt}`}>
                         {p.estiloPiezas || '—'}
                       </td>
-                      <td className="px-3 py-2 text-xs font-bold uppercase text-blue-700">
-                        {SERVICIOS_PEDIDO.find((s) => s.value === p.servicio)?.label ?? p.servicio}
+                      <td className={`px-3 py-2 text-xs font-bold uppercase ${colorTxt}`}>
+                        {SERVICIOS_PEDIDO.find((s) => s.value === p.servicio)?.label ??
+                          (p.servicio === 'premier' ? 'PREMIER' : 'VENTA')}
                       </td>
-                      <td className="px-3 py-2 text-xs font-semibold uppercase text-gray-800">
+                      <td className={`px-3 py-2 text-xs font-semibold uppercase ${colorTxt}`}>
                         {p.fechaEntrega || '—'}
                       </td>
-                      <td className="max-w-[260px] px-3 py-2 text-xs text-gray-700">
+                      <td className={`max-w-[260px] px-3 py-2 text-xs ${colorTxt}`}>
                         {p.comentarios || '—'}
                       </td>
                       <td className="px-3 py-2">
@@ -317,7 +326,8 @@ export function PedidosPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </Fragment>
               ))
             )}
