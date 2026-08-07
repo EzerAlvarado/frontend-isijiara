@@ -80,9 +80,6 @@ function mapRenta(raw: RentaApi): Renta {
     feriaMxn: Number(raw.feriaMxn ?? 0),
     estatusFila: raw.estatusFila ? (raw.estatusFila as Renta['estatusFila']) : undefined,
   }
-  if (!renta.fechaCita?.valor && renta.fechaSalida) {
-    renta.fechaCita = { valor: renta.fechaSalida }
-  }
   return normalizarRenta(renta)
 }
 

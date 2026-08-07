@@ -119,7 +119,7 @@ export function crearFormularioVacio(): RentaFormValues {
     cliente: '',
     telefono: '',
     direccion: '',
-    horario: '',
+    horario: '17:00',
     detalles: '',
     ajustes: '',
     fechaSalida,

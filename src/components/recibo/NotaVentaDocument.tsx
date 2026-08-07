@@ -68,7 +68,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               ['Entrega', doc.fechas.entrega],
               ['Evento', doc.fechas.evento],
               ['Regreso', doc.fechas.regreso],
-              ['Cita', doc.fechas.cita ?? ''],
+              ['Cita', doc.fechas.cita?.trim() || '-'],
             ] as const
           ).map(([label, val]) => (
             <div key={label} className="grid grid-cols-[72px_1fr] border-b border-black/30 last:border-b-0">
