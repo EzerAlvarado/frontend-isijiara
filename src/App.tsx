@@ -11,6 +11,7 @@ import { DevolucionesPage } from './pages/DevolucionesPage'
 import { InventarioPage } from './pages/InventarioPage'
 import { CorteDiaPage } from './pages/CorteDiaPage'
 import { FinanzasPage } from './pages/FinanzasPage'
+import { PedidosPage } from './pages/PedidosPage'
 import { LoginPage } from './pages/LoginPage'
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           />
           <Route path="devoluciones" element={<DevolucionesPage />} />
           <Route path="archivo-devoluciones" element={<ArchivoDevolucionesPage />} />
+          <Route path="pedidos" element={<PedidosPage />} />
           <Route path="corte" element={<CorteDiaPage />} />
           <Route path="finanzas" element={<FinanzasPage />} />
           <Route path="vestidos/:perfil" element={<VestidosProfileGate />}>
