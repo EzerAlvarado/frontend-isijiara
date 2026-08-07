@@ -45,7 +45,15 @@ const FORM_VACIO: FormState = {
 }
 
 function colorTextoServicio(servicio: ServicioPedido): string {
-  return servicio === 'premier' ? 'text-violet-700' : 'text-blue-700'
+  if (servicio === 'premier') return 'text-violet-700'
+  if (servicio === 'faltante_boutique') return 'text-amber-700'
+  return 'text-blue-700'
+}
+
+function normalizarServicio(servicio: string): ServicioPedido {
+  if (servicio === 'premier') return 'premier'
+  if (servicio === 'faltante_boutique') return 'faltante_boutique'
+  return 'venta'
 }
 
 function pedidoAForm(p: Pedido): FormState {
@@ -54,7 +62,7 @@ function pedidoAForm(p: Pedido): FormState {
     tipoPedido: p.tipoPedido,
     estatus: p.estatus,
     estiloPiezas: p.estiloPiezas,
-    servicio: p.servicio === 'premier' ? 'premier' : 'venta',
+    servicio: normalizarServicio(p.servicio),
     fechaEntrega: p.fechaEntrega,
     comentarios: p.comentarios,
     mesEtiqueta: p.mesEtiqueta,
@@ -266,9 +274,7 @@ export function PedidosPage() {
                     </td>
                   </tr>
                   {items.map((p) => {
-                    const colorTxt = colorTextoServicio(
-                      p.servicio === 'premier' ? 'premier' : 'venta',
-                    )
+                    const colorTxt = colorTextoServicio(normalizarServicio(p.servicio))
                     return (
                     <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50/80">
                       <td className={`px-3 py-2 font-semibold uppercase ${colorTxt}`}>
@@ -296,8 +302,8 @@ export function PedidosPage() {
                         {p.estiloPiezas || '—'}
                       </td>
                       <td className={`px-3 py-2 text-xs font-bold uppercase ${colorTxt}`}>
-                        {SERVICIOS_PEDIDO.find((s) => s.value === p.servicio)?.label ??
-                          (p.servicio === 'premier' ? 'PREMIER' : 'VENTA')}
+                        {SERVICIOS_PEDIDO.find((s) => s.value === normalizarServicio(p.servicio))
+                          ?.label ?? 'VENTA'}
                       </td>
                       <td className={`px-3 py-2 text-xs font-semibold uppercase ${colorTxt}`}>
                         {p.fechaEntrega || '—'}
