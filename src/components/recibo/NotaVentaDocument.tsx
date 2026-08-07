@@ -1,6 +1,5 @@
 import type { DocumentoRenta } from '../../types/documentoRenta'
 import { TERMINOS_RENTA } from '../../types/documentoRenta'
-import { calcularResta } from '../../utils/documentoRenta'
 import { fmtAnticipo, fmtMontoConDlls, getTipoCambioMxUsd } from '../../utils/tipoCambio'
 import type { MetodoPago } from '../../types'
 import { EncabezadoIsijara } from './reciboStyles'
@@ -16,7 +15,6 @@ function fmt(n: number) {
 }
 
 export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDocumentProps) {
-  const montoResta = calcularResta(doc)
   const metodoPago = (doc.metodoPago ?? 'pesos') as MetodoPago
   const totalPagos = doc.pagos.reduce(
     (s, p) =>
@@ -104,7 +102,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               </div>
             ))
           )}
-          <div className="grid grid-cols-[1.3fr_0.7fr_0.9fr] border-t border-black bg-gray-50 font-black">
+          <div className="grid grid-cols-[1.3fr_0.7fr_0.9fr] border-t border-black bg-gray-50 font-black text-red-600">
             <div className="border-r border-black px-0.5 py-0.5 text-right">Total</div>
             <div className="col-span-2 px-0.5 py-0.5 text-right">{fmt(totalPagos)}</div>
           </div>
@@ -196,7 +194,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                 {fmtMontoConDlls(doc.total)}
               </span>
             </div>
-            <div className="grid grid-cols-[1fr_1fr] border-b border-black">
+            <div className="grid grid-cols-[1fr_1fr]">
               <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                 Anticipo
               </span>
@@ -212,7 +210,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               </span>
             </div>
             {(doc.feriaMxn ?? 0) > 0 && (
-              <div className="grid grid-cols-[1fr_1fr] border-b border-black">
+              <div className="grid grid-cols-[1fr_1fr] border-t border-black">
                 <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                   Feria
                 </span>
@@ -221,39 +219,13 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                 </span>
               </div>
             )}
-            <div className="grid grid-cols-[1fr_1fr]">
-              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
-                Resta $
-              </span>
-              <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
-                {doc.pagado ? (
-                  <span className="rounded bg-green-600 px-1.5 py-0.5 text-white">PAGADO</span>
-                ) : (
-                  fmtMontoConDlls(montoResta)
-                )}
-              </span>
-            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-0.5">
-            <div className="border border-black px-1 py-0.5 text-center">
-              <p className="text-[7.5px] font-black uppercase">Depósito Reemb.</p>
-              <p className="text-xs font-black">{doc.depositoReembolsable || '0.00'}</p>
-            </div>
-            <div
-              className={`border border-black px-1 py-0.5 text-center ${
-                doc.pagado ? 'bg-green-100' : ''
-              }`}
-            >
-              <p className="text-[7.5px] font-black uppercase">Monto Resta</p>
-              <p className="text-[8.5px] font-black leading-tight">
-                {doc.pagado ? (
-                  <span className="text-green-800">PAGADO</span>
-                ) : (
-                  fmtMontoConDlls(montoResta)
-                )}
-              </p>
-            </div>
+          <div className="flex flex-1 flex-col items-center justify-center border border-black px-2 py-3 text-center">
+            <p className="text-[8px] font-black uppercase">Depósito Reembolsable</p>
+            <p className="mt-1 text-sm font-black leading-tight">
+              {doc.depositoReembolsable || '0.00'}
+            </p>
           </div>
         </div>
       </div>
