@@ -68,6 +68,7 @@ function mapRenta(raw: RentaApi): Renta {
     categoriaVestido: raw.categoriaVestido ?? '',
     cancelada: Boolean(raw.cancelada),
     excluirCorte: Boolean(raw.excluirCorte),
+    creadoEn: raw.creadoEn ? String(raw.creadoEn) : undefined,
     tipoOperacion: raw.tipoOperacion ?? '',
     totalCobrar: raw.totalCobrar != null ? Number(raw.totalCobrar) : undefined,
     totalPagado: raw.totalPagado != null ? Number(raw.totalPagado) : undefined,

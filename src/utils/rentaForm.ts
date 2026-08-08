@@ -10,6 +10,11 @@ import {
   type TipoOperacionVestido,
 } from './precioVestido'
 import { horarioDesdeInput, horarioParaInput } from './horario'
+import {
+  ahoraParaInputDatetime,
+  inputDatetimeAIso,
+  isoAInputDatetime,
+} from './fechaHoraRegistro'
 import { aMayusculas } from './mayusculas'
 import { calcularMultaAutomatica } from './multa'
 import {
@@ -84,6 +89,8 @@ export interface RentaFormValues {
   depositoReembolsable: string
   /** Monto del pagaré (BUENO POR $) */
   pagare: string
+  /** Fecha/hora de registro (datetime-local) */
+  creadoEn: string
 }
 
 export function hoyMX(): string {
@@ -139,6 +146,7 @@ export function crearFormularioVacio(): RentaFormValues {
     tipoOperacion: 'renta',
     depositoReembolsable: '',
     pagare: '',
+    creadoEn: ahoraParaInputDatetime(),
   }
 }
 
@@ -213,6 +221,7 @@ export function rentaAFormulario(renta: Renta, esVestidos = false): RentaFormVal
     tipoOperacion,
     depositoReembolsable: renta.depositoReembolsable ?? '',
     pagare: renta.pagare != null ? String(renta.pagare) : '',
+    creadoEn: isoAInputDatetime(renta.creadoEn),
   }
 }
 
@@ -349,6 +358,7 @@ export function formularioAPayload(
     depositoReembolsable: values.depositoReembolsable.trim(),
     pagare: values.pagare ? parseFloat(values.pagare) : 0,
     excluirCorte: Boolean(opciones?.excluirCorte),
+    creadoEn: inputDatetimeAIso(values.creadoEn),
   }
 }
 

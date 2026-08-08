@@ -134,6 +134,8 @@ export interface Renta {
   depositoReembolsable?: string
   /** Monto del pagaré (BUENO POR $) */
   pagare?: number
+  /** Fecha/hora en que se registró la renta (editable; no va en el recibo) */
+  creadoEn?: string
   abonos?: Abono[]
 }
 

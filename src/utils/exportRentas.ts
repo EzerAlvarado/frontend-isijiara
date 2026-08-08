@@ -10,6 +10,7 @@ import {
 } from './rentasConfig'
 import { multaEfectiva } from './multa'
 import { formatearHorario } from './horario'
+import { formatearFechaHoraRegistro } from './fechaHoraRegistro'
 import { etiquetaMetodoPago } from './metodoPago'
 import {
   etiquetaTipoOperacionVestido,
@@ -32,6 +33,9 @@ function valorColumna(renta: Renta, col: ColumnaRentaPrenda): string {
 }
 
 function valorColumnaInfo(renta: Renta, col: ColumnaRentaInfo): string {
+  if (col.kind === 'meta') {
+    return col.key === 'creadoEn' ? formatearFechaHoraRegistro(renta.creadoEn) : ''
+  }
   if (col.kind === 'texto') return renta.ajustes ?? ''
   if (col.key === 'fechaCita') return renta.fechaCita.valor || renta.fechaSalida
   if (col.key === 'horario') return formatearHorario(renta.horario.valor)

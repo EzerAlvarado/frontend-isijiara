@@ -105,14 +105,15 @@ function Field({
   required?: boolean
   readOnly?: boolean
   hint?: string
-  type?: 'text' | 'time'
+  type?: 'text' | 'time' | 'datetime-local'
 }) {
+  const sinMayus = type === 'time' || type === 'datetime-local'
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">{label}</span>
       <input
         type={type}
-        className={`input-field uppercase ${readOnly ? 'bg-gray-50 text-gray-600' : ''} ${type === 'time' ? 'max-w-[140px] normal-case' : ''}`}
+        className={`input-field ${readOnly ? 'bg-gray-50 text-gray-600' : ''} ${sinMayus ? 'normal-case' : 'uppercase'} ${type === 'time' ? 'max-w-[140px]' : ''} ${type === 'datetime-local' ? 'max-w-[220px]' : ''}`}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         placeholder={placeholder}
@@ -651,6 +652,13 @@ export function RentaFormModal({
               hint={values.tipoOperacion === 'venta' ? 'Opcional en ventas' : `Por defecto ${DIAS_RENTA_DEFAULT} días después`}
             />
             <Field label="Horario" type="time" value={values.horario} onChange={set('horario')} />
+            <Field
+              label="Fecha y hora de registro"
+              type="datetime-local"
+              value={values.creadoEn}
+              onChange={set('creadoEn')}
+              hint="Cuándo se agregó la renta (no aparece en el recibo)"
+            />
             <Field label="Ajustes" value={values.ajustes} onChange={set('ajustes')} placeholder="Ej. subir mangas, ensanchar cintura" />
             <Field label="Detalles" value={values.detalles} onChange={set('detalles')} />
           </div>

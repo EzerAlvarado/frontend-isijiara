@@ -12,6 +12,7 @@ export type CampoRentaCeldaInfo = 'empleado' | 'cliente' | 'fechaCita' | 'horari
 export type ColumnaRentaInfo =
   | { kind: 'celda'; key: CampoRentaCeldaInfo; label: string; minW?: string }
   | { kind: 'texto'; key: 'ajustes'; label: string; minW?: string }
+  | { kind: 'meta'; key: 'creadoEn'; label: string; minW?: string }
 
 export type ColumnaRentaPrenda =
   | { kind: 'celda'; key: CampoPrendaCelda; label: string; minW?: string }
@@ -49,6 +50,12 @@ export const COLUMNAS_INFO: ColumnaRentaInfo[] = [
   { kind: 'celda', key: 'horario', label: 'Horario', minW: 'min-w-[72px]' },
   { kind: 'texto', key: 'ajustes', label: 'Ajustes', minW: 'min-w-[120px]' },
   { kind: 'celda', key: 'detalles', label: 'Detalles', minW: 'min-w-[100px]' },
+  {
+    kind: 'meta',
+    key: 'creadoEn',
+    label: 'Registrada',
+    minW: 'min-w-[120px]',
+  },
 ]
 
 export const TABS_RENTAS_TRAJES: { tab: TabRentasTrajes; label: string }[] = [

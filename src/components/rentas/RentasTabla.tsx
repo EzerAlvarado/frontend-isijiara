@@ -7,6 +7,7 @@ import type { LineaNegocio } from '../../types/auth'
 import type { MesArchivo } from '../../utils/archivoRentas'
 import { estatusCeldaBg } from '../../utils/estatusCelda'
 import { formatearHorario } from '../../utils/horario'
+import { formatearFechaHoraRegistro } from '../../utils/fechaHoraRegistro'
 import { FILAS_VACIAS_POR_SEMANA, type SemanaRenta } from '../../utils/semanasRentas'
 import {
   etiquetaTipoOperacionVestido,
@@ -239,6 +240,16 @@ export function FilaRenta({
       })}
       {COLUMNAS_INFO.map((col) => {
         const { minW } = col
+        if (col.kind === 'meta') {
+          return (
+            <td
+              key={col.key}
+              className={`border border-gray-300 px-1 py-1.5 text-[11px] font-medium normal-case whitespace-nowrap ${minW ?? ''} ${estatusCeldaBg[estatusRenta]} ${textoTipoOperacion}`}
+            >
+              {formatearFechaHoraRegistro(renta.creadoEn)}
+            </td>
+          )
+        }
         if (col.kind === 'texto') {
           return (
             <td
