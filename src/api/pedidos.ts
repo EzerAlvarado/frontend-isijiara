@@ -1,9 +1,11 @@
 import type { Pedido } from '../types/pedido'
+import { ANIO_PEDIDO_DEFAULT } from '../types/pedido'
 import { apiRequest, type PaginatedResponse } from './client'
 
-type PedidoApi = Omit<Pedido, 'id' | 'orden'> & {
+type PedidoApi = Omit<Pedido, 'id' | 'orden' | 'anio'> & {
   id: number | string
   orden?: number
+  anio?: number | string | null
 }
 
 function mapPedido(raw: PedidoApi): Pedido {
@@ -17,6 +19,7 @@ function mapPedido(raw: PedidoApi): Pedido {
     fechaEntrega: raw.fechaEntrega ?? '',
     comentarios: raw.comentarios ?? '',
     mesEtiqueta: raw.mesEtiqueta ?? '',
+    anio: Number(raw.anio) || ANIO_PEDIDO_DEFAULT,
     orden: Number(raw.orden ?? 0),
     creadoEn: raw.creadoEn,
     actualizadoEn: raw.actualizadoEn,

@@ -22,6 +22,7 @@ export interface Pedido {
   fechaEntrega: string
   comentarios: string
   mesEtiqueta: string
+  anio: number
   orden: number
   creadoEn?: string
   actualizadoEn?: string
@@ -69,11 +70,28 @@ export const MESES_PEDIDO = [
 
 export type MesPedido = (typeof MESES_PEDIDO)[number]
 
+export const ANIO_PEDIDO_DEFAULT = 2026
+
+/** Años disponibles en el selector (actual ± margen). */
+export function aniosPedidoOpciones(anioExtra?: number): number[] {
+  const base = [2025, 2026, 2027, 2028, 2029, 2030]
+  if (anioExtra && !base.includes(anioExtra)) {
+    return [...base, anioExtra].sort((a, b) => a - b)
+  }
+  return base
+}
+
 export function ordenMesPedido(mes: string): number {
   const key = mes.trim().toLocaleUpperCase('es-MX')
   if (!key || key === 'SIN MES') return 999
   const idx = MESES_PEDIDO.indexOf(key as MesPedido)
   return idx >= 0 ? idx : 500
+}
+
+export function etiquetaGrupoPedido(mes: string, anio: number): string {
+  const m = mes.trim() || 'SIN MES'
+  if (m === 'SIN MES') return anio ? `SIN MES ${anio}` : 'SIN MES'
+  return `${m} ${anio}`
 }
 
 export function etiquetaTipoPedido(tipo: TipoPedido): string {

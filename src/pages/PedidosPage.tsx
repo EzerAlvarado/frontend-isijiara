@@ -11,10 +11,13 @@ import {
 import { Modal } from '../components/ui/Modal'
 import { aMayusculas } from '../utils/mayusculas'
 import {
+  ANIO_PEDIDO_DEFAULT,
   ESTATUS_PEDIDO,
   MESES_PEDIDO,
   SERVICIOS_PEDIDO,
   TIPOS_PEDIDO,
+  aniosPedidoOpciones,
+  etiquetaGrupoPedido,
   etiquetaTipoPedido,
   estiloEstatusPedido,
   ordenMesPedido,
@@ -33,6 +36,7 @@ type FormState = {
   fechaEntrega: string
   comentarios: string
   mesEtiqueta: string
+  anio: number
 }
 
 const FORM_VACIO: FormState = {
@@ -44,6 +48,7 @@ const FORM_VACIO: FormState = {
   fechaEntrega: '',
   comentarios: '',
   mesEtiqueta: '',
+  anio: ANIO_PEDIDO_DEFAULT,
 }
 
 function colorTextoServicio(servicio: ServicioPedido): string {
@@ -73,6 +78,7 @@ function pedidoAForm(p: Pedido): FormState {
     fechaEntrega: p.fechaEntrega,
     comentarios: p.comentarios,
     mesEtiqueta: normalizarMes(p.mesEtiqueta),
+    anio: p.anio || ANIO_PEDIDO_DEFAULT,
   }
 }
 
@@ -86,6 +92,7 @@ function formAPayload(f: FormState): PedidoPayload {
     fechaEntrega: aMayusculas(f.fechaEntrega.trim()),
     comentarios: f.comentarios.trim(),
     mesEtiqueta: aMayusculas(f.mesEtiqueta.trim()),
+    anio: f.anio || ANIO_PEDIDO_DEFAULT,
     orden: 0,
   }
 }
@@ -122,16 +129,29 @@ export function PedidosPage() {
   }, [cargar])
 
   const grupos = useMemo(() => {
-    const map = new Map<string, Pedido[]>()
+    type Grupo = { key: string; label: string; anio: number; mes: string; items: Pedido[] }
+    const map = new Map<string, Grupo>()
     for (const p of pedidos) {
-      const key = p.mesEtiqueta.trim() || 'SIN MES'
-      const list = map.get(key) ?? []
-      list.push(p)
-      map.set(key, list)
+      const mes = p.mesEtiqueta.trim() || 'SIN MES'
+      const anio = p.anio || ANIO_PEDIDO_DEFAULT
+      const key = `${anio}|${mes}`
+      const existente = map.get(key)
+      if (existente) {
+        existente.items.push(p)
+      } else {
+        map.set(key, {
+          key,
+          label: etiquetaGrupoPedido(mes === 'SIN MES' ? '' : mes, anio),
+          anio,
+          mes,
+          items: [p],
+        })
+      }
     }
-    return [...map.entries()].sort(
-      ([a], [b]) => ordenMesPedido(a) - ordenMesPedido(b),
-    )
+    return [...map.values()].sort((a, b) => {
+      if (a.anio !== b.anio) return a.anio - b.anio
+      return ordenMesPedido(a.mes) - ordenMesPedido(b.mes)
+    })
   }, [pedidos])
 
   const abrirNuevo = () => {
@@ -272,17 +292,17 @@ export function PedidosPage() {
                 </td>
               </tr>
             ) : (
-              grupos.map(([mes, items]) => (
-                <Fragment key={`grupo-${mes}`}>
+              grupos.map((grupo) => (
+                <Fragment key={grupo.key}>
                   <tr className="bg-amber-50">
                     <td
                       colSpan={8}
                       className="px-3 py-2 text-center text-base font-black tracking-[0.2em] text-gray-900"
                     >
-                      {mes}
+                      {grupo.label}
                     </td>
                   </tr>
-                  {items.map((p) => {
+                  {grupo.items.map((p) => {
                     const colorTxt = colorTextoServicio(normalizarServicio(p.servicio))
                     return (
                     <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50/80">
@@ -456,6 +476,20 @@ export function PedidosPage() {
                   !MESES_PEDIDO.includes(form.mesEtiqueta as (typeof MESES_PEDIDO)[number]) && (
                     <option value={form.mesEtiqueta}>{form.mesEtiqueta}</option>
                   )}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">Año</span>
+              <select
+                className="input-field"
+                value={form.anio}
+                onChange={(e) => setForm((f) => ({ ...f, anio: Number(e.target.value) }))}
+              >
+                {aniosPedidoOpciones(form.anio).map((anio) => (
+                  <option key={anio} value={anio}>
+                    {anio}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="block sm:col-span-2">
