@@ -221,6 +221,7 @@ export function formularioAPayload(
   piezasInventario: Pieza[] = [],
   lineaNegocio: LineaNegocio = 'trajes',
   usarCodigosNuevosPantalon = false,
+  opciones?: { excluirCorte?: boolean },
 ): Omit<Renta, 'id'> {
   const fechaRegreso = values.fechaRegreso || sumarDiasFecha(values.fechaSalida, DIAS_RENTA_DEFAULT)
   const semana =
@@ -347,6 +348,7 @@ export function formularioAPayload(
     estatusFila: estatusAuto ?? ('' as Renta['estatusFila']),
     depositoReembolsable: values.depositoReembolsable.trim(),
     pagare: values.pagare ? parseFloat(values.pagare) : 0,
+    excluirCorte: Boolean(opciones?.excluirCorte),
   }
 }
 

@@ -71,6 +71,7 @@ export function RentasPage() {
   )
   const [colorActivo, setColorActivo] = useState<EstatusCelda | null>(null)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [modoSinCorte, setModoSinCorte] = useState(false)
   const [rentaEditando, setRentaEditando] = useState<Renta | null>(null)
   const [rentaAbono, setRentaAbono] = useState<Renta | null>(null)
   const [docImpresion, setDocImpresion] = useState<DocumentoRenta | null>(null)
@@ -248,13 +249,27 @@ export function RentasPage() {
 
   const abrirNueva = () => {
     setRentaEditando(null)
+    setModoSinCorte(false)
+    setMostrarFormulario(true)
+  }
+
+  const abrirNuevaSinCorte = () => {
+    setRentaEditando(null)
+    setModoSinCorte(true)
     setMostrarFormulario(true)
   }
 
   const abrirEditar = (renta: Renta) => {
     if (renta.cancelada) return
     setRentaEditando(renta)
+    setModoSinCorte(Boolean(renta.excluirCorte))
     setMostrarFormulario(true)
+  }
+
+  const cerrarFormulario = () => {
+    setMostrarFormulario(false)
+    setRentaEditando(null)
+    setModoSinCorte(false)
   }
 
   const cancelarRentaHandler = async (renta: Renta) => {
@@ -316,11 +331,6 @@ export function RentasPage() {
     }
   }
 
-  const cerrarFormulario = () => {
-    setMostrarFormulario(false)
-    setRentaEditando(null)
-  }
-
   const modoPintarEfectivo: ModoPintar = esVestidos ? 'fila' : modoPintar
   const puedePintarFila = colorActivo !== null && modoPintarEfectivo === 'fila'
   const filaProps = {
@@ -380,6 +390,15 @@ export function RentasPage() {
           <button type="button" onClick={cargarRentas} className="btn-secondary" title="Recargar">
             <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
           </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={abrirNuevaSinCorte}
+            title="Capturar rentas de papel cuyo anticipo ya se cobró (no entra al corte)"
+          >
+            <Plus className="h-4 w-4" />
+            Sin corte (papel)
+          </button>
           <button type="button" className="btn-primary" onClick={abrirNueva}>
             <Plus className="h-4 w-4" />
             Agregar Nueva Renta
@@ -417,6 +436,7 @@ export function RentasPage() {
         onClose={cerrarFormulario}
         renta={rentaEditando}
         onSubmit={rentaEditando ? handleActualizarRenta : handleCrearRenta}
+        modoSinCorte={modoSinCorte}
       />
 
       <AbonoModal

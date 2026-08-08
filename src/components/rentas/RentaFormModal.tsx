@@ -84,6 +84,8 @@ interface RentaFormModalProps {
   onClose: () => void
   renta?: Renta | null
   onSubmit: (payload: Omit<Renta, 'id'>) => Promise<void>
+  /** Captura de rentas en papel: anticipo no entra al corte de hoy */
+  modoSinCorte?: boolean
 }
 
 function Field({
@@ -205,6 +207,7 @@ export function RentaFormModal({
   onClose,
   renta,
   onSubmit,
+  modoSinCorte = false,
 }: RentaFormModalProps) {
   const esEdicion = renta != null
   const { usuario } = useAuth()
@@ -498,6 +501,10 @@ export function RentaFormModal({
           piezasTodas,
           usuario?.lineaNegocio ?? 'trajes',
           usarCodigosNuevosPantalon,
+          {
+            excluirCorte:
+              modoSinCorte || Boolean(renta?.excluirCorte),
+          },
         ),
       )
       onClose()
@@ -586,10 +593,26 @@ export function RentaFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={esEdicion ? `Editar Renta #${renta?.id}` : 'Agregar Nueva Renta'}
+      title={
+        esEdicion
+          ? `Editar Renta #${renta?.id}`
+          : modoSinCorte
+            ? 'Capturar renta (sin corte)'
+            : 'Agregar Nueva Renta'
+      }
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {(modoSinCorte || renta?.excluirCorte) && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <p className="font-semibold">No afecta el corte de hoy</p>
+            <p className="mt-0.5 text-xs">
+              Usa esto para rentas en papel cuyo anticipo ya se cobró antes. El anticipo
+              se guarda en la renta, pero no entra al corte. Los abonos nuevos sí contarán
+              normalmente.
+            </p>
+          </div>
+        )}
         <section>
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-700">
             Cliente y fechas
@@ -956,7 +979,13 @@ export function RentaFormModal({
             Cancelar
           </button>
           <button type="submit" className="btn-primary" disabled={guardando}>
-            {guardando ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Guardar renta'}
+            {guardando
+              ? 'Guardando…'
+              : esEdicion
+                ? 'Guardar cambios'
+                : modoSinCorte
+                  ? 'Guardar sin corte'
+                  : 'Guardar renta'}
           </button>
         </div>
       </form>

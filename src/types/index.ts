@@ -113,6 +113,11 @@ export interface Renta {
   categoriaVestido?: string
   /** Renta cancelada: conserva registro pero libera piezas del inventario */
   cancelada?: boolean
+  /**
+   * Si true, el anticipo no genera movimiento de corte
+   * (captura de rentas en papel con cobro previo).
+   */
+  excluirCorte?: boolean
   /** Renta, venta o premier */
   tipoOperacion?: string
   /** Total a cobrar (fondo + multa) en MXN */
