@@ -61,6 +61,20 @@ export function mesesArchivo(
     .map((key) => parseMesArchivo(key)!)
 }
 
+/** Meses con rentas futuras, del más cercano al más lejano */
+export function mesesFuturos(
+  rentas: { fechaSalida: string }[],
+): MesArchivo[] {
+  const keys = new Set<string>()
+  for (const r of rentas) {
+    const k = mesKeyDesdeFechaSalida(r.fechaSalida)
+    if (k) keys.add(k)
+  }
+  return [...keys]
+    .sort((a, b) => a.localeCompare(b))
+    .map((key) => parseMesArchivo(key)!)
+}
+
 export function conteoRentasPorMes(
   rentas: { fechaSalida: string }[],
 ): Map<string, number> {
@@ -87,6 +101,16 @@ export function ordenarRentasPorFechaDesc<T extends { fechaSalida: string }>(ren
   })
 }
 
+/** Ordena rentas por fecha de salida ascendente (próximas primero) */
+export function ordenarRentasPorFechaAsc<T extends { fechaSalida: string }>(rentas: T[]): T[] {
+  return [...rentas].sort((a, b) => {
+    const fa = parseFechaDDMMYYYY(a.fechaSalida)
+    const fb = parseFechaDDMMYYYY(b.fechaSalida)
+    if (!fa || !fb) return 0
+    return fa.getTime() - fb.getTime()
+  })
+}
+
 /** Agrupa rentas por semana (lunes–domingo), de la más reciente a la más antigua */
 export function agruparRentasPorSemana<T extends { fechaSalida: string }>(
   rentas: T[],
@@ -104,5 +128,25 @@ export function agruparRentasPorSemana<T extends { fechaSalida: string }>(
     .map((key) => ({
       semana: semanaDesdeISO(key),
       rentas: ordenarRentasPorFechaDesc(porSemana.get(key)!),
+    }))
+}
+
+/** Agrupa por semana de más cercana a más lejana (rentas futuras) */
+export function agruparRentasPorSemanaAsc<T extends { fechaSalida: string }>(
+  rentas: T[],
+): { semana: SemanaRenta; rentas: T[] }[] {
+  const porSemana = new Map<string, T[]>()
+  for (const r of rentas) {
+    const k = semanaKeyDesdeFechaSalida(r.fechaSalida)
+    if (!k) continue
+    const lista = porSemana.get(k)
+    if (lista) lista.push(r)
+    else porSemana.set(k, [r])
+  }
+  return [...porSemana.keys()]
+    .sort((a, b) => a.localeCompare(b))
+    .map((key) => ({
+      semana: semanaDesdeISO(key),
+      rentas: ordenarRentasPorFechaAsc(porSemana.get(key)!),
     }))
 }

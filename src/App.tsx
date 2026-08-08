@@ -5,6 +5,7 @@ import { LineaNegocioRedirect } from './components/auth/LineaNegocioRedirect'
 import { HomeRedirect } from './components/auth/HomeRedirect'
 import { AppLayout } from './components/layout/AppLayout'
 import { ArchivoRentasPage } from './pages/ArchivoRentasPage'
+import { RentasFuturasPage } from './pages/RentasFuturasPage'
 import { ArchivoDevolucionesPage } from './pages/ArchivoDevolucionesPage'
 import { RentasPage } from './pages/RentasPage'
 import { DevolucionesPage } from './pages/DevolucionesPage'
@@ -38,6 +39,14 @@ export default function App() {
             }
           />
           <Route
+            path="rentas-futuras"
+            element={
+              <LineaNegocioRedirect destinoTrajes="rentas-futuras">
+                <RentasFuturasPage />
+              </LineaNegocioRedirect>
+            }
+          />
+          <Route
             path="inventario"
             element={
               <LineaNegocioRedirect destinoTrajes="inventario">
@@ -53,6 +62,7 @@ export default function App() {
           <Route path="vestidos/:perfil" element={<VestidosProfileGate />}>
             <Route path="rentas" element={<RentasPage />} />
             <Route path="archivo-rentas" element={<ArchivoRentasPage />} />
+            <Route path="rentas-futuras" element={<RentasFuturasPage />} />
             <Route path="devoluciones" element={<DevolucionesPage />} />
             <Route path="archivo-devoluciones" element={<ArchivoDevolucionesPage />} />
             <Route path="inventario" element={<InventarioPage />} />

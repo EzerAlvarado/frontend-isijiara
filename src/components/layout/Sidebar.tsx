@@ -9,6 +9,7 @@ import {
   LogOut,
   Archive,
   ClipboardList,
+  CalendarClock,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { usePerfilVestido } from '../../context/PerfilVestidoContext'
@@ -32,6 +33,12 @@ export function Sidebar() {
           label: 'Archivo rentas',
           end: true,
         },
+        {
+          to: rutaVestidos(perfilSlug, 'rentas-futuras'),
+          icon: CalendarClock,
+          label: 'Fechas lejanas',
+          end: true,
+        },
         { to: '/pedidos', icon: ClipboardList, label: 'Pedidos', end: false },
         { to: '/corte', icon: Wallet, label: 'Corte del Día', end: false },
         { to: rutaVestidos(perfilSlug, 'inventario'), icon: FolderOpen, label: 'Inventario', end: true },
@@ -42,6 +49,7 @@ export function Sidebar() {
         { to: '/devoluciones', icon: History, label: 'Devoluciones', end: false },
         { to: '/rentas', icon: CalendarDays, label: 'Rentas', end: false },
         { to: '/archivo-rentas', icon: Archive, label: 'Archivo rentas', end: false },
+        { to: '/rentas-futuras', icon: CalendarClock, label: 'Fechas lejanas', end: false },
         { to: '/pedidos', icon: ClipboardList, label: 'Pedidos', end: false },
         { to: '/corte', icon: Wallet, label: 'Corte del Día', end: false },
         { to: '/inventario', icon: FolderOpen, label: 'Inventario', end: false },

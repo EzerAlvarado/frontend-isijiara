@@ -149,6 +149,23 @@ export function semanasVentanaActual(
   return semanas
 }
 
+/** Fin de la ventana visible (+N meses desde hoy) */
+export function limiteVentanaActual(mesesAdelante = MESES_VENTANA_ADELANTE): Date {
+  const limite = new Date()
+  limite.setMonth(limite.getMonth() + mesesAdelante)
+  limite.setHours(23, 59, 59, 999)
+  return limite
+}
+
+/** Inicio de la ventana visible (semana actual − N semanas) */
+export function inicioVentanaActual(semanasAtras = SEMANAS_VENTANA_ATRAS): Date {
+  const hoy = inicioDeSemana(new Date())
+  const inicio = new Date(hoy)
+  inicio.setDate(inicio.getDate() - semanasAtras * 7)
+  inicio.setHours(0, 0, 0, 0)
+  return inicio
+}
+
 /** ¿La fecha de salida cae en la ventana visible (semanas atrás → +2 meses)? */
 export function estaEnVentanaActual(
   fechaSalida: string,
@@ -157,17 +174,7 @@ export function estaEnVentanaActual(
 ): boolean {
   const fecha = parseFechaDDMMYYYY(fechaSalida)
   if (!fecha) return false
-
-  const hoy = inicioDeSemana(new Date())
-  const inicio = new Date(hoy)
-  inicio.setDate(inicio.getDate() - semanasAtras * 7)
-  inicio.setHours(0, 0, 0, 0)
-
-  const limite = new Date()
-  limite.setMonth(limite.getMonth() + mesesAdelante)
-  limite.setHours(23, 59, 59, 999)
-
-  return fecha >= inicio && fecha <= limite
+  return fecha >= inicioVentanaActual(semanasAtras) && fecha <= limiteVentanaActual(mesesAdelante)
 }
 
 /** Rentas con fecha de salida anterior a la semana en curso */
@@ -179,6 +186,16 @@ export function esRentaPasada(fechaSalida: string): boolean {
   inicio.setHours(0, 0, 0, 0)
 
   return fecha < inicio
+}
+
+/** Rentas más allá de la ventana (+2 meses): van a «Rentas futuras» */
+export function esRentaFutura(
+  fechaSalida: string,
+  mesesAdelante = MESES_VENTANA_ADELANTE,
+): boolean {
+  const fecha = parseFechaDDMMYYYY(fechaSalida)
+  if (!fecha) return false
+  return fecha > limiteVentanaActual(mesesAdelante)
 }
 
 /** Semanas únicas de rentas pasadas, de la más reciente a la más antigua */

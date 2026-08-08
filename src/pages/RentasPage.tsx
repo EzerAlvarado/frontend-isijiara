@@ -34,6 +34,7 @@ import {
 import {
   FILAS_VACIAS_POR_SEMANA,
   MESES_VENTANA_ADELANTE,
+  esRentaFutura,
   esRentaPasada,
   estaEnVentanaActual,
   semanaKeyDesdeFechaSalida,
@@ -49,6 +50,7 @@ export function RentasPage() {
   const esVestidos = lineaNegocio === 'vestidos'
   const tabActiva: TabRentas = esVestidos ? tipoVestido : tabInicialRentas(lineaNegocio)
   const rutaArchivo = esVestidos ? rutaVestidos(perfilSlug, 'archivo-rentas') : '/archivo-rentas'
+  const rutaFuturas = esVestidos ? rutaVestidos(perfilSlug, 'rentas-futuras') : '/rentas-futuras'
 
   useEffect(() => {
     if (esVestidos) setModoPintar('fila')
@@ -125,6 +127,11 @@ export function RentasPage() {
 
   const rentasArchivadas = useMemo(
     () => rentas.filter((r) => esRentaPasada(r.fechaSalida)).length,
+    [rentas],
+  )
+
+  const rentasFuturasCount = useMemo(
+    () => rentas.filter((r) => esRentaFutura(r.fechaSalida)).length,
     [rentas],
   )
 
@@ -354,6 +361,15 @@ export function RentasPage() {
               Archivo ({rentasArchivadas})
             </Link>
           )}
+          {rentasFuturasCount > 0 && (
+            <Link
+              to={rutaFuturas}
+              className="btn-secondary"
+              title="Ver rentas con fechas lejanas (más de 2 meses)"
+            >
+              Fechas lejanas ({rentasFuturasCount})
+            </Link>
+          )}
           <ExportRentasMenu
             disabled={cargando}
             onExportExcel={exportarExcel}
@@ -442,6 +458,14 @@ export function RentasPage() {
                     </Link>
                   </>
                 )}
+                {rentasFuturasCount > 0 && (
+                  <>
+                    {' · '}
+                    <Link to={rutaFuturas} className="text-brand-600 hover:underline">
+                      {rentasFuturasCount} fechas lejanas
+                    </Link>
+                  </>
+                )}
                 )
               </span>
             )}
@@ -485,6 +509,14 @@ export function RentasPage() {
                 {' · '}
                 <Link to={rutaArchivo} className="text-brand-600 hover:underline">
                   Ver archivo de rentas pasadas
+                </Link>
+              </>
+            )}
+            {rentasFuturasCount > 0 && (
+              <>
+                {' · '}
+                <Link to={rutaFuturas} className="text-brand-600 hover:underline">
+                  Ver rentas con fechas lejanas
                 </Link>
               </>
             )}

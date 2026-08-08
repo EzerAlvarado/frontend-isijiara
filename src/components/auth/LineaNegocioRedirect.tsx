@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { PERFIL_VESTIDO_DEFAULT, rutaVestidos } from '../../utils/perfilVestido'
 
-type DestinoTrajes = 'rentas' | 'inventario' | 'archivo-rentas'
+type DestinoTrajes = 'rentas' | 'inventario' | 'archivo-rentas' | 'rentas-futuras'
 
 interface LineaNegocioRedirectProps {
   destinoTrajes: DestinoTrajes
