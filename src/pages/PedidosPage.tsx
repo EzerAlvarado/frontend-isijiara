@@ -46,13 +46,13 @@ const FORM_VACIO: FormState = {
 
 function colorTextoServicio(servicio: ServicioPedido): string {
   if (servicio === 'premier') return 'text-violet-700'
-  if (servicio === 'faltante_boutique') return 'text-amber-700'
+  if (servicio === 'faltante') return 'text-amber-700'
   return 'text-blue-700'
 }
 
 function normalizarServicio(servicio: string): ServicioPedido {
   if (servicio === 'premier') return 'premier'
-  if (servicio === 'faltante_boutique') return 'faltante_boutique'
+  if (servicio === 'faltante' || servicio === 'faltante_boutique') return 'faltante'
   return 'venta'
 }
 
