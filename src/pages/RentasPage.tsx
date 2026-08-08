@@ -276,7 +276,7 @@ export function RentasPage() {
     if (renta.cancelada) return
     const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Cancelar la renta #${renta.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.`,
+      `¿Cancelar la renta #${renta.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.\n\nEl dinero cobrado se queda en el corte (no hay devolución). Si hace falta quitar un movimiento, hazlo desde el corte.`,
     )
     if (!ok) return
     try {

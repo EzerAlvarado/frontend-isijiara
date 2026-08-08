@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  Ban,
   Banknote,
   ChevronLeft,
   ChevronRight,
@@ -13,6 +14,7 @@ import {
 import { ApiError } from '../api/client'
 import {
   actualizarFondoInicial,
+  anularTransaccionCorte,
   cerrarCorte,
   diaAnterior,
   diaSiguiente,
@@ -178,6 +180,24 @@ export function CorteDiaPage() {
       setCorte(data)
     } catch {
       setError('No se pudo guardar el fondo inicial.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  const anularMovimiento = async (txId: string, referencia: string, cliente: string) => {
+    if (!corte || corte.cerrado) return
+    const ok = window.confirm(
+      `¿Anular el movimiento ${referencia} (${cliente})?\n\nSe quitará del corte y de los totales. Usa esto solo en casos excepcionales.`,
+    )
+    if (!ok) return
+    setGuardando(true)
+    setError(null)
+    try {
+      const data = await anularTransaccionCorte(txId, fecha, turnoActivo, categoriaBackend)
+      setCorte(data)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo anular el movimiento.')
     } finally {
       setGuardando(false)
     }
@@ -439,6 +459,9 @@ export function CorteDiaPage() {
                       <th className="px-4 py-3">Cliente</th>
                       <th className="px-4 py-3">Pago</th>
                       <th className="px-4 py-3">Monto</th>
+                      {!corte.cerrado && (
+                        <th className="px-4 py-3 text-right print:hidden">Acciones</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -472,6 +495,20 @@ export function CorteDiaPage() {
                           {tx.monto < 0 ? '-' : ''}
                           {formatMontoTransaccion(tx.monto, tx.pago)}
                         </td>
+                        {!corte.cerrado && (
+                          <td className="px-4 py-3 text-right print:hidden">
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-bold uppercase text-red-700 hover:bg-red-100 disabled:opacity-50"
+                              disabled={guardando}
+                              title="Anular movimiento del corte"
+                              onClick={() => anularMovimiento(tx.id, tx.referencia, tx.cliente)}
+                            >
+                              <Ban className="h-3.5 w-3.5" />
+                              Anular
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     )})}
                   </tbody>
