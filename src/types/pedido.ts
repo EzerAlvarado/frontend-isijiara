@@ -51,6 +51,31 @@ export const SERVICIOS_PEDIDO: { value: ServicioPedido; label: string }[] = [
   { value: 'faltante', label: 'FALTANTE BOUTIQUE' },
 ]
 
+/** Meses en orden calendario (índice 0 = primero del año). */
+export const MESES_PEDIDO = [
+  'ENERO',
+  'FEBRERO',
+  'MARZO',
+  'ABRIL',
+  'MAYO',
+  'JUNIO',
+  'JULIO',
+  'AGOSTO',
+  'SEPTIEMBRE',
+  'OCTUBRE',
+  'NOVIEMBRE',
+  'DICIEMBRE',
+] as const
+
+export type MesPedido = (typeof MESES_PEDIDO)[number]
+
+export function ordenMesPedido(mes: string): number {
+  const key = mes.trim().toLocaleUpperCase('es-MX')
+  if (!key || key === 'SIN MES') return 999
+  const idx = MESES_PEDIDO.indexOf(key as MesPedido)
+  return idx >= 0 ? idx : 500
+}
+
 export function etiquetaTipoPedido(tipo: TipoPedido): string {
   return TIPOS_PEDIDO.find((t) => t.value === tipo)?.label ?? tipo.toUpperCase()
 }

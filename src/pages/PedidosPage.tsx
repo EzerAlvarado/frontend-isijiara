@@ -12,10 +12,12 @@ import { Modal } from '../components/ui/Modal'
 import { aMayusculas } from '../utils/mayusculas'
 import {
   ESTATUS_PEDIDO,
+  MESES_PEDIDO,
   SERVICIOS_PEDIDO,
   TIPOS_PEDIDO,
   etiquetaTipoPedido,
   estiloEstatusPedido,
+  ordenMesPedido,
   type EstatusPedido,
   type Pedido,
   type ServicioPedido,
@@ -56,6 +58,11 @@ function normalizarServicio(servicio: string): ServicioPedido {
   return 'venta'
 }
 
+function normalizarMes(mes: string): string {
+  const key = mes.trim().toLocaleUpperCase('es-MX')
+  return MESES_PEDIDO.includes(key as (typeof MESES_PEDIDO)[number]) ? key : key
+}
+
 function pedidoAForm(p: Pedido): FormState {
   return {
     cliente: p.cliente,
@@ -65,7 +72,7 @@ function pedidoAForm(p: Pedido): FormState {
     servicio: normalizarServicio(p.servicio),
     fechaEntrega: p.fechaEntrega,
     comentarios: p.comentarios,
-    mesEtiqueta: p.mesEtiqueta,
+    mesEtiqueta: normalizarMes(p.mesEtiqueta),
   }
 }
 
@@ -122,7 +129,9 @@ export function PedidosPage() {
       list.push(p)
       map.set(key, list)
     }
-    return [...map.entries()]
+    return [...map.entries()].sort(
+      ([a], [b]) => ordenMesPedido(a) - ordenMesPedido(b),
+    )
   }, [pedidos])
 
   const abrirNuevo = () => {
@@ -432,14 +441,22 @@ export function PedidosPage() {
               <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
                 Mes (grupo)
               </span>
-              <input
-                className="input-field uppercase"
+              <select
+                className="input-field"
                 value={form.mesEtiqueta}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, mesEtiqueta: aMayusculas(e.target.value) }))
-                }
-                placeholder="Ej. JULIO"
-              />
+                onChange={(e) => setForm((f) => ({ ...f, mesEtiqueta: e.target.value }))}
+              >
+                <option value="">Sin mes</option>
+                {MESES_PEDIDO.map((mes) => (
+                  <option key={mes} value={mes}>
+                    {mes}
+                  </option>
+                ))}
+                {form.mesEtiqueta &&
+                  !MESES_PEDIDO.includes(form.mesEtiqueta as (typeof MESES_PEDIDO)[number]) && (
+                    <option value={form.mesEtiqueta}>{form.mesEtiqueta}</option>
+                  )}
+              </select>
             </label>
             <label className="block sm:col-span-2">
               <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
