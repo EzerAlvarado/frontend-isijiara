@@ -122,6 +122,13 @@ export async function cancelRenta(id: string): Promise<Renta> {
   return mapRenta(data)
 }
 
+/** Solo rentas canceladas: quita el registro de la lista (el corte no se modifica). */
+export async function deleteRentaCancelada(id: string): Promise<void> {
+  await apiRequest<void>(`/rentas/${id}/`, {
+    method: 'DELETE',
+  })
+}
+
 export async function registrarAbono(
   id: string,
   payload: {

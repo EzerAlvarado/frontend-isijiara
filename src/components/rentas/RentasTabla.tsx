@@ -1,4 +1,4 @@
-import { Ban, Banknote, FileText, Paintbrush, Pencil, Printer } from 'lucide-react'
+import { Ban, Banknote, FileText, Paintbrush, Pencil, Printer, Trash2 } from 'lucide-react'
 import type { CampoRentaCelda, CeldaRenta, EstatusCelda, Renta } from '../../types'
 import { RentasCell } from './RentasCell'
 import type { ModoPintar } from './PaintToolbar'
@@ -77,6 +77,7 @@ export interface FilaRentaHandlers {
   onImprimir: (renta: Renta) => void
   onReciboAbono?: (renta: Renta) => void
   onCancelar?: (renta: Renta) => void
+  onQuitarCancelada?: (renta: Renta) => void
 }
 
 interface FilaRentaProps extends FilaRentaHandlers {
@@ -99,6 +100,7 @@ export function FilaRenta({
   onImprimir,
   onReciboAbono,
   onCancelar,
+  onQuitarCancelada,
 }: FilaRentaProps) {
   const soloLectura = variant === 'archivo'
   const tipoOperacion = tipoOperacionDesdeRenta(renta, esVestidos)
@@ -194,6 +196,18 @@ export function FilaRenta({
                 className="rounded p-0.5 text-gray-500 hover:bg-red-50 hover:text-red-600"
               >
                 <Ban className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+          {renta.cancelada && onQuitarCancelada && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => onQuitarCancelada(renta)}
+                title="Quitar registro cancelado"
+                className="rounded p-0.5 text-red-600 hover:bg-red-100 hover:text-red-800"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
           )}

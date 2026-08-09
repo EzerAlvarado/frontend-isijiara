@@ -2,7 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
-import { cancelRenta, createRenta, fetchRentas, registrarAbono, updateRenta } from '../api/rentas'
+import {
+  cancelRenta,
+  createRenta,
+  deleteRentaCancelada,
+  fetchRentas,
+  registrarAbono,
+  updateRenta,
+} from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
 import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
 import { AbonoModal } from '../components/rentas/AbonoModal'
@@ -287,6 +294,21 @@ export function RentasPage() {
     }
   }
 
+  const quitarCanceladaHandler = async (renta: Renta) => {
+    if (!renta.cancelada) return
+    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const ok = window.confirm(
+      `¿Quitar el registro cancelado #${renta.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
+    )
+    if (!ok) return
+    try {
+      await deleteRentaCancelada(renta.id)
+      setRentas((prev) => prev.filter((r) => r.id !== renta.id))
+    } catch {
+      setErrorCarga('No se pudo quitar el registro cancelado. Verifica la conexión con el servidor.')
+    }
+  }
+
   const abrirImprimir = (renta: Renta) => {
     setDocImpresion(rentaADocumento(renta))
   }
@@ -346,6 +368,7 @@ export function RentasPage() {
     onImprimir: abrirImprimir,
     onReciboAbono: abrirReciboAbono,
     onCancelar: cancelarRentaHandler,
+    onQuitarCancelada: quitarCanceladaHandler,
   }
 
   const primeraSemana = semanas[0]

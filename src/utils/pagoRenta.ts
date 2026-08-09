@@ -10,9 +10,14 @@ export function totalCobrarRenta(renta: Renta): number {
 export function totalPagadoRenta(renta: Renta): number {
   if (renta.totalPagado != null) return renta.totalPagado
   const abonos = renta.abonos?.reduce((s, a) => s + a.montoMxn, 0) ?? 0
-  if (renta.metodoPago === 'mixto' && ((renta.pagoEfectivoMxn ?? 0) > 0 || (renta.pagoEfectivoUsd ?? 0) > 0)) {
+  const mxn = renta.pagoEfectivoMxn ?? 0
+  const usd = renta.pagoEfectivoUsd ?? 0
+  if (
+    (renta.metodoPago === 'mixto' || renta.metodoPago === 'dlls') &&
+    (mxn > 0 || usd > 0)
+  ) {
     const tc = getTipoCambioMxUsd()
-    const inicial = (renta.pagoEfectivoMxn ?? 0) + (renta.pagoEfectivoUsd ?? 0) * tc
+    const inicial = mxn + usd * tc
     return inicial + abonos
   }
   const inicial = anticipoEnPesos(renta.anticipo, renta.metodoPago ?? 'pesos')
@@ -26,5 +31,6 @@ export function restanteRenta(renta: Renta): number {
 
 export function rentaEstaPagada(renta: Renta): boolean {
   if (renta.pagado != null) return renta.pagado
-  return restanteRenta(renta) <= 0.01
+  // Misma tolerancia que el backend (redondeo de tipo de cambio).
+  return restanteRenta(renta) <= 1
 }

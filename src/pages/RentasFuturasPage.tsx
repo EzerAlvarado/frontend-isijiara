@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, CalendarClock, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
-import { fetchRentas, updateRenta, cancelRenta } from '../api/rentas'
+import { fetchRentas, updateRenta, cancelRenta, deleteRentaCancelada } from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
 import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
 import { RentaFormModal } from '../components/rentas/RentaFormModal'
@@ -221,6 +221,21 @@ export function RentasFuturasPage() {
     }
   }
 
+  const quitarCanceladaHandler = async (renta: Renta) => {
+    if (!renta.cancelada) return
+    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const ok = window.confirm(
+      `¿Quitar el registro cancelado #${renta.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
+    )
+    if (!ok) return
+    try {
+      await deleteRentaCancelada(renta.id)
+      setRentas((prev) => prev.filter((r) => r.id !== renta.id))
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'No se pudo quitar el registro cancelado.')
+    }
+  }
+
   const filaProps = {
     esVestidos,
     variant: 'activa' as const,
@@ -228,6 +243,7 @@ export function RentasFuturasPage() {
     onReciboAbono: (renta: Renta) => setRentaReciboAbono(renta),
     onEditar: abrirEditar,
     onCancelar: cancelarRentaHandler,
+    onQuitarCancelada: quitarCanceladaHandler,
   }
 
   return (

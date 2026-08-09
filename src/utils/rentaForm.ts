@@ -19,9 +19,9 @@ import { aMayusculas } from './mayusculas'
 import { calcularMultaAutomatica } from './multa'
 import {
   calcularPagoEfectivo,
+  dolaresParaCubrirPesos,
   esPagoEfectivo,
   inferirMetodoEfectivo,
-  pesosADolares,
 } from './tipoCambio'
 import {
   DIAS_RENTA_DEFAULT,
@@ -305,7 +305,8 @@ export function formularioAPayload(
     pagoEfectivoUsd = pago.recibidoUsd
     feriaMxn = pago.feriaMxn
     if (metodoPago === 'dlls' && recibidoMxn <= 0 && recibidoUsd > 0) {
-      anticipo = Math.min(recibidoUsd, pesosADolares(totalCobrar))
+      // Anticipo en USD suficiente para cubrir el total (sin quedar corto por TC).
+      anticipo = Math.min(recibidoUsd, dolaresParaCubrirPesos(totalCobrar))
     } else {
       anticipo = pago.aplicadoMxn
     }

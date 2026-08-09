@@ -47,6 +47,7 @@ import {
   type AvisoDisponibilidadItem,
 } from '../inventario/AvisoDisponibilidad'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
+import { FechaMxInput } from '../ui/FechaMxInput'
 import {
   calcularPrecioVestido,
   esPrecioOperacionManual,
@@ -623,33 +624,33 @@ export function RentaFormModal({
             <Field label="Teléfono" value={values.telefono} onChange={set('telefono')} placeholder="6531234567" />
             <Field label="Dirección" value={values.direccion} onChange={set('direccion')} />
             <Field label="Empleado" value={values.empleado} onChange={set('empleado')} />
-            <Field
+            <FechaMxInput
               label="Fecha de entrega *"
               value={values.fechaSalida}
               onChange={set('fechaSalida')}
-              placeholder="dd/mm/aaaa"
               required
             />
-            <Field
+            <FechaMxInput
               label="Fecha de evento *"
               value={values.fechaEvento}
               onChange={set('fechaEvento')}
-              placeholder="dd/mm/aaaa"
               required
             />
-            <Field
+            <FechaMxInput
               label="Fecha de cita"
               value={values.fechaCita}
               onChange={set('fechaCita')}
-              placeholder="dd/mm/aaaa"
             />
-            <Field
+            <FechaMxInput
               label={values.tipoOperacion === 'venta' ? 'Fecha regreso' : 'Fecha regreso *'}
               value={values.fechaRegreso}
               onChange={set('fechaRegreso')}
-              placeholder="dd/mm/aaaa"
               required={values.tipoOperacion !== 'venta'}
-              hint={values.tipoOperacion === 'venta' ? 'Opcional en ventas' : `Por defecto ${DIAS_RENTA_DEFAULT} días después`}
+              hint={
+                values.tipoOperacion === 'venta'
+                  ? 'Opcional en ventas · calendario o escribe sin /'
+                  : `Por defecto ${DIAS_RENTA_DEFAULT} días después · calendario o escribe sin /`
+              }
             />
             <Field label="Horario" type="time" value={values.horario} onChange={set('horario')} />
             <Field
