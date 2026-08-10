@@ -1,14 +1,8 @@
 import type { Pieza } from '../types/pieza'
 import { esTipoVestido, etiquetaTipoVestido } from '../types/pieza'
 import type { RentaFormValues } from './rentaForm'
+import { etiquetaDetallesConCodigos } from './inventarioSugerencias'
 import { formatearPantalonTraje } from './pantalonCodigo'
-
-function formatearDetallesConCodigo(pieza: Pieza): string {
-  const detalles = (pieza.detalles ?? '').trim()
-  if (!detalles) return ''
-  const codigo = pieza.conjunto || pieza.codigoNew || pieza.codigoOld || ''
-  return codigo ? `${detalles} [${codigo}]`.toUpperCase() : detalles.toUpperCase()
-}
 
 /** Solo vincula la pieza del inventario y rellena campos según tipo */
 export function valoresDesdePieza(
@@ -26,7 +20,7 @@ export function valoresDesdePieza(
       pantalon: pieza.talla,
     }
   }
-  const detallesConCodigo = formatearDetallesConCodigo(pieza)
+  const detallesConCodigo = etiquetaDetallesConCodigos(pieza)
   if (pieza.tipo === 'saco') {
     return {
       piezaSacoId: pieza.id,

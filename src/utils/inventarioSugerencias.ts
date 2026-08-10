@@ -177,6 +177,19 @@ function codigoPieza(p: Pieza): string {
   return normalizar(p.codigoNew || p.codigoOld || '')
 }
 
+/** Etiqueta de detalles en autocompletado: nombre + [old] + [new] */
+export function etiquetaDetallesConCodigos(p: Pieza): string {
+  const detalles = (p.detalles ?? '').trim()
+  if (!detalles) return ''
+  const old = (p.codigoOld ?? '').trim()
+  const nuevo = (p.codigoNew ?? '').trim()
+  const sufijos: string[] = []
+  if (old) sufijos.push(`[${old}]`)
+  if (nuevo) sufijos.push(`[${nuevo}]`)
+  const base = detalles.toUpperCase()
+  return sufijos.length ? `${base} ${sufijos.join(' ')}` : base
+}
+
 export interface FiltrosVestido {
   color?: string
   marca?: string
@@ -385,13 +398,11 @@ export function sugerenciasDetalles(
   for (const p of piezas) {
     if (p.tipo !== tipo) continue
     if (p.estatus === 'mantenimiento') continue
-    const detalles = (p.detalles ?? '').trim()
-    if (!detalles) continue
-    const codigo = p.conjunto || p.codigoNew || p.codigoOld || ''
-    const v = codigo ? `${detalles} [${codigo}]` : detalles
+    const v = etiquetaDetallesConCodigos(p)
+    if (!v) continue
     const vNorm = normalizar(v)
     if (!q || vNorm.includes(q) || q.split(/\s+/).every((palabra) => vNorm.includes(palabra))) {
-      valores.add(v.toUpperCase())
+      valores.add(v)
     }
   }
 
@@ -420,10 +431,16 @@ export function buscarPiezaPorDetalles(
   return piezas.find((p) => {
     if (p.tipo !== tipo) return false
     if (p.estatus === 'mantenimiento') return false
+    const etiqueta = etiquetaDetallesConCodigos(p)
     const detalles = (p.detalles ?? '').trim()
-    const codigo = p.conjunto || p.codigoNew || p.codigoOld || ''
-    const conCodigo = codigo ? `${detalles} [${codigo}]` : detalles
-    return normalizar(conCodigo) === d || normalizar(detalles) === d
+    if (etiqueta && normalizar(etiqueta) === d) return true
+    if (detalles && normalizar(detalles) === d) return true
+    // Compatibilidad con rentas guardadas con código de conjunto
+    const conjunto = (p.conjunto ?? '').trim()
+    if (conjunto && detalles) {
+      return normalizar(`${detalles} [${conjunto}]`) === d
+    }
+    return false
   })
 }
 
