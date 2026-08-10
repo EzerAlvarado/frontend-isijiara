@@ -40,7 +40,6 @@ export async function apiRequest<T>(
     cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache',
       ...(token ? { Authorization: `Token ${token}` } : {}),
       ...headers,
     },
