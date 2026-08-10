@@ -31,6 +31,14 @@ export function idsPiezasEnRenta(renta: Renta): string[] {
   ) as string[]
 }
 
+/** False si la renta ya devolvió las piezas o es venta (no bloquea calendario). */
+export function rentaBloqueaDisponibilidad(renta: Renta): boolean {
+  if (renta.cancelada) return false
+  if (renta.tipoOperacion === 'venta') return false
+  if (renta.devolucionEstatus === 'regresado') return false
+  return true
+}
+
 export function semanaDesplazada(semanaKey: string, semanas: number): string {
   const base = new Date(semanaKey + 'T12:00:00')
   base.setDate(base.getDate() + semanas * 7)
@@ -69,7 +77,7 @@ export function conflictoPieza(
   let avisoSiguiente: ConflictoPieza | null = null
 
   for (const r of rentas) {
-    if (r.cancelada) continue
+    if (!rentaBloqueaDisponibilidad(r)) continue
     if (excluirRentaId && r.id === excluirRentaId) continue
     if (!idsPiezasEnRenta(r).includes(piezaId)) continue
 

@@ -1,5 +1,6 @@
 import type { Devolucion, EstatusDevolucion } from '../types'
 import { apiRequest, type PaginatedResponse } from './client'
+import { invalidarInventarioRentaCache } from '../utils/inventarioRentaCache'
 
 type DevolucionApi = Omit<
   Devolucion,
@@ -76,6 +77,7 @@ export async function updateDevolucion(
     method: 'PATCH',
     body: JSON.stringify(payload),
   })
+  invalidarInventarioRentaCache()
   return mapDevolucion(data)
 }
 

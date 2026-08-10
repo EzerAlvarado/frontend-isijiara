@@ -130,6 +130,8 @@ export interface Renta {
   restante?: number
   /** true cuando totalPagado >= totalCobrar */
   pagado?: boolean
+  /** Estatus de la devolución vinculada (si existe) */
+  devolucionEstatus?: string
   /** Depósito reembolsable (texto descriptivo) */
   depositoReembolsable?: string
   /** Monto del pagaré (BUENO POR $) */

@@ -22,6 +22,7 @@ type RentaApi = Omit<
   estatusFila?: string
   cancelada?: boolean
   tipoOperacion?: string
+  devolucionEstatus?: string
   totalCobrar?: number | string
   totalPagado?: number | string
   totalAbonado?: number | string
@@ -71,6 +72,7 @@ function mapRenta(raw: RentaApi): Renta {
     excluirCorte: Boolean(raw.excluirCorte),
     creadoEn: raw.creadoEn ? String(raw.creadoEn) : undefined,
     tipoOperacion: raw.tipoOperacion ?? '',
+    devolucionEstatus: raw.devolucionEstatus ?? undefined,
     totalCobrar: raw.totalCobrar != null ? Number(raw.totalCobrar) : undefined,
     totalPagado: raw.totalPagado != null ? Number(raw.totalPagado) : undefined,
     totalAbonado: raw.totalAbonado != null ? Number(raw.totalAbonado) : undefined,
