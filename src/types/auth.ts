@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'isijara_auth_token'
 const USER_KEY = 'isijara_auth_user'
+const LAST_ACTIVITY_KEY = 'isijara_last_activity'
 
 export type LineaNegocio = 'trajes' | 'vestidos'
 
@@ -41,6 +42,7 @@ export function storeAuth(token: string, usuario: AuthUser) {
 export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
+  localStorage.removeItem(LAST_ACTIVITY_KEY)
 }
 
 export const LINEA_LABELS: Record<LineaNegocio, string> = {

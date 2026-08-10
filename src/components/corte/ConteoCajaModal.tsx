@@ -184,9 +184,9 @@ function FormularioConteo({
               hint={
                 valesHint
                   ? modoFondo
-                    ? `Pendientes: ${valesHint}. Baja la cantidad al reponer efectivo.`
-                    : `Pendientes: ${valesHint}. Cuenta los vales que aún tienes; pueden reponerse después.`
-                  : '1 en cantidad = $1 MXN en vales pendientes.'
+                    ? `Pendientes: ${valesHint}. Los vales cubren efectivo faltante; baja la cantidad al reponer.`
+                    : `Pendientes: ${valesHint}. Los vales cuentan como parte del fondo esperado.`
+                  : '1 unidad = $1 MXN. Usa vales para cubrir efectivo que falte en caja.'
               }
             />
           </div>
@@ -385,13 +385,9 @@ export function ConteoCajaModal({
   const equivalenteMxnTotal = totales.mxnTotal + totales.usdTotal * tc
 
   if (modoSeparado) {
-    const esperadoFondo = expectedFondoMxn ?? fondoMxn ?? 0
+    const esperadoFondoTotal = expectedFondoMxn ?? fondoMxn ?? 0
     const esperadoCaja = expectedCajaMxn ?? cajaMxn ?? 0
-    const valesFondoEsperados = valesEsperadosEnFondo(
-      conteoFondo,
-      valesEsperadosFondo ?? totalValesPendientes,
-    )
-    const esperadoFondoTotal = esperadoFondo + valesFondoEsperados
+    const valesEnConteoFondo = conteoFondo.valesMxn ?? 0
     const esperadoTotal = esperadoFondoTotal + esperadoCaja
 
     const contadoFondo = equivalenteMxn(conteoFondo, tc)
@@ -421,9 +417,9 @@ export function ConteoCajaModal({
             <div>
               <p className="text-xs uppercase text-gray-500">Esperado fondo</p>
               <p className="text-base font-bold text-gray-900">{formatMxn(esperadoFondoTotal)}</p>
-              {valesFondoEsperados > 0 && (
+              {valesEnConteoFondo > 0 && (
                 <p className="mt-0.5 text-[10px] text-gray-500">
-                  Efectivo {formatMxn(esperadoFondo)} + vales {formatMxn(valesFondoEsperados)}
+                  Efectivo + vales deben sumar {formatMxn(esperadoFondoTotal)}
                 </p>
               )}
             </div>
@@ -592,13 +588,8 @@ export function ConteoCajaModal({
     )
   }
 
-  const expectedTotal = modoFondo
-    ? fondoReferencia && fondoReferencia > 0
-      ? fondoReferencia
-      : expectedMxn + valesEsperadosEnFondo(conteo, valesEsperadosFondo ?? totalValesPendientes)
-    : mostrarVales
-      ? expectedMxn + valesEsperadosEnFondo(conteo, valesEsperadosFondo ?? totalValesPendientes)
-      : expectedMxn
+  const expectedTotal =
+    modoFondo && fondoReferencia && fondoReferencia > 0 ? fondoReferencia : expectedMxn
   const diferencia = equivalenteMxnTotal - expectedTotal
 
   return (
@@ -620,18 +611,14 @@ export function ConteoCajaModal({
               {modoFondo ? 'Fondo esperado' : 'Esperado en caja'}
             </p>
             <p className="text-lg font-bold text-gray-900">{formatMxn(expectedTotal)}</p>
-            {modoFondo && (
+            {modoFondo && totales.mxnVales > 0 && (
               <p className="mt-1 text-xs text-gray-500">
-                Efectivo {formatMxn(expectedMxn)} + vales{' '}
-                {formatMxn(valesEsperadosEnFondo(conteo, valesEsperadosFondo ?? totalValesPendientes))}
+                Incluye {formatMxn(totales.mxnVales)} en vales que cubren efectivo faltante
               </p>
             )}
             {fondoMxn != null && cajaMxn != null && !modoFondo && (
               <p className="mt-1 text-xs text-gray-500">
-                {mostrarVales &&
-                valesEsperadosEnFondo(conteo, valesEsperadosFondo ?? totalValesPendientes) > 0
-                  ? `Fondo ${formatMxn(fondoMxn)} + caja ${formatMxn(cajaMxn)} + vales ${formatMxn(valesEsperadosEnFondo(conteo, valesEsperadosFondo ?? totalValesPendientes))}`
-                  : `Fondo ${formatMxn(fondoMxn)} + caja ${formatMxn(cajaMxn)}`}
+                Fondo {formatMxn(fondoMxn)} + caja {formatMxn(cajaMxn)}
               </p>
             )}
           </div>

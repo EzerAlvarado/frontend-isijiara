@@ -37,8 +37,10 @@ export async function apiRequest<T>(
 
   const response = await fetch(`${API_BASE}${path}`, {
     ...rest,
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
       ...(token ? { Authorization: `Token ${token}` } : {}),
       ...headers,
     },

@@ -174,7 +174,11 @@ export function InventarioAutocomplete({
         )}
         <input
           type="text"
-          className="input-field uppercase"
+          className={
+            modo === 'detalles'
+              ? 'input-field border-gray-300 bg-white font-semibold uppercase text-gray-900'
+              : 'input-field uppercase'
+          }
           value={value}
           onChange={(e) => {
             onChange(e.target.value.toLocaleUpperCase('es-MX'))

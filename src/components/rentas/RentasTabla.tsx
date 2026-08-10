@@ -15,6 +15,7 @@ import {
   clasesTextoTipoOperacion,
 } from '../../utils/precioVestido'
 import { rentaEstaPagada } from '../../utils/pagoRenta'
+import { celdaPrendaTrajes, clasesTextoCeldaTrajes } from '../../utils/rentasDisplay'
 
 const CAMPOS_ESTATUS_DEVOLUCION_VESTIDOS = [
   'color',
@@ -236,14 +237,18 @@ export function FilaRenta({
             </td>
           )
         }
+        const celda = esVestidos ? renta[col.key] : celdaPrendaTrajes(renta, col.key)
+        const clasesTexto = esVestidos
+          ? textoTipoOperacion
+          : clasesTextoCeldaTrajes(renta, col.key, tipoOperacion, textoTipoOperacion)
         return (
           <RentasCell
             key={col.key}
-            celda={renta[col.key]}
+            celda={celda}
             colorActivo={colorActivo}
             modo={modoPintar}
             estatusFila={estatusFila}
-            clasesTextoTipo={textoTipoOperacion}
+            clasesTextoTipo={clasesTexto}
             onApply={
               bloqueada || !onActualizarCelda
                 ? undefined

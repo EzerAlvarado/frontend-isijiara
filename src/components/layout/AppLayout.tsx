@@ -1,4 +1,6 @@
 import { Outlet } from 'react-router-dom'
+import { SessionInactivityGuard } from '../auth/SessionInactivityGuard'
+import { AppBootstrap } from '../auth/AppBootstrap'
 import { PerfilVestidoProvider } from '../../context/PerfilVestidoContext'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
@@ -6,6 +8,8 @@ import { Sidebar } from './Sidebar'
 export function AppLayout() {
   return (
     <PerfilVestidoProvider>
+      <AppBootstrap />
+      <SessionInactivityGuard />
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">

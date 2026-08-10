@@ -158,8 +158,8 @@ function FilaPieza({
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-700">{titulo}</p>
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-        <div className="col-span-2">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-2">
           <InventarioAutocomplete
             label="Detalles"
             modo="detalles"
@@ -172,6 +172,11 @@ function FilaPieza({
             onChange={onDetalles}
             onElegirPieza={onElegirPieza}
           />
+          {detalles.trim() && (
+            <p className="mt-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold uppercase tracking-wide text-gray-900">
+              {detalles.trim()}
+            </p>
+          )}
         </div>
         <Field label="Color" value={color} onChange={onColor} placeholder="NEGRO" />
         <InventarioAutocomplete
@@ -221,7 +226,8 @@ export function RentaFormModal({
   const [error, setError] = useState<string | null>(null)
   const [confirmProximaSemana, setConfirmProximaSemana] = useState(false)
 
-  const { piezas: inventario, piezasTodas, rentas: rentasActivas } = usePiezasDisponibles(open, {
+  const { piezas: inventario, piezasTodas, rentas: rentasActivas, cargando: cargandoInventario } =
+    usePiezasDisponibles(open, {
     piezaIds: {
       saco: renta?.piezaSacoId,
       chaleco: renta?.piezaChalecoId,
@@ -605,6 +611,11 @@ export function RentaFormModal({
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {cargandoInventario && (
+          <div className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900">
+            Cargando inventario… espera un momento antes de guardar.
+          </div>
+        )}
         {(modoSinCorte || renta?.excluirCorte) && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             <p className="font-semibold">No afecta el corte de hoy</p>
@@ -987,14 +998,16 @@ export function RentaFormModal({
           <button type="button" onClick={onClose} className="btn-secondary" disabled={guardando}>
             Cancelar
           </button>
-          <button type="submit" className="btn-primary" disabled={guardando}>
+          <button type="submit" className="btn-primary" disabled={guardando || cargandoInventario}>
             {guardando
               ? 'Guardando…'
-              : esEdicion
-                ? 'Guardar cambios'
-                : modoSinCorte
-                  ? 'Guardar sin corte'
-                  : 'Guardar renta'}
+              : cargandoInventario
+                ? 'Cargando inventario…'
+                : esEdicion
+                  ? 'Guardar cambios'
+                  : modoSinCorte
+                    ? 'Guardar sin corte'
+                    : 'Guardar renta'}
           </button>
         </div>
       </form>

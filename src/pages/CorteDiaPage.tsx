@@ -799,9 +799,9 @@ export function CorteDiaPage() {
           onClose={() => !guardando && setMostrarConteo(false)}
           onConfirmSeparado={confirmarCierre}
           expectedMxn={resumen.totalEnCaja}
-          expectedFondoMxn={resumen.fondoFisico}
+          expectedFondoMxn={resumen.fondoInicial}
           expectedCajaMxn={resumen.cajaDelDia}
-          fondoMxn={resumen.fondoFisico}
+          fondoMxn={resumen.fondoInicial}
           cajaMxn={resumen.cajaDelDia}
           initialConteoFondo={corte.conteoFondo}
           tipoCambioUsd={corte.totalesConteo?.tipoCambioUsd}
@@ -820,9 +820,9 @@ export function CorteDiaPage() {
           open={verConteo}
           onClose={() => setVerConteo(false)}
           expectedMxn={resumen?.totalEnCaja ?? 0}
-          expectedFondoMxn={resumen?.fondoFisico}
+          expectedFondoMxn={resumen?.fondoInicial}
           expectedCajaMxn={resumen?.cajaDelDia}
-          fondoMxn={resumen?.fondoFisico}
+          fondoMxn={resumen?.fondoInicial}
           cajaMxn={resumen?.cajaDelDia}
           tipoCambioUsd={corte.totalesConteo?.tipoCambioUsd}
           initialConteoFondo={corte.conteoFondo}

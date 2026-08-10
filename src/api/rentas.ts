@@ -1,6 +1,7 @@
 import type { Abono, Renta } from '../types'
 import { apiRequest, type PaginatedResponse } from './client'
 import { normalizarRenta, normalizarRentaParcial } from '../utils/mayusculas'
+import { invalidarInventarioRentaCache } from '../utils/inventarioRentaCache'
 
 type RentaApi = Omit<
   Renta,
@@ -104,6 +105,7 @@ export async function createRenta(payload: Omit<Renta, 'id'>): Promise<Renta> {
     method: 'POST',
     body: JSON.stringify(normalizarRentaParcial(payload)),
   })
+  invalidarInventarioRentaCache()
   return mapRenta(data)
 }
 
@@ -112,6 +114,7 @@ export async function updateRenta(id: string, payload: Partial<Renta>): Promise<
     method: 'PATCH',
     body: JSON.stringify(normalizarRentaParcial(payload)),
   })
+  invalidarInventarioRentaCache()
   return mapRenta(data)
 }
 
@@ -119,6 +122,7 @@ export async function cancelRenta(id: string): Promise<Renta> {
   const data = await apiRequest<RentaApi>(`/rentas/${id}/cancelar/`, {
     method: 'POST',
   })
+  invalidarInventarioRentaCache()
   return mapRenta(data)
 }
 

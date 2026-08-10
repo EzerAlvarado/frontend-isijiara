@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Pieza } from '../types/pieza'
 import type { Renta } from '../types'
-import { fetchPiezas } from '../api/piezas'
-import { fetchRentas } from '../api/rentas'
 import { piezasParaSeleccionRenta } from '../utils/disponibilidadPieza'
+import {
+  invalidarInventarioRentaCache,
+  leerInventarioRentaCache,
+  prefetchInventarioRenta,
+} from '../utils/inventarioRentaCache'
+
+export { invalidarInventarioRentaCache, prefetchInventarioRenta }
 
 interface PiezaIdsEdicion {
   saco?: string | null
@@ -19,35 +24,54 @@ interface OpcionesPiezasRenta {
   rentaIdExcluir?: string | null
 }
 
+function normalizarPiezas(
+  todas: Pieza[],
+  idsExtra: string[],
+): Pieza[] {
+  const base = todas.filter((p) => p.estatus !== 'mantenimiento')
+  const faltantes = idsExtra.filter((id) => !base.some((p) => p.id === id))
+  const extras = faltantes.length ? todas.filter((p) => faltantes.includes(p.id)) : []
+  return [...extras, ...base]
+}
+
 /** Piezas para renta + rentas activas (conflictos por semana). */
 export function usePiezasDisponibles(open: boolean, opciones: OpcionesPiezasRenta = {}) {
   const { piezaIds, fechaSalida = '', rentaIdExcluir } = opciones
-  const [piezas, setPiezas] = useState<Pieza[]>([])
-  const [rentas, setRentas] = useState<Renta[]>([])
+  const idsExtra = useMemo(
+    () =>
+      [piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon].filter(Boolean) as string[],
+    [piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon],
+  )
+
+  const cacheInicial = leerInventarioRentaCache()
+  const [piezas, setPiezas] = useState<Pieza[]>(() =>
+    cacheInicial ? normalizarPiezas(cacheInicial.piezas, idsExtra) : [],
+  )
+  const [rentas, setRentas] = useState<Renta[]>(() => cacheInicial?.rentas ?? [])
   const [cargando, setCargando] = useState(false)
 
   useEffect(() => {
     if (!open) return
     let activo = true
-    setCargando(true)
 
-    const idsExtra = [piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon].filter(
-      Boolean,
-    ) as string[]
+    const aplicar = (todas: Pieza[], rentasData: Renta[]) => {
+      if (!activo) return
+      setPiezas(normalizarPiezas(todas, idsExtra))
+      setRentas(rentasData)
+    }
 
-    Promise.all([fetchPiezas(), fetchRentas()])
-      .then(([todas, rentasData]) => {
-        if (!activo) return
-        const base = todas.filter((p) => p.estatus !== 'mantenimiento')
-        const faltantes = idsExtra.filter((id) => !base.some((p) => p.id === id))
-        const extras = faltantes.length
-          ? todas.filter((p) => faltantes.includes(p.id))
-          : []
-        setPiezas([...extras, ...base])
-        setRentas(rentasData)
-      })
+    const cache = leerInventarioRentaCache()
+    if (cache) {
+      aplicar(cache.piezas, cache.rentas)
+    } else {
+      setCargando(true)
+    }
+
+    prefetchInventarioRenta()
+      .then(({ piezas: todas, rentas: rentasData }) => aplicar(todas, rentasData))
       .catch(() => {
-        if (activo) {
+        if (!activo) return
+        if (!leerInventarioRentaCache()) {
           setPiezas([])
           setRentas([])
         }
@@ -59,13 +83,10 @@ export function usePiezasDisponibles(open: boolean, opciones: OpcionesPiezasRent
     return () => {
       activo = false
     }
-  }, [open, piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon])
+  }, [open, idsExtra.join('|'), fechaSalida])
 
   const piezasSeleccionables = useMemo(() => {
     const base = piezasParaSeleccionRenta(piezas, fechaSalida, rentas, rentaIdExcluir)
-    const idsExtra = [piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon].filter(
-      Boolean,
-    ) as string[]
     const out = [...base]
     for (const id of idsExtra) {
       if (!out.some((p) => p.id === id)) {
@@ -74,7 +95,7 @@ export function usePiezasDisponibles(open: boolean, opciones: OpcionesPiezasRent
       }
     }
     return out
-  }, [piezas, fechaSalida, rentas, rentaIdExcluir, piezaIds?.saco, piezaIds?.chaleco, piezaIds?.pantalon])
+  }, [piezas, fechaSalida, rentas, rentaIdExcluir, idsExtra])
 
   return { piezas: piezasSeleccionables, piezasTodas: piezas, rentas, cargando }
 }

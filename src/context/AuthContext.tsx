@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { fetchMe, loginApi, logoutApi } from '../api/auth'
+import { ApiError } from '../api/client'
 import {
   clearAuth,
   getStoredToken,
@@ -36,9 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await fetchMe()
       setUsuario(data.usuario)
       storeAuth(token, data.usuario)
-    } catch {
-      clearAuth()
-      setUsuario(null)
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        clearAuth()
+        setUsuario(null)
+      } else {
+        const stored = getStoredUser()
+        if (stored) setUsuario(stored)
+      }
     } finally {
       setCargando(false)
     }
