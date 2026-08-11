@@ -172,11 +172,6 @@ function FilaPieza({
             onChange={onDetalles}
             onElegirPieza={onElegirPieza}
           />
-          {detalles.trim() && (
-            <p className="mt-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold uppercase tracking-wide text-gray-900">
-              {detalles.trim()}
-            </p>
-          )}
         </div>
         <Field label="Color" value={color} onChange={onColor} placeholder="NEGRO" />
         <InventarioAutocomplete
