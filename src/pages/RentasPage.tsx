@@ -476,7 +476,7 @@ export function RentasPage() {
         onGuardar={(nota) => cerrarNotaModal(nota)}
       />
 
-      <div className="mb-4">
+      <div className="sticky top-0 z-20 mb-4 bg-surface/95 pb-2 pt-1 backdrop-blur-sm">
         <PaintToolbar
           lineaNegocio={lineaNegocio}
           modo={modoPintarEfectivo}
