@@ -14,8 +14,10 @@ export function AppLayout() {
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />
-          <main className="flex-1 overflow-y-auto bg-surface p-6">
-            <Outlet />
+          <main className="flex-1 overflow-y-auto bg-surface">
+            <div className="p-6">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

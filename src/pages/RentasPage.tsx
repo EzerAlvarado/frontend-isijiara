@@ -377,66 +377,66 @@ export function RentasPage() {
   return (
     <div>
       <div className="mb-4 flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold uppercase tracking-tight">
-            {tituloRentas(lineaNegocio, tabActiva)}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            {primeraSemana?.label} — {ultimaSemana?.label}
-            <span className="ml-1 text-xs">
-              (1 semana atrás + actual + {MESES_VENTANA_ADELANTE} meses)
-            </span>
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {rentasArchivadas > 0 && (
-            <Link to={rutaArchivo} className="btn-secondary" title="Ver rentas pasadas">
-              Archivo ({rentasArchivadas})
-            </Link>
-          )}
-          {rentasFuturasCount > 0 && (
-            <Link
-              to={rutaFuturas}
+          <div>
+            <h2 className="text-2xl font-bold uppercase tracking-tight">
+              {tituloRentas(lineaNegocio, tabActiva)}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {primeraSemana?.label} — {ultimaSemana?.label}
+              <span className="ml-1 text-xs">
+                (1 semana atrás + actual + {MESES_VENTANA_ADELANTE} meses)
+              </span>
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {rentasArchivadas > 0 && (
+              <Link to={rutaArchivo} className="btn-secondary" title="Ver rentas pasadas">
+                Archivo ({rentasArchivadas})
+              </Link>
+            )}
+            {rentasFuturasCount > 0 && (
+              <Link
+                to={rutaFuturas}
+                className="btn-secondary"
+                title="Ver rentas con fechas lejanas (más de 2 meses)"
+              >
+                Fechas lejanas ({rentasFuturasCount})
+              </Link>
+            )}
+            <ExportRentasMenu
+              disabled={cargando}
+              onExportExcel={exportarExcel}
+              onExportPdf={exportarPdf}
+              titleExcel={`Exportar solo ${etiquetaTab} (CSV para Excel)`}
+              titlePdf={`Reporte mensual de ${etiquetaTab} con gráficas`}
+            />
+            <button type="button" onClick={cargarRentas} className="btn-secondary" title="Recargar">
+              <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              type="button"
               className="btn-secondary"
-              title="Ver rentas con fechas lejanas (más de 2 meses)"
+              onClick={abrirNuevaSinCorte}
+              title="Capturar rentas de papel cuyo anticipo ya se cobró (no entra al corte)"
             >
-              Fechas lejanas ({rentasFuturasCount})
-            </Link>
-          )}
-          <ExportRentasMenu
-            disabled={cargando}
-            onExportExcel={exportarExcel}
-            onExportPdf={exportarPdf}
-            titleExcel={`Exportar solo ${etiquetaTab} (CSV para Excel)`}
-            titlePdf={`Reporte mensual de ${etiquetaTab} con gráficas`}
-          />
-          <button type="button" onClick={cargarRentas} className="btn-secondary" title="Recargar">
-            <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={abrirNuevaSinCorte}
-            title="Capturar rentas de papel cuyo anticipo ya se cobró (no entra al corte)"
-          >
-            <Plus className="h-4 w-4" />
-            Sin corte (papel)
-          </button>
-          <button type="button" className="btn-primary" onClick={abrirNueva}>
-            <Plus className="h-4 w-4" />
-            Agregar Nueva Renta
-          </button>
+              <Plus className="h-4 w-4" />
+              Sin corte (papel)
+            </button>
+            <button type="button" className="btn-primary" onClick={abrirNueva}>
+              <Plus className="h-4 w-4" />
+              Agregar Nueva Renta
+            </button>
+          </div>
         </div>
-      </div>
 
-      {errorCarga && (
-        <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <span>{errorCarga}</span>
-          <button type="button" onClick={cargarRentas} className="btn-secondary text-xs">
-            Reintentar
-          </button>
-        </div>
-      )}
+        {errorCarga && (
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span>{errorCarga}</span>
+            <button type="button" onClick={cargarRentas} className="btn-secondary text-xs">
+              Reintentar
+            </button>
+          </div>
+        )}
 
       {docImpresion && (
         <NotaVentaPreview
@@ -476,7 +476,7 @@ export function RentasPage() {
         onGuardar={(nota) => cerrarNotaModal(nota)}
       />
 
-      <div className="sticky top-0 z-30 -mx-6 mb-4 border-b border-gray-200 bg-surface px-6 pb-3 pt-3 shadow-sm">
+      <div className="sticky top-0 z-30 -mx-6 border-b border-gray-200 bg-white px-6 py-3 shadow-sm">
         <PaintToolbar
           lineaNegocio={lineaNegocio}
           modo={modoPintarEfectivo}
@@ -486,90 +486,92 @@ export function RentasPage() {
         />
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 px-6 py-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-            {subtituloTabRentas(tabActiva)}
-            {!cargando && (
-              <span className="ml-2 font-normal text-gray-500">
-                ({rentasFiltradas.length} en ventana
-                {rentasArchivadas > 0 && (
-                  <>
-                    {' · '}
-                    <Link to={rutaArchivo} className="text-brand-600 hover:underline">
-                      {rentasArchivadas} en archivo
-                    </Link>
-                  </>
-                )}
-                {rentasFuturasCount > 0 && (
-                  <>
-                    {' · '}
-                    <Link to={rutaFuturas} className="text-brand-600 hover:underline">
-                      {rentasFuturasCount} fechas lejanas
-                    </Link>
-                  </>
-                )}
-                )
+      <div className="mt-4">
+        <div className="card overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 px-6 py-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+              {subtituloTabRentas(tabActiva)}
+              {!cargando && (
+                <span className="ml-2 font-normal text-gray-500">
+                  ({rentasFiltradas.length} en ventana
+                  {rentasArchivadas > 0 && (
+                    <>
+                      {' · '}
+                      <Link to={rutaArchivo} className="text-brand-600 hover:underline">
+                        {rentasArchivadas} en archivo
+                      </Link>
+                    </>
+                  )}
+                  {rentasFuturasCount > 0 && (
+                    <>
+                      {' · '}
+                      <Link to={rutaFuturas} className="text-brand-600 hover:underline">
+                        {rentasFuturasCount} fechas lejanas
+                      </Link>
+                    </>
+                  )}
+                  )
+                </span>
+              )}
+            </h3>
+            <SearchInput value={search} onChange={setSearch} className="w-48" />
+          </div>
+
+          {cargando ? (
+            <div className="px-6 py-12 text-center text-sm text-gray-500">Cargando rentas…</div>
+          ) : buscando && rentasFiltradas.length === 0 ? (
+            <div className="px-6 py-12 text-center text-sm text-gray-500">
+              No hay rentas que coincidan con la búsqueda.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <tbody>
+                  {semanasVisibles.map((semana) => (
+                    <BloqueSemana
+                      key={semana.key}
+                      semana={semana}
+                      rentas={rentasPorSemana.get(semana.key) ?? []}
+                      columnasPrenda={colsPrenda}
+                      totalCols={totalCols}
+                      mostrarFilasVacias={!buscando}
+                      {...filaProps}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
+            <p className="text-xs text-gray-500">
+              {buscando
+                ? `${rentasFiltradas.length} coincidencias · solo semanas con resultados`
+                : `${semanas.length} semanas en ventana · las vacías muestran ${FILAS_VACIAS_POR_SEMANA} filas en blanco`}
+              {rentasArchivadas > 0 && (
+                <>
+                  {' · '}
+                  <Link to={rutaArchivo} className="text-brand-600 hover:underline">
+                    Ver archivo de rentas pasadas
+                  </Link>
+                </>
+              )}
+              {rentasFuturasCount > 0 && (
+                <>
+                  {' · '}
+                  <Link to={rutaFuturas} className="text-brand-600 hover:underline">
+                    Ver rentas con fechas lejanas
+                  </Link>
+                </>
+              )}
+            </p>
+            <p className="text-sm font-medium text-gray-700">
+              Total visible:{' '}
+              <span className="text-brand-600">
+                {total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </span>
-            )}
-          </h3>
-          <SearchInput value={search} onChange={setSearch} className="w-48" />
-        </div>
-
-        {cargando ? (
-          <div className="px-6 py-12 text-center text-sm text-gray-500">Cargando rentas…</div>
-        ) : buscando && rentasFiltradas.length === 0 ? (
-          <div className="px-6 py-12 text-center text-sm text-gray-500">
-            No hay rentas que coincidan con la búsqueda.
+            </p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <tbody>
-                {semanasVisibles.map((semana) => (
-                  <BloqueSemana
-                    key={semana.key}
-                    semana={semana}
-                    rentas={rentasPorSemana.get(semana.key) ?? []}
-                    columnasPrenda={colsPrenda}
-                    totalCols={totalCols}
-                    mostrarFilasVacias={!buscando}
-                    {...filaProps}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
-          <p className="text-xs text-gray-500">
-            {buscando
-              ? `${rentasFiltradas.length} coincidencias · solo semanas con resultados`
-              : `${semanas.length} semanas en ventana · las vacías muestran ${FILAS_VACIAS_POR_SEMANA} filas en blanco`}
-            {rentasArchivadas > 0 && (
-              <>
-                {' · '}
-                <Link to={rutaArchivo} className="text-brand-600 hover:underline">
-                  Ver archivo de rentas pasadas
-                </Link>
-              </>
-            )}
-            {rentasFuturasCount > 0 && (
-              <>
-                {' · '}
-                <Link to={rutaFuturas} className="text-brand-600 hover:underline">
-                  Ver rentas con fechas lejanas
-                </Link>
-              </>
-            )}
-          </p>
-          <p className="text-sm font-medium text-gray-700">
-            Total visible:{' '}
-            <span className="text-brand-600">
-              {total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-            </span>
-          </p>
         </div>
       </div>
     </div>

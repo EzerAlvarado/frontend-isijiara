@@ -98,7 +98,7 @@ export function PaintToolbar({
   const tituloFondo = esVestidos ? 'Sesión de fotos' : 'Casilla completa'
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-none border-0 bg-transparent p-0 shadow-none">
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <Paintbrush className="h-4 w-4 text-brand-600" />
