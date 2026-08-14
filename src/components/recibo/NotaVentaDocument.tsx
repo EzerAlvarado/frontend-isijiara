@@ -15,6 +15,7 @@ function fmt(n: number) {
 }
 
 export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDocumentProps) {
+  const etiquetaOperacion = doc.etiquetaOperacion || 'Renta'
   const metodoPago = (doc.metodoPago ?? 'pesos') as MetodoPago
   const totalPagos = doc.pagos.reduce(
     (s, p) =>
@@ -40,7 +41,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             {doc.folio}
           </div>
           <div className="border border-black px-1.5 py-0.5">
-            <span className="font-black">Fecha Renta: </span>
+            <span className="font-black">Fecha {etiquetaOperacion}: </span>
             <span className="normal-case">{doc.fechaRenta}</span>
           </div>
           <div className="border border-black px-1.5 py-0.5">
@@ -66,7 +67,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
               ['Entrega', doc.fechas.entrega],
               ['Evento', doc.fechas.evento],
               ['Regreso', doc.fechas.regreso],
-              ['Cita', doc.fechas.cita?.trim() || '-'],
+              ['Sesión', doc.fechas.cita?.trim() || '-'],
             ] as const
           ).map(([label, val]) => (
             <div key={label} className="grid grid-cols-[72px_1fr] border-b border-black/30 last:border-b-0">
@@ -142,7 +143,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
         <div className="col-span-2 space-y-1">
           <div className="border border-black">
             <div className="border-b border-black bg-gray-100 px-1.5 py-0.5 text-[8px] font-black uppercase">
-              Detalle de renta
+              Detalle de {etiquetaOperacion}
             </div>
             {doc.lineasDetalle.map((l, i) => (
               <div key={i} className="border-b border-black/20 px-1.5 py-0.5 last:border-b-0">

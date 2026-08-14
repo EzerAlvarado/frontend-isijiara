@@ -69,7 +69,7 @@ export interface RentaFormValues {
   fechaSalida: string
   /** Fecha del evento */
   fechaEvento: string
-  /** Fecha de cita (recibo / celda) */
+  /** Fecha de sesión (recibo / celda) */
   fechaCita: string
   fechaRegreso: string
   semanaInicio: string

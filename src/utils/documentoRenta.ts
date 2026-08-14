@@ -225,6 +225,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   return {
     folio: renta.id,
     fechaRenta,
+    etiquetaOperacion,
     cliente: {
       nombre: aMayusculas(renta.cliente.valor),
       telefono: aMayusculas(renta.telefono ?? ''),

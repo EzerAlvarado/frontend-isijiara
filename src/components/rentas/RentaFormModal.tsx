@@ -643,7 +643,7 @@ export function RentaFormModal({
               required
             />
             <FechaMxInput
-              label="Fecha de cita"
+              label="Fecha de sesión"
               value={values.fechaCita}
               onChange={set('fechaCita')}
             />

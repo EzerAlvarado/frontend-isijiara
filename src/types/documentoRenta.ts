@@ -21,6 +21,8 @@ export interface PagoRenta {
 export interface DocumentoRenta {
   folio: string
   fechaRenta: string
+  /** Renta, venta, premier, etc. — para encabezados del recibo */
+  etiquetaOperacion?: string
   cliente: {
     nombre: string
     telefono: string

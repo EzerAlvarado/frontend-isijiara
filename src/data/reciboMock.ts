@@ -6,6 +6,7 @@ export { calcularResta } from '../utils/documentoRenta'
 export const documentoRentaMock: DocumentoRenta = {
   folio: '5369',
   fechaRenta: '05/03/2026 12:00 p.m.',
+  etiquetaOperacion: 'Renta',
   cliente: {
     nombre: 'Carolina Prieto',
     telefono: '9289196513',
