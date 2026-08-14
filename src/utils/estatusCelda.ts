@@ -25,7 +25,7 @@ export const ESTATUS_VESTIDOS_TEXTO: EstatusCelda[] = [
 ]
 
 /** Estatus casilla completa — vestidos */
-export const ESTATUS_VESTIDOS_FONDO: EstatusCelda[] = ['sesion_fotos']
+export const ESTATUS_VESTIDOS_FONDO: EstatusCelda[] = ['sesion_fotos', 'paquete_premium']
 
 export const ESTATUS_CELDA_ORDEN: EstatusCelda[] = [
   ...ESTATUS_CELDA_TEXTO,
@@ -48,6 +48,7 @@ export const estatusCeldaLabels: Record<EstatusCelda, string> = {
   venta: 'Venta',
   premier: 'Premier',
   sesion_fotos: 'Sesión de fotos',
+  paquete_premium: 'Paquete Premium',
 }
 
 /** Clases Tailwind para pintar celdas (texto o fondo según estatus). */
@@ -65,6 +66,7 @@ export const estatusCeldaClases: Record<EstatusCelda, string> = {
   venta: 'bg-white text-blue-600',
   premier: 'bg-white text-purple-700 font-semibold',
   sesion_fotos: 'bg-pink-100 text-pink-600',
+  paquete_premium: 'bg-amber-100 text-amber-800 font-semibold',
 }
 
 /** Alias para compatibilidad con inventario y componentes existentes. */
@@ -107,7 +109,7 @@ export const OPCIONES_CELDA_FONDO: OpcionToolbarPintar[] = [
   ...ESTATUS_CELDA_FONDO.map(opcionDesdeEstatus),
 ]
 
-/** Estatus pintables manualmente en el toolbar vestidos (venta/premier/sesión son automáticos). */
+/** Estatus pintables manualmente en el toolbar vestidos (venta/premier/sesión/paquete son automáticos). */
 const ESTATUS_VESTIDOS_TOOLBAR_TEXTO: EstatusCelda[] = ['salio', 'entregado']
 
 /** Toolbar simplificado para vestidos: limpiar, Salió y Entregado. */

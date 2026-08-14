@@ -680,6 +680,7 @@ export function RentaFormModal({
             pieza={piezaPrecioReferencia}
             preciosReferencia={preciosReferencia}
             esVestidos={esVestidos}
+            categoriaVestido={values.categoriaVestido}
             onChange={cambiarTipoOperacion}
           />
           <p className="mt-2 text-xs text-gray-500">

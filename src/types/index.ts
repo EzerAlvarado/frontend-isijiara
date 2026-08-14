@@ -23,6 +23,7 @@ export type EstatusCelda =
   | 'venta'
   | 'premier'
   | 'sesion_fotos'
+  | 'paquete_premium'
 
 export interface CeldaRenta {
   valor: string

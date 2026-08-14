@@ -55,6 +55,7 @@ export function analizarRentasParaReporte(
     premier: 0,
     sesion_fotos: 0,
     patrocinio: 0,
+    paquete_premium: 0,
   }
 
   for (const r of activas) {

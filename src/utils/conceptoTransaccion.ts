@@ -22,6 +22,8 @@ export function conceptoBadgeClass(concepto: string): string {
   if (c.includes('venta')) return 'bg-violet-100 text-violet-900'
   if (c.includes('premier')) return 'bg-purple-100 text-purple-900'
   if (c.includes('patrocinio') || c.includes('patrocion')) return 'bg-teal-100 text-teal-900'
+  if (c.includes('paquete')) return 'bg-amber-100 text-amber-900'
+  if (c.includes('sesión') || c.includes('sesion')) return 'bg-pink-100 text-pink-900'
   if (c.includes('renta')) return 'bg-emerald-100 text-emerald-900'
   return 'bg-gray-100 text-gray-700'
 }

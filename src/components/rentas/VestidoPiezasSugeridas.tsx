@@ -2,6 +2,7 @@ import type { Pieza } from '../../types/pieza'
 import type { PrecioReferencia } from '../../api/finanzas'
 import {
   calcularPrecioVestido,
+  esCategoriaQuince,
   esPatrocinio,
   esPrecioOperacionManual,
   type TipoOperacion,
@@ -12,7 +13,7 @@ function fmtPrecio(n: number) {
   return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })
 }
 
-function opcionesTipo(esVestidos: boolean): {
+function opcionesTipo(esVestidos: boolean, categoriaVestido?: string): {
   value: TipoOperacion
   label: string
   hint: string
@@ -24,12 +25,19 @@ function opcionesTipo(esVestidos: boolean): {
     { value: 'venta', label: 'Venta', hint: `Venta del ${articulo}` },
     { value: 'patrocinio', label: 'Patrocinio', hint: 'Renta patrocinada' },
   ]
-  if (esVestidos) {
-    opciones.push({
-      value: 'sesion_fotos',
-      label: 'Sesión de fotos',
-      hint: 'Sesión fotográfica con vestido',
-    })
+  if (esVestidos && esCategoriaQuince(categoriaVestido)) {
+    opciones.push(
+      {
+        value: 'sesion_fotos',
+        label: 'Sesión de fotos',
+        hint: 'Sesión fotográfica con vestido',
+      },
+      {
+        value: 'paquete_premium',
+        label: 'Paquete Premium',
+        hint: 'Paquete premium de XV',
+      },
+    )
   }
   return opciones
 }
@@ -39,6 +47,7 @@ interface SelectorTipoOperacionProps {
   pieza?: Pieza
   preciosReferencia: PrecioReferencia[]
   esVestidos: boolean
+  categoriaVestido?: string
   onChange: (tipo: TipoOperacion) => void
 }
 
@@ -47,12 +56,14 @@ export function SelectorTipoOperacion({
   pieza,
   preciosReferencia,
   esVestidos,
+  categoriaVestido,
   onChange,
 }: SelectorTipoOperacionProps) {
-  const opciones = opcionesTipo(esVestidos)
+  const opciones = opcionesTipo(esVestidos, categoriaVestido)
   const avisoPieza = esVestidos
     ? 'Completa color, marca o talla con una sugerencia del inventario para ver los precios.'
     : 'Elige el saco del inventario para ver los precios sugeridos.'
+  const cols = opciones.length >= 6 ? 'lg:grid-cols-3 xl:grid-cols-6' : 'lg:grid-cols-4'
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-3">
@@ -62,7 +73,7 @@ export function SelectorTipoOperacion({
       {!pieza && (
         <p className="mb-2 text-[11px] text-amber-700">{avisoPieza}</p>
       )}
-      <div className={`grid gap-2 sm:grid-cols-2 ${esVestidos ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
+      <div className={`grid gap-2 sm:grid-cols-2 ${cols}`}>
         {opciones.map((op) => {
           const esManual = esPrecioOperacionManual(op.value)
           const gratis = esPatrocinio(op.value)
