@@ -50,6 +50,42 @@ export async function actualizarFinanzas(
   return mapFinanzas(data)
 }
 
+export type RubroIngresoId = 'trajes' | 'xv' | 'noche' | 'novia'
+
+export interface RubroIngreso {
+  id: RubroIngresoId
+  label: string
+  ingresoMxn: number
+  hoyMxn: number
+  movimientos: number
+  porConcepto: {
+    operacion: number
+    abono: number
+    multa: number
+    danos: number
+    otro: number
+  }
+}
+
+export interface IngresosMes {
+  anio: number
+  mes: number
+  mesLabel: string
+  esMesActual: boolean
+  desde: string
+  hasta: string
+  diasDelMes: number
+  totalMxn: number
+  hoyMxn: number
+  movimientos: number
+  rubros: RubroIngreso[]
+}
+
+export async function fetchIngresosMes(anio: number, mes: number): Promise<IngresosMes> {
+  const q = new URLSearchParams({ anio: String(anio), mes: String(mes) })
+  return apiRequest<IngresosMes>(`/finanzas/ingresos/?${q}`)
+}
+
 export interface LimpiarDatosResult {
   rentas: number
   devoluciones: number
