@@ -322,7 +322,7 @@ export function RentasPage() {
     setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))
   }
 
-  const guardarMulta = async (payload: { cargoDanos: number; notaDanos: string }) => {
+  const guardarMulta = async (payload: { cargoDanos: number; notaDanos: string; quitar?: boolean }) => {
     if (!rentaMulta) return
     const actualizada = await agregarMultaRenta(rentaMulta.id, payload)
     setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))

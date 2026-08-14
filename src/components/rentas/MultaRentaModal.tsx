@@ -7,7 +7,7 @@ interface MultaRentaModalProps {
   open: boolean
   renta: Renta | null
   onClose: () => void
-  onSubmit: (payload: { cargoDanos: number; notaDanos: string }) => Promise<void>
+  onSubmit: (payload: { cargoDanos: number; notaDanos: string; quitar?: boolean }) => Promise<void>
 }
 
 export function MultaRentaModal({ open, renta, onClose, onSubmit }: MultaRentaModalProps) {
@@ -26,20 +26,11 @@ export function MultaRentaModal({ open, renta, onClose, onSubmit }: MultaRentaMo
   const cargoNumerico = Number.parseFloat(cargo.replace(',', '.')) || 0
   const hayCargo = cargoNumerico > 0 || nota.trim().length > 0
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!renta) return
-    if (!hayCargo) {
-      setError('Indica el monto de la multa o una nota.')
-      return
-    }
+  const enviar = async (payload: { cargoDanos: number; notaDanos: string; quitar?: boolean }) => {
     setGuardando(true)
     setError(null)
     try {
-      await onSubmit({
-        cargoDanos: cargoNumerico > 0 ? cargoNumerico : 0,
-        notaDanos: nota.trim(),
-      })
+      await onSubmit(payload)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo registrar la multa.')
@@ -48,10 +39,29 @@ export function MultaRentaModal({ open, renta, onClose, onSubmit }: MultaRentaMo
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!renta) return
+    if (!hayCargo) {
+      setError('Indica el monto de la multa o una nota.')
+      return
+    }
+    await enviar({
+      cargoDanos: cargoNumerico > 0 ? cargoNumerico : 0,
+      notaDanos: nota.trim(),
+    })
+  }
+
+  const quitarMulta = async () => {
+    await enviar({ cargoDanos: 0, notaDanos: '', quitar: true })
+  }
+
   if (!renta) return null
 
+  const yaTieneMulta = (renta.cargoDanos ?? 0) > 0 || Boolean(renta.notaDanos?.trim())
+
   return (
-    <Modal open={open} onClose={() => !guardando && onClose()} title="Agregar multa">
+    <Modal open={open} onClose={() => !guardando && onClose()} title={yaTieneMulta ? 'Multa de la renta' : 'Agregar multa'}>
       <p className="mb-4 text-sm text-gray-600">
         Renta <strong>#{renta.id}</strong> — {renta.cliente.valor}
       </p>
@@ -95,12 +105,22 @@ export function MultaRentaModal({ open, renta, onClose, onSubmit }: MultaRentaMo
             {error}
           </p>
         )}
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-2">
           <button type="button" className="btn-secondary flex-1" onClick={onClose} disabled={guardando}>
             Cancelar
           </button>
+          {yaTieneMulta && (
+            <button
+              type="button"
+              className="btn-secondary flex-1 text-red-700"
+              onClick={() => void quitarMulta()}
+              disabled={guardando}
+            >
+              {guardando ? 'Guardando…' : 'Quitar multa'}
+            </button>
+          )}
           <button type="submit" className="btn-primary flex-1" disabled={guardando}>
-            {guardando ? 'Guardando…' : 'Registrar multa'}
+            {guardando ? 'Guardando…' : yaTieneMulta ? 'Actualizar multa' : 'Registrar multa'}
           </button>
         </div>
       </form>

@@ -155,7 +155,7 @@ export async function registrarAbono(
 
 export async function agregarMultaRenta(
   id: string,
-  payload: { cargoDanos: number; notaDanos?: string },
+  payload: { cargoDanos: number; notaDanos?: string; quitar?: boolean },
 ): Promise<Renta> {
   const data = await apiRequest<RentaApi>(`/rentas/${id}/multa/`, {
     method: 'POST',
