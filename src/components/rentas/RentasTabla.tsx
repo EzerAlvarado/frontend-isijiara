@@ -1,4 +1,4 @@
-import { Ban, Banknote, FileText, Paintbrush, Pencil, Printer, Trash2 } from 'lucide-react'
+import { AlertTriangle, Ban, Banknote, FileText, Paintbrush, Pencil, Printer, Trash2 } from 'lucide-react'
 import type { CampoRentaCelda, CeldaRenta, EstatusCelda, Renta } from '../../types'
 import { RentasCell } from './RentasCell'
 import type { ModoPintar } from './PaintToolbar'
@@ -78,6 +78,7 @@ export interface FilaRentaHandlers {
   onImprimir: (renta: Renta) => void
   onReciboAbono?: (renta: Renta) => void
   onCancelar?: (renta: Renta) => void
+  onMulta?: (renta: Renta) => void
   onQuitarCancelada?: (renta: Renta) => void
 }
 
@@ -101,6 +102,7 @@ export function FilaRenta({
   onImprimir,
   onReciboAbono,
   onCancelar,
+  onMulta,
   onQuitarCancelada,
 }: FilaRentaProps) {
   const soloLectura = variant === 'archivo'
@@ -170,34 +172,48 @@ export function FilaRenta({
         className={`border border-gray-300 px-2 py-1.5 text-xs font-semibold ${estatusCeldaBg[estatusRenta]} ${textoTipoOperacion}`}
       >
         <div className="flex flex-col gap-0.5">
-          {!bloqueada && !renta.cancelada && (
+          {!renta.cancelada && (onEditar || onAbono || onCancelar || onMulta) && (
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => onEditar?.(renta)}
-                title="Editar renta"
-                className="rounded p-0.5 text-gray-500 hover:bg-white/60 hover:text-brand-700"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              {!pagado && onAbono && (
+              {!bloqueada && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onEditar?.(renta)}
+                    title="Editar renta"
+                    className="rounded p-0.5 text-gray-500 hover:bg-white/60 hover:text-brand-700"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  {!pagado && onAbono && (
+                    <button
+                      type="button"
+                      onClick={() => onAbono(renta)}
+                      title="Registrar abono"
+                      className="rounded p-0.5 text-gray-500 hover:bg-white/60 hover:text-emerald-700"
+                    >
+                      <Banknote className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onCancelar?.(renta)}
+                    title="Cancelar renta (libera piezas)"
+                    className="rounded p-0.5 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Ban className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              )}
+              {onMulta && (
                 <button
                   type="button"
-                  onClick={() => onAbono(renta)}
-                  title="Registrar abono"
-                  className="rounded p-0.5 text-gray-500 hover:bg-white/60 hover:text-emerald-700"
+                  onClick={() => onMulta(renta)}
+                  title="Agregar multa por daños"
+                  className="rounded p-0.5 text-gray-500 hover:bg-amber-50 hover:text-amber-700"
                 >
-                  <Banknote className="h-3.5 w-3.5" />
+                  <AlertTriangle className="h-3.5 w-3.5" />
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => onCancelar?.(renta)}
-                title="Cancelar renta (libera piezas)"
-                className="rounded p-0.5 text-gray-500 hover:bg-red-50 hover:text-red-600"
-              >
-                <Ban className="h-3.5 w-3.5" />
-              </button>
             </div>
           )}
           {renta.cancelada && onQuitarCancelada && (
@@ -222,6 +238,11 @@ export function FilaRenta({
           {pagado && !renta.cancelada && (
             <span className="inline-block rounded bg-green-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
               Pagado
+            </span>
+          )}
+          {(renta.cargoDanos ?? 0) > 0 && !renta.cancelada && (
+            <span className="inline-block rounded bg-amber-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+              Multa
             </span>
           )}
         </div>

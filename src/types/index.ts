@@ -139,6 +139,9 @@ export interface Renta {
   pagare?: number
   /** Fecha/hora en que se registró la renta (editable; no va en el recibo) */
   creadoEn?: string
+  /** Multa por daños agregada después de entregar (va al corte) */
+  cargoDanos?: number
+  notaDanos?: string
   abonos?: Abono[]
 }
 

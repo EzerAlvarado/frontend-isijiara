@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
-import { deleteRentaCancelada, fetchRentas } from '../api/rentas'
+import { agregarMultaRenta, deleteRentaCancelada, fetchRentas } from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
 import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
+import { MultaRentaModal } from '../components/rentas/MultaRentaModal'
 import { SearchInput } from '../components/ui/SearchInput'
 import { BloqueSemana, totalColumnasRentas } from '../components/rentas/RentasTabla'
 import { useAuth } from '../context/AuthContext'
@@ -79,6 +80,7 @@ export function ArchivoRentasPage() {
   const [search, setSearch] = useState('')
   const [docImpresion, setDocImpresion] = useState<DocumentoRenta | null>(null)
   const [rentaReciboAbono, setRentaReciboAbono] = useState<Renta | null>(null)
+  const [rentaMulta, setRentaMulta] = useState<Renta | null>(null)
 
   const mesSeleccionado = useMemo(
     () => (mesParam ? parseMesArchivo(mesParam) : null),
@@ -211,6 +213,7 @@ export function ArchivoRentasPage() {
     variant: 'archivo' as const,
     onImprimir: (renta: Renta) => setDocImpresion(rentaADocumento(renta)),
     onReciboAbono: (renta: Renta) => setRentaReciboAbono(renta),
+    onMulta: (renta: Renta) => setRentaMulta(renta),
     onQuitarCancelada: quitarCanceladaHandler,
   }
 
@@ -297,6 +300,17 @@ export function ArchivoRentasPage() {
           renta={rentaReciboAbono}
         />
       )}
+
+      <MultaRentaModal
+        open={rentaMulta !== null}
+        renta={rentaMulta}
+        onClose={() => setRentaMulta(null)}
+        onSubmit={async (payload) => {
+          if (!rentaMulta) return
+          const actualizada = await agregarMultaRenta(rentaMulta.id, payload)
+          setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))
+        }}
+      />
 
       {cargando ? (
         <div className="card px-6 py-12 text-center text-sm text-gray-500">Cargando archivo…</div>

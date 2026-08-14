@@ -2,17 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, RefreshCw } from 'lucide-react'
 import { ExportRentasMenu } from '../components/rentas/ExportRentasMenu'
-import {
-  cancelRenta,
-  createRenta,
-  deleteRentaCancelada,
-  fetchRentas,
-  registrarAbono,
-  updateRenta,
-} from '../api/rentas'
+import { agregarMultaRenta, cancelRenta, createRenta, deleteRentaCancelada, fetchRentas, registrarAbono, updateRenta } from '../api/rentas'
 import { NotaVentaPreview } from '../components/recibo/NotaVentaPreview'
 import { ReciboAbonoPreview } from '../components/recibo/ReciboAbonoPreview'
 import { AbonoModal } from '../components/rentas/AbonoModal'
+import { MultaRentaModal } from '../components/rentas/MultaRentaModal'
 import { RentaFormModal } from '../components/rentas/RentaFormModal'
 import { SearchInput } from '../components/ui/SearchInput'
 import { PaintToolbar, type ModoPintar } from '../components/rentas/PaintToolbar'
@@ -81,6 +75,7 @@ export function RentasPage() {
   const [modoSinCorte, setModoSinCorte] = useState(false)
   const [rentaEditando, setRentaEditando] = useState<Renta | null>(null)
   const [rentaAbono, setRentaAbono] = useState<Renta | null>(null)
+  const [rentaMulta, setRentaMulta] = useState<Renta | null>(null)
   const [docImpresion, setDocImpresion] = useState<DocumentoRenta | null>(null)
   const [rentaReciboAbono, setRentaReciboAbono] = useState<Renta | null>(null)
   const [notaModal, setNotaModal] = useState<{
@@ -327,6 +322,12 @@ export function RentasPage() {
     setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))
   }
 
+  const guardarMulta = async (payload: { cargoDanos: number; notaDanos: string }) => {
+    if (!rentaMulta) return
+    const actualizada = await agregarMultaRenta(rentaMulta.id, payload)
+    setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))
+  }
+
   const etiquetaTab = etiquetaExportTab(tabActiva, lineaNegocio)
 
   const exportarExcel = () => {
@@ -365,6 +366,7 @@ export function RentasPage() {
     onActualizarCelda: actualizarCelda,
     onEditar: abrirEditar,
     onAbono: abrirAbono,
+    onMulta: (renta: Renta) => setRentaMulta(renta),
     onImprimir: abrirImprimir,
     onReciboAbono: abrirReciboAbono,
     onCancelar: cancelarRentaHandler,
@@ -467,6 +469,13 @@ export function RentasPage() {
         renta={rentaAbono}
         onClose={() => setRentaAbono(null)}
         onSubmit={guardarAbono}
+      />
+
+      <MultaRentaModal
+        open={rentaMulta !== null}
+        renta={rentaMulta}
+        onClose={() => setRentaMulta(null)}
+        onSubmit={guardarMulta}
       />
 
       <NotaOtraSituacionModal

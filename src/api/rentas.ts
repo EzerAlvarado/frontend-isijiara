@@ -78,6 +78,8 @@ function mapRenta(raw: RentaApi): Renta {
     totalAbonado: raw.totalAbonado != null ? Number(raw.totalAbonado) : undefined,
     restante: raw.restante != null ? Number(raw.restante) : undefined,
     pagado: raw.pagado != null ? Boolean(raw.pagado) : undefined,
+    cargoDanos: raw.cargoDanos != null ? Number(raw.cargoDanos) : 0,
+    notaDanos: raw.notaDanos ? String(raw.notaDanos) : '',
     abonos: raw.abonos?.map(mapAbono),
     metodoPago: (raw.metodoPago as Renta['metodoPago']) ?? 'pesos',
     pagoEfectivoMxn: Number(raw.pagoEfectivoMxn ?? 0),
@@ -149,4 +151,16 @@ export async function registrarAbono(
     body: JSON.stringify(payload),
   })
   return mapRenta(data.renta)
+}
+
+export async function agregarMultaRenta(
+  id: string,
+  payload: { cargoDanos: number; notaDanos?: string },
+): Promise<Renta> {
+  const data = await apiRequest<RentaApi>(`/rentas/${id}/multa/`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  invalidarInventarioRentaCache()
+  return mapRenta(data)
 }
