@@ -11,6 +11,7 @@ import {
   ClipboardList,
   CalendarClock,
   TrendingUp,
+  AlertTriangle,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { usePerfilVestido } from '../../context/PerfilVestidoContext'
@@ -43,6 +44,7 @@ export function Sidebar() {
         { to: '/pedidos', icon: ClipboardList, label: 'Pedidos', end: false },
         { to: '/corte', icon: Wallet, label: 'Corte del Día', end: false },
         { to: '/ingresos', icon: TrendingUp, label: 'Ingresos', end: false },
+        { to: '/alertas', icon: AlertTriangle, label: 'Alertas de vestido', end: false },
         { to: rutaVestidos(perfilSlug, 'inventario'), icon: FolderOpen, label: 'Inventario', end: true },
         { to: '/finanzas', icon: Settings, label: 'Finanzas', end: false },
       ]

@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from 'lucide-react'
 import {
-  fetchAlertasReuso,
   fetchIngresosMes,
-  type AlertaReuso,
-  type AlertasReuso,
+  fetchOcupacionAnio,
   type IngresosMes,
+  type OcupacionAnio,
   type RubroIngreso,
 } from '../api/finanzas'
-import { useAuth } from '../context/AuthContext'
-import { usePerfilVestido } from '../context/PerfilVestidoContext'
 
-type TabIngresos = 'dinero' | 'alertas'
+type TabIngresos = 'dinero' | 'piezas'
 
 function formatMoney(amount: number) {
   return amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
@@ -45,6 +42,16 @@ const ETIQUETA_CONCEPTO: Record<string, string> = {
   multa: 'Multas',
   danos: 'Daños',
   otro: 'Otros',
+}
+
+function diferenciaClase(valor: number, futuro?: boolean) {
+  if (futuro || valor === 0) return 'text-gray-500'
+  return valor > 0 ? 'text-emerald-700' : 'text-red-700'
+}
+
+function formatDelta(valor: number) {
+  if (valor === 0) return 'igual'
+  return valor > 0 ? `+${valor}` : String(valor)
 }
 
 function BarraParticipacion({ rubros, total }: { rubros: RubroIngreso[]; total: number }) {
@@ -245,20 +252,10 @@ function PanelDinero() {
   )
 }
 
-function tarjetaAlerta(alerta: AlertaReuso) {
-  if (alerta.traslape || alerta.severidad === 'alta') {
-    return 'border-red-200 bg-red-50'
-  }
-  if (alerta.severidad === 'media') {
-    return 'border-amber-200 bg-amber-50'
-  }
-  return 'border-orange-200 bg-orange-50'
-}
-
-function PanelAlertas() {
-  const { tipoVestido } = usePerfilVestido()
-  const [categoria, setCategoria] = useState<string>(tipoVestido)
-  const [data, setData] = useState<AlertasReuso | null>(null)
+function PanelPiezas() {
+  const ahora = new Date()
+  const [anio, setAnio] = useState(ahora.getFullYear())
+  const [data, setData] = useState<OcupacionAnio | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -266,18 +263,14 @@ function PanelAlertas() {
     setCargando(true)
     setError(null)
     try {
-      setData(await fetchAlertasReuso(categoria, 10))
+      setData(await fetchOcupacionAnio(anio))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudieron cargar las alertas.')
+      setError(err instanceof Error ? err.message : 'No se pudo cargar el conteo.')
       setData(null)
     } finally {
       setCargando(false)
     }
-  }, [categoria])
-
-  useEffect(() => {
-    setCategoria(tipoVestido)
-  }, [tipoVestido])
+  }, [anio])
 
   useEffect(() => {
     void cargar()
@@ -286,16 +279,26 @@ function PanelAlertas() {
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-end gap-2">
-        <select
-          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm"
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setAnio((a) => a - 1)}
+          title="Año anterior"
         >
-          <option value="quince">XV</option>
-          <option value="noche">Noche</option>
-          <option value="boda">Novia</option>
-          <option value="todas">Todos los vestidos</option>
-        </select>
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <span className="min-w-[120px] text-center text-sm font-semibold uppercase tracking-wide text-gray-800">
+          {anio} vs {anio - 1}
+        </span>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setAnio((a) => a + 1)}
+          disabled={anio >= ahora.getFullYear()}
+          title="Año siguiente"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
         <button type="button" className="btn-secondary" onClick={() => void cargar()} disabled={cargando}>
           <RefreshCw className={`h-4 w-4 ${cargando ? 'animate-spin' : ''}`} />
         </button>
@@ -308,94 +311,81 @@ function PanelAlertas() {
       )}
 
       {cargando && !data ? (
-        <p className="py-12 text-center text-sm text-gray-500">Cargando alertas…</p>
+        <p className="py-12 text-center text-sm text-gray-500">Cargando ocupación…</p>
       ) : data ? (
         <>
-          <p className="mb-4 text-sm text-gray-600">
-            Si el mismo vestido vuelve a salir en {data.diasAlerta} días o menos después de regresar,
-            aparece aquí: hay que recibirlo a tiempo y en buenas condiciones, o encargar otro.
-          </p>
-
-          {data.alertas.length === 0 ? (
-            <p className="card mb-6 px-4 py-8 text-center text-sm text-gray-500">
-              No hay vestidos con rentas tan seguidas en las próximas semanas.
+          <section className="card mb-6 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Piezas que salieron en {data.anio}
             </p>
-          ) : (
-            <div className="mb-6 space-y-3">
-              {data.alertas.map((alerta) => (
-                <article
-                  key={`${alerta.codigo}-${alerta.anterior.rentaId}-${alerta.siguiente.rentaId}`}
-                  className={`card border p-4 ${tarjetaAlerta(alerta)}`}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-bold uppercase tracking-wide text-gray-900">
-                        {alerta.color || 'Vestido'} {alerta.codigo}
-                      </p>
-                      {alerta.descripcion && (
-                        <p className="text-xs text-gray-600">{alerta.descripcion}</p>
-                      )}
-                    </div>
-                    <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
-                      {alerta.traslape
-                        ? 'Se empalman'
-                        : `${alerta.diasEntre} día${alerta.diasEntre === 1 ? '' : 's'} de holgura`}
-                    </span>
-                  </div>
-                  <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-                    <p>
-                      <span className="text-xs font-semibold uppercase text-gray-500">Sale</span>
-                      <br />
-                      {alerta.anterior.fechaSalida} → {alerta.anterior.fechaRegreso}
-                      {alerta.anterior.cliente ? ` · ${alerta.anterior.cliente}` : ''}
-                    </p>
-                    <p>
-                      <span className="text-xs font-semibold uppercase text-gray-500">Vuelve a salir</span>
-                      <br />
-                      {alerta.siguiente.fechaSalida} → {alerta.siguiente.fechaRegreso}
-                      {alerta.siguiente.cliente ? ` · ${alerta.siguiente.cliente}` : ''}
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs text-gray-600">
-                    Este vestido se ha rentado {alerta.vecesRentado} vez
-                    {alerta.vecesRentado === 1 ? '' : 'es'}.
-                  </p>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <section className="card overflow-x-auto">
-            <div className="border-b border-gray-100 px-4 py-3">
-              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-800">
-                Veces que se ha rentado el mismo vestido
-              </h3>
-            </div>
-            {data.masRentados.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-gray-500">Aún no hay rentas en esta categoría.</p>
-            ) : (
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
-                    <th className="px-4 py-2">Código</th>
-                    <th className="px-4 py-2">Color</th>
-                    <th className="px-4 py-2">Descripción</th>
-                    <th className="px-4 py-2 text-right">Veces</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.masRentados.map((item) => (
-                    <tr key={`${item.piezaId ?? item.codigo}-${item.color}`} className="border-b border-gray-100">
-                      <td className="px-4 py-2 font-semibold">{item.codigo || '—'}</td>
-                      <td className="px-4 py-2">{item.color || '—'}</td>
-                      <td className="px-4 py-2 text-gray-600">{item.descripcion || '—'}</td>
-                      <td className="px-4 py-2 text-right font-semibold">{item.veces}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <p className="mt-1 text-3xl font-bold tracking-tight text-gray-900">{data.totales.actual}</p>
+            <p className={`mt-1 text-sm ${diferenciaClase(data.totales.actual - data.totales.anterior)}`}>
+              {formatDelta(data.totales.actual - data.totales.anterior)} vs {data.anioAnterior} (
+              {data.totales.anterior})
+            </p>
+            <p className="mt-2 text-xs text-gray-500">
+              Cuenta rentas, premier, sesión y paquete. No cuenta ventas ni canceladas. El número entre
+              paréntesis es el mismo mes del año pasado.
+            </p>
+            {data.mesesMasOcupados.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {data.mesesMasOcupados.map((item) => (
+                  <span
+                    key={`${item.rubro}-${item.mes}`}
+                    className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700"
+                  >
+                    {item.mesLabel} {data.anioAnterior}: {item.anterior} {item.rubroLabel}
+                  </span>
+                ))}
+              </div>
             )}
           </section>
+
+          <div className="card overflow-x-auto">
+            <table className="w-full min-w-[720px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                  <th className="px-4 py-3">Mes</th>
+                  {data.meses[0]?.rubros.map((r) => (
+                    <th key={r.id} className="px-3 py-3">
+                      {r.label}
+                    </th>
+                  ))}
+                  <th className="px-3 py-3">Total</th>
+                  <th className="px-3 py-3">Vs {data.anioAnterior}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.meses.map((mes) => (
+                  <tr
+                    key={mes.mes}
+                    className={`border-b border-gray-100 ${mes.esMesActual ? 'bg-emerald-50/60' : ''} ${
+                      mes.esFuturo ? 'text-gray-400' : ''
+                    }`}
+                  >
+                    <td className="px-4 py-2.5 font-medium">
+                      {mes.mesLabel}
+                      {mes.esMesActual ? (
+                        <span className="ml-2 text-[10px] font-semibold uppercase text-emerald-700">
+                          en curso
+                        </span>
+                      ) : null}
+                    </td>
+                    {mes.rubros.map((r) => (
+                      <td key={r.id} className="px-3 py-2.5">
+                        <span className="font-semibold">{r.actual}</span>
+                        <span className="ml-1 text-xs text-gray-500">({r.anterior})</span>
+                      </td>
+                    ))}
+                    <td className="px-3 py-2.5 font-semibold">{mes.totalActual}</td>
+                    <td className={`px-3 py-2.5 font-medium ${diferenciaClase(mes.diferencia, mes.esFuturo)}`}>
+                      {mes.esFuturo ? '—' : formatDelta(mes.diferencia)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       ) : null}
     </>
@@ -403,15 +393,12 @@ function PanelAlertas() {
 }
 
 export function IngresosPage() {
-  const { lineaNegocio } = useAuth()
-  const esVestidos = lineaNegocio === 'vestidos'
   const [tab, setTab] = useState<TabIngresos>('dinero')
-  const tabActiva = esVestidos ? tab : 'dinero'
 
-  const titulo = tabActiva === 'alertas' ? 'Alertas de vestido' : 'Ingresos mensuales'
+  const titulo = tab === 'piezas' ? 'Piezas por mes' : 'Ingresos mensuales'
   const subtitulo =
-    tabActiva === 'alertas'
-      ? 'El mismo vestido rentado otra vez muy seguido: hay que cuidarlo o encargar otro.'
+    tab === 'piezas'
+      ? 'Cuántos vestidos o trajes salieron cada mes, comparado con el mismo mes del año pasado.'
       : 'Dinero que ya entró al corte, separado por Trajes, XV, Noche y Novia.'
 
   return (
@@ -421,26 +408,24 @@ export function IngresosPage() {
           <h2 className="text-2xl font-bold uppercase tracking-tight">{titulo}</h2>
           <p className="mt-1 text-sm text-gray-600">{subtitulo}</p>
         </div>
-        {esVestidos && (
-          <div className="flex flex-wrap gap-2">
-            <TabButton activa={tabActiva === 'dinero'} onClick={() => setTab('dinero')}>
-              <span className="inline-flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5" />
-                Dinero
-              </span>
-            </TabButton>
-            <TabButton activa={tabActiva === 'alertas'} onClick={() => setTab('alertas')}>
-              <span className="inline-flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                Alertas
-              </span>
-            </TabButton>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <TabButton activa={tab === 'dinero'} onClick={() => setTab('dinero')}>
+            <span className="inline-flex items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5" />
+              Dinero
+            </span>
+          </TabButton>
+          <TabButton activa={tab === 'piezas'} onClick={() => setTab('piezas')}>
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Piezas
+            </span>
+          </TabButton>
+        </div>
       </div>
 
-      {tabActiva === 'dinero' && <PanelDinero />}
-      {tabActiva === 'alertas' && esVestidos && <PanelAlertas />}
+      {tab === 'dinero' && <PanelDinero />}
+      {tab === 'piezas' && <PanelPiezas />}
     </div>
   )
 }

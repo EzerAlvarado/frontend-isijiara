@@ -86,6 +86,46 @@ export async function fetchIngresosMes(anio: number, mes: number): Promise<Ingre
   return apiRequest<IngresosMes>(`/finanzas/ingresos/?${q}`)
 }
 
+export interface RubroOcupacion {
+  id: RubroIngresoId
+  label: string
+  actual: number
+  anterior: number
+  diferencia: number
+}
+
+export interface MesOcupacion {
+  mes: number
+  mesLabel: string
+  esMesActual: boolean
+  esFuturo: boolean
+  rubros: RubroOcupacion[]
+  totalActual: number
+  totalAnterior: number
+  diferencia: number
+}
+
+export interface OcupacionAnio {
+  anio: number
+  anioAnterior: number
+  meses: MesOcupacion[]
+  mesesMasOcupados: {
+    mes: number
+    mesLabel: string
+    total: number
+    actual: number
+    anterior: number
+    rubro: RubroIngresoId
+    rubroLabel: string
+  }[]
+  totales: { actual: number; anterior: number }
+}
+
+export async function fetchOcupacionAnio(anio: number): Promise<OcupacionAnio> {
+  const q = new URLSearchParams({ anio: String(anio) })
+  return apiRequest<OcupacionAnio>(`/finanzas/ocupacion/?${q}`)
+}
+
 export interface AlertaReusoRenta {
   rentaId: number
   cliente: string

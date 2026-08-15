@@ -13,6 +13,7 @@ import { InventarioPage } from './pages/InventarioPage'
 import { CorteDiaPage } from './pages/CorteDiaPage'
 import { FinanzasPage } from './pages/FinanzasPage'
 import { IngresosPage } from './pages/IngresosPage'
+import { AlertasVestidosPage } from './pages/AlertasVestidosPage'
 import { PedidosPage } from './pages/PedidosPage'
 import { LoginPage } from './pages/LoginPage'
 
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="pedidos" element={<PedidosPage />} />
           <Route path="corte" element={<CorteDiaPage />} />
           <Route path="ingresos" element={<IngresosPage />} />
+          <Route path="alertas" element={<AlertasVestidosPage />} />
           <Route path="finanzas" element={<FinanzasPage />} />
           <Route path="vestidos/:perfil" element={<VestidosProfileGate />}>
             <Route path="rentas" element={<RentasPage />} />
