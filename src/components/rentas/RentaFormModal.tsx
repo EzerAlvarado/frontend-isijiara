@@ -52,6 +52,7 @@ import {
   calcularPrecioVestido,
   esPrecioOperacionManual,
   esPatrocinio,
+  esOperacionSinInventario,
   etiquetaTipoOperacionVestido,
   type TipoOperacion,
 } from '../../utils/precioVestido'
@@ -139,6 +140,7 @@ function FilaPieza({
   onTalla,
   onDetalles,
   onElegirPieza,
+  usarInventario = true,
   usarCodigosNuevosPantalon,
 }: {
   titulo: string
@@ -153,6 +155,7 @@ function FilaPieza({
   onTalla: (v: string) => void
   onDetalles: (v: string) => void
   onElegirPieza: (pieza: Pieza) => void
+  usarInventario?: boolean
   usarCodigosNuevosPantalon?: boolean
 }) {
   return (
@@ -171,6 +174,7 @@ function FilaPieza({
             piezas={piezas}
             onChange={onDetalles}
             onElegirPieza={onElegirPieza}
+            usarInventario={usarInventario}
           />
         </div>
         <Field label="Color" value={color} onChange={onColor} placeholder="NEGRO" />
@@ -185,6 +189,7 @@ function FilaPieza({
           piezas={piezas}
           onChange={onMarca}
           onElegirPieza={onElegirPieza}
+          usarInventario={usarInventario}
         />
         <InventarioAutocomplete
           label="Talla"
@@ -197,6 +202,7 @@ function FilaPieza({
           piezas={piezas}
           onChange={onTalla}
           onElegirPieza={onElegirPieza}
+          usarInventario={usarInventario}
           usarCodigosNuevosPantalon={tipo === 'pantalon' ? usarCodigosNuevosPantalon : undefined}
         />
       </div>
@@ -301,9 +307,12 @@ export function RentaFormModal({
     return items
   }, [esVestidos, avisosDisponibilidad, conflictosTraje])
 
+  const sinInventario = esOperacionSinInventario(values.tipoOperacion)
+  const piezasSugerencia = sinInventario ? piezasTodas : inventario
+
   const piezasPorTipo = useCallback(
-    (tipo: TipoPieza) => inventario.filter((p) => p.tipo === tipo),
-    [inventario],
+    (tipo: TipoPieza) => piezasSugerencia.filter((p) => p.tipo === tipo),
+    [piezasSugerencia],
   )
 
   const piezaPrecioReferencia = useMemo(() => {
@@ -420,6 +429,11 @@ export function RentaFormModal({
         ...prev,
         tipoOperacion: tipo,
         tipoEntrega: tipo === 'premier' ? 'premier' : 'recoger',
+      }
+      if (esOperacionSinInventario(tipo)) {
+        next.piezaSacoId = ''
+        next.piezaChalecoId = ''
+        next.piezaPantalonId = ''
       }
       if (esPatrocinio(tipo)) {
         next.precio = '0'
@@ -539,7 +553,13 @@ export function RentaFormModal({
       setError('La fecha de evento es obligatoria.')
       return
     }
-    if (esVestidos && !esEdicion && !piezaVestidoVinculada && !tieneAccesorios) {
+    if (
+      esVestidos &&
+      !esEdicion &&
+      !sinInventario &&
+      !piezaVestidoVinculada &&
+      !tieneAccesorios
+    ) {
       setError('Selecciona un vestido del inventario o ingresa al menos un accesorio.')
       return
     }
@@ -553,7 +573,7 @@ export function RentaFormModal({
       return
     }
 
-    const errorDisponibilidad = piezasVinculadasIds.length > 0
+    const errorDisponibilidad = !sinInventario && piezasVinculadasIds.length > 0
       ? esVestidos
         ? validarPiezasParaRenta(
             piezasVinculadasIds,
@@ -575,6 +595,7 @@ export function RentaFormModal({
     }
 
     if (
+      !sinInventario &&
       !esVestidos &&
       itemsAvisoDisponibilidad.some(
         (i) => i.conflicto.estado === 'reservada_semana_siguiente',
@@ -606,7 +627,7 @@ export function RentaFormModal({
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {cargandoInventario && (
+        {cargandoInventario && !sinInventario && (
           <div className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900">
             Cargando inventario… espera un momento antes de guardar.
           </div>
@@ -819,7 +840,7 @@ export function RentaFormModal({
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-700">
             {esVestidos ? 'Vestido' : 'Prendas'}
           </h4>
-          {itemsAvisoDisponibilidad.length > 0 && (
+          {itemsAvisoDisponibilidad.length > 0 && !sinInventario && (
             <div className="mb-3">
               <BannerAvisoDisponibilidad items={itemsAvisoDisponibilidad} />
             </div>
@@ -827,8 +848,9 @@ export function RentaFormModal({
           {esVestidos ? (
             <>
               <p className="mb-3 text-xs text-gray-500">
-                Escribe color mero o marca y elige una sugerencia del desplegable. No se muestran
-                piezas ocupadas la misma semana; si sale la próxima semana verás un aviso arriba.
+                {sinInventario
+                  ? 'Venta y premier no usan inventario. Escribe la marca (se reconoce sola) y el resto a mano.'
+                  : 'Escribe color mero o marca y elige una sugerencia del desplegable. No se muestran piezas ocupadas la misma semana; si sale la próxima semana verás un aviso arriba.'}
               </p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <label className="block">
@@ -852,9 +874,10 @@ export function RentaFormModal({
                   marca={values.marca}
                   talla={values.pantalon}
                   codigo={values.saco}
-                  piezas={inventario}
+                  piezas={piezasSugerencia}
                   onChange={set('color')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   sinRequisitoColor
                 />
                 <InventarioAutocomplete
@@ -867,9 +890,10 @@ export function RentaFormModal({
                   talla={values.pantalon}
                   codigo={values.saco}
                   colorVestido={values.chaleco}
-                  piezas={inventario}
+                  piezas={piezasSugerencia}
                   onChange={set('chaleco')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   sinRequisitoColor
                 />
                 <InventarioAutocomplete
@@ -881,9 +905,10 @@ export function RentaFormModal({
                   marca={values.marca}
                   talla={values.pantalon}
                   codigo={values.saco}
-                  piezas={inventario}
+                  piezas={piezasSugerencia}
                   onChange={set('marca')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   sinRequisitoColor
                 />
                 <InventarioAutocomplete
@@ -895,9 +920,10 @@ export function RentaFormModal({
                   marca={values.marca}
                   talla={values.pantalon}
                   codigo={values.saco}
-                  piezas={inventario}
+                  piezas={piezasSugerencia}
                   onChange={set('saco')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   sinRequisitoColor
                 />
                 <InventarioAutocomplete
@@ -909,9 +935,10 @@ export function RentaFormModal({
                   marca={values.marca}
                   talla={values.pantalon}
                   codigo={values.saco}
-                  piezas={inventario}
+                  piezas={piezasSugerencia}
                   onChange={set('pantalon')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   sinRequisitoColor
                 />
                 <Field
@@ -926,8 +953,9 @@ export function RentaFormModal({
           ) : (
             <>
               <p className="mb-3 text-xs text-gray-500">
-                Cada prenda (saco, chaleco, pantalón) se elige por separado. Puedes buscar por detalles
-                (ej: "TUX NEGRO") y se autocompleta marca y talla.
+                {sinInventario
+                  ? 'Venta y premier no descuentan inventario. Escribe la marca (Creativo, Antonio Uomo…) y se reconoce sola.'
+                  : 'Cada prenda (saco, chaleco, pantalón) se elige por separado. Puedes buscar por detalles (ej: "TUX NEGRO") y se autocompleta marca y talla.'}
               </p>
               <div className="space-y-3">
                 <FilaPieza
@@ -943,6 +971,7 @@ export function RentaFormModal({
                   onTalla={set('saco')}
                   onDetalles={set('detallesSaco')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                 />
                 <FilaPieza
                   titulo="Chaleco"
@@ -957,6 +986,7 @@ export function RentaFormModal({
                   onTalla={set('chaleco')}
                   onDetalles={set('detallesChaleco')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                 />
                 <FilaPieza
                   titulo="Pantalón"
@@ -971,6 +1001,7 @@ export function RentaFormModal({
                   onTalla={set('pantalon')}
                   onDetalles={set('detallesPantalon')}
                   onElegirPieza={aplicarPieza}
+                  usarInventario={!sinInventario}
                   usarCodigosNuevosPantalon={usarCodigosNuevosPantalon}
                 />
               </div>
@@ -994,10 +1025,10 @@ export function RentaFormModal({
           <button type="button" onClick={onClose} className="btn-secondary" disabled={guardando}>
             Cancelar
           </button>
-          <button type="submit" className="btn-primary" disabled={guardando || cargandoInventario}>
+          <button type="submit" className="btn-primary" disabled={guardando || (cargandoInventario && !sinInventario)}>
             {guardando
               ? 'Guardando…'
-              : cargandoInventario
+              : cargandoInventario && !sinInventario
                 ? 'Cargando inventario…'
                 : esEdicion
                   ? 'Guardar cambios'

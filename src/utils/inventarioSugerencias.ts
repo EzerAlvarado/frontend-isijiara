@@ -1,6 +1,7 @@
 import type { Pieza, TipoPieza, TipoPiezaVestido } from '../types/pieza'
-import { normalizarTipoVestido } from '../types/pieza'
+import { esTipoVestido, normalizarTipoVestido } from '../types/pieza'
 import { formatearPantalonTraje, tallaSinCodigo } from './pantalonCodigo'
+import { marcasEquivalentes, sugerenciasMarcaCatalogo } from './marcasCatalogo'
 
 function normalizar(s: string): string {
   return s.trim().toUpperCase()
@@ -34,7 +35,7 @@ function filtrarPool(
     if (p.tipo !== tipo) return false
     if (p.estatus === 'mantenimiento') return false
     if (color.trim() && !coloresCoinciden(p.color, color)) return false
-    if (marca.trim() && p.marca && normalizar(p.marca) !== normalizar(marca)) return false
+    if (marca.trim() && p.marca && !marcasEquivalentes(p.marca, marca)) return false
     if (tallaNorm && piezaValida(tallaNorm) && normalizar(p.talla) !== tallaNorm) return false
     return true
   })
@@ -49,27 +50,11 @@ export function sugerenciasMarca(
   texto: string,
   limite = 8,
 ): string[] {
-  const q = normalizar(texto)
   const pool = filtrarPool(piezas, tipo, color, '', talla.trim() ? talla : undefined)
-  const valores = new Set<string>()
-
-  for (const p of pool) {
-    const v = (p.marca ?? '').trim()
-    if (!v) continue
-    if (!q || normalizar(v).includes(q) || normalizar(v).startsWith(q)) {
-      valores.add(v.toUpperCase())
-    }
-  }
-
-  return [...valores]
-    .sort((a, b) => {
-      if (!q) return a.localeCompare(b, 'es')
-      const aStarts = a.startsWith(q)
-      const bStarts = b.startsWith(q)
-      if (aStarts !== bStarts) return aStarts ? -1 : 1
-      return a.localeCompare(b, 'es')
-    })
-    .slice(0, limite)
+  const delInventario = pool
+    .map((p) => (p.marca ?? '').trim().toUpperCase())
+    .filter(Boolean)
+  return sugerenciasMarcaCatalogo(texto, delInventario, limite, !esTipoVestido(tipo))
 }
 
 /** Valores únicos de talla para autocompletar según tipo, color y marca */

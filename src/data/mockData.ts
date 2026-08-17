@@ -489,12 +489,4 @@ export const TIPOS_PRENDA = ['Tuxedos', 'Trajes', 'Blazers']
 export const TALLAS_GENERAL = ['S', 'M', 'L', 'XL']
 export const TALLAS_SACO_CHALECO = ['34R', '36R', '36S', '38R', '40R', '42R', '44R', '46R']
 export const TALLAS_PANTALON = ['28R', '30R', '30S', '32R', '34R', '34W', '36R', '38R', '38W', '40R']
-export const MARCAS_INVENTARIO = [
-  'ANTONIO UOMO',
-  'BELLIO',
-  'RIZZA',
-  'RETRO PARIS',
-  'GINO VITALE',
-  'FERRECCI',
-  'GQ',
-]
+export { MARCAS_CATALOGO as MARCAS_INVENTARIO } from '../utils/marcasCatalogo'

@@ -13,6 +13,7 @@ import {
   sugerenciasMarca,
   sugerenciasTalla,
 } from '../../utils/inventarioSugerencias'
+import { reconocerMarca } from '../../utils/marcasCatalogo'
 import { esTipoVestido } from '../../types/pieza'
 
 export type ModoInventarioAutocomplete = 'marca' | 'talla' | 'color' | 'codigo' | 'colorVestido' | 'detalles'
@@ -30,6 +31,8 @@ interface InventarioAutocompleteProps {
   piezas: Pieza[]
   onChange: (valor: string) => void
   onElegirPieza?: (pieza: Pieza) => void
+  /** Si false, solo llena el texto (marca, talla…) y no amarra una pieza. */
+  usarInventario?: boolean
   /** Vestidos: no exige color antes de sugerir marca/talla */
   sinRequisitoColor?: boolean
   /** Trajes pantalón: formato talla#código en sugerencias */
@@ -71,6 +74,7 @@ export function InventarioAutocomplete({
   piezas,
   onChange,
   onElegirPieza,
+  usarInventario = true,
   sinRequisitoColor = false,
   usarCodigosNuevosPantalon = false,
 }: InventarioAutocompleteProps) {
@@ -107,21 +111,33 @@ export function InventarioAutocomplete({
   }, [modo, piezas, tipo, color, marca, talla, codigo, value, usarCodigosNuevosPantalon])
 
   const vincularPiezaTraje = (marcaValor: string, tallaValor: string) => {
-    if (!onElegirPieza || !piezaValida(tallaValor)) return
+    if (!usarInventario || !onElegirPieza || !piezaValida(tallaValor)) return
     const pieza = buscarPieza(piezas, tipo, color, marcaValor, tallaValor)
     if (pieza) onElegirPieza(pieza)
   }
 
-  const elegir = (valor: string) => {
-    const colorN = modo === 'color' ? valor : color
-    const marcaN = modo === 'marca' ? valor : marca
-    const tallaN = modo === 'talla' ? valor : talla
-    const codigoN = modo === 'codigo' ? valor : codigo
+  const canonizarMarca = (valor: string) => {
+    if (modo !== 'marca') return valor
+    return reconocerMarca(valor, piezas.map((p) => p.marca)) ?? valor
+  }
 
-    onChange(valor)
+  const elegir = (valor: string) => {
+    const elegido = canonizarMarca(valor)
+    const colorN = modo === 'color' ? elegido : color
+    const marcaN = modo === 'marca' ? elegido : marca
+    const tallaN = modo === 'talla' ? elegido : talla
+    const codigoN = modo === 'codigo' ? elegido : codigo
+
+    onChange(elegido)
+
+    if (!usarInventario) {
+      setAbierto(false)
+      setActivo(-1)
+      return
+    }
 
     if (modo === 'detalles') {
-      const pieza = buscarPiezaPorDetalles(piezas, tipo, valor)
+      const pieza = buscarPiezaPorDetalles(piezas, tipo, elegido)
       if (pieza && onElegirPieza) {
         onElegirPieza(pieza)
       }
@@ -133,9 +149,9 @@ export function InventarioAutocomplete({
         onElegirPieza,
       )
     } else if (modo === 'talla') {
-      vincularPiezaTraje(marca, valor)
+      vincularPiezaTraje(marca, elegido)
     } else if (modo === 'marca' && talla.trim()) {
-      vincularPiezaTraje(valor, talla)
+      vincularPiezaTraje(elegido, talla)
     }
 
     setAbierto(false)
@@ -186,7 +202,13 @@ export function InventarioAutocomplete({
             setActivo(-1)
           }}
           onFocus={() => setAbierto(true)}
-          onBlur={() => setTimeout(() => setAbierto(false), 150)}
+          onBlur={() => {
+            if (modo === 'marca') {
+              const canon = canonizarMarca(value)
+              if (canon !== value) onChange(canon)
+            }
+            setTimeout(() => setAbierto(false), 150)
+          }}
           onKeyDown={(e) => {
             if (!abierto || !sugerencias.length) return
             if (e.key === 'ArrowDown') {

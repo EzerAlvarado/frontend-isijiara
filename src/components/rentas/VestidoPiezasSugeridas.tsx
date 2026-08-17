@@ -63,6 +63,7 @@ export function SelectorTipoOperacion({
   const avisoPieza = esVestidos
     ? 'Completa color, marca o talla con una sugerencia del inventario para ver los precios.'
     : 'Elige el saco del inventario para ver los precios sugeridos.'
+  const ocultarAvisoInventario = value === 'venta' || value === 'premier'
   const cols = opciones.length >= 6 ? 'lg:grid-cols-3 xl:grid-cols-6' : 'lg:grid-cols-4'
 
   return (
@@ -70,7 +71,7 @@ export function SelectorTipoOperacion({
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-700">
         Tipo de operación *
       </p>
-      {!pieza && (
+      {!pieza && !ocultarAvisoInventario && (
         <p className="mb-2 text-[11px] text-amber-700">{avisoPieza}</p>
       )}
       <div className={`grid gap-2 sm:grid-cols-2 ${cols}`}>

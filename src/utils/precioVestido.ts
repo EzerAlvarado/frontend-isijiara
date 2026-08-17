@@ -24,6 +24,11 @@ export function esPrecioOperacionManual(tipo: TipoOperacionVestido): boolean {
   return tipo === 'sesion_fotos'
 }
 
+/** Venta y premier se capturan a mano: no amarran ni ocupan inventario. */
+export function esOperacionSinInventario(tipo: TipoOperacionVestido): boolean {
+  return tipo === 'venta' || tipo === 'premier'
+}
+
 export function calcularPrecioVestido(
   pieza: Pieza | undefined,
   tipo: TipoOperacionVestido,

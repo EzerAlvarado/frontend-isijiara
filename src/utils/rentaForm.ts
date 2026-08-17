@@ -7,6 +7,7 @@ import {
   tipoOperacionDesdeRenta,
   estatusFilaDesdeTipoOperacion,
   valorCamisaVestido,
+  esOperacionSinInventario,
   type TipoOperacionVestido,
 } from './precioVestido'
 import { horarioDesdeInput, horarioParaInput } from './horario'
@@ -16,6 +17,7 @@ import {
   isoAInputDatetime,
 } from './fechaHoraRegistro'
 import { aMayusculas } from './mayusculas'
+import { reconocerMarca } from './marcasCatalogo'
 import { calcularMultaAutomatica } from './multa'
 import {
   calcularPagoEfectivo,
@@ -236,14 +238,15 @@ export function formularioAPayload(
   const semana =
     semanaKeyDesdeFechaSalida(values.fechaSalida) || values.semanaInicio || hoyISO()
 
-  let piezaSacoId = values.piezaSacoId.trim() || null
-  let piezaChalecoId = values.piezaChalecoId.trim() || null
-  let piezaPantalonId = values.piezaPantalonId.trim() || null
+  const sinInventario = esOperacionSinInventario(values.tipoOperacion)
+  let piezaSacoId = sinInventario ? null : values.piezaSacoId.trim() || null
+  let piezaChalecoId = sinInventario ? null : values.piezaChalecoId.trim() || null
+  let piezaPantalonId = sinInventario ? null : values.piezaPantalonId.trim() || null
 
   if (lineaNegocio === 'vestidos') {
     piezaChalecoId = null
     piezaPantalonId = null
-    if (!piezaSacoId) {
+    if (!sinInventario && !piezaSacoId) {
       const vestido = buscarPiezaVestido(
         piezasInventario,
         values.categoriaVestido,
@@ -254,7 +257,7 @@ export function formularioAPayload(
       )
       if (vestido) piezaSacoId = vestido.id
     }
-  } else {
+  } else if (!sinInventario) {
     const resueltas = resolverPiezasDesdeFormulario(
       piezasInventario,
       { color: values.color, marca: values.marca, talla: values.saco },
@@ -331,11 +334,11 @@ export function formularioAPayload(
     horario: celda(horarioDesdeInput(values.horario)),
     detalles: celda(values.detalles),
     ajustes: aMayusculas(values.ajustes.trim()),
-    marca: aMayusculas(values.marca.trim()),
+    marca: reconocerMarca(values.marca) ?? aMayusculas(values.marca.trim()),
     colorChaleco: aMayusculas(values.colorChaleco.trim()),
     colorPantalon: aMayusculas(values.colorPantalon.trim()),
-    marcaChaleco: aMayusculas(values.marcaChaleco.trim()),
-    marcaPantalon: aMayusculas(values.marcaPantalon.trim()),
+    marcaChaleco: reconocerMarca(values.marcaChaleco) ?? aMayusculas(values.marcaChaleco.trim()),
+    marcaPantalon: reconocerMarca(values.marcaPantalon) ?? aMayusculas(values.marcaPantalon.trim()),
     detallesSaco: aMayusculas(values.detallesSaco.trim()),
     detallesChaleco: aMayusculas(values.detallesChaleco.trim()),
     detallesPantalon: aMayusculas(values.detallesPantalon.trim()),
