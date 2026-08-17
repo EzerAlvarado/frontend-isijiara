@@ -9,13 +9,16 @@ import {
   type PedidoPayload,
 } from '../api/pedidos'
 import { Modal } from '../components/ui/Modal'
+import { FechaMxInput } from '../components/ui/FechaMxInput'
 import { aMayusculas } from '../utils/mayusculas'
 import {
   ANIO_PEDIDO_DEFAULT,
   ESTATUS_PEDIDO,
+  FECHA_ENCARGAR_YA,
   MESES_PEDIDO,
   SERVICIOS_PEDIDO,
   TIPOS_PEDIDO,
+  esFechaEncargarYa,
   aniosPedidoOpciones,
   etiquetaGrupoPedido,
   etiquetaTipoPedido,
@@ -335,7 +338,13 @@ export function PedidosPage() {
                           ?.label ?? 'VENTA'}
                       </td>
                       <td className={`px-3 py-2 text-xs font-semibold uppercase ${colorTxt}`}>
-                        {p.fechaEntrega || '—'}
+                        {esFechaEncargarYa(p.fechaEntrega) ? (
+                          <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900">
+                            {FECHA_ENCARGAR_YA}
+                          </span>
+                        ) : (
+                          p.fechaEntrega || '—'
+                        )}
                       </td>
                       <td className={`max-w-[260px] px-3 py-2 text-xs ${colorTxt}`}>
                         {p.comentarios || '—'}
@@ -444,19 +453,44 @@ export function PedidosPage() {
                 ))}
               </select>
             </label>
-            <label className="block">
-              <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
-                Fecha de entrega
-              </span>
-              <input
-                className="input-field uppercase"
-                value={form.fechaEntrega}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, fechaEntrega: aMayusculas(e.target.value) }))
+            <div className="block">
+              {esFechaEncargarYa(form.fechaEntrega) ? (
+                <label className="block">
+                  <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
+                    Fecha de entrega
+                  </span>
+                  <div className="input-field border-amber-300 bg-amber-50 font-bold text-amber-950">
+                    {FECHA_ENCARGAR_YA}
+                  </div>
+                  <span className="mt-0.5 block text-[11px] text-gray-500">
+                    Pedido urgente, sin fecha fija. Quita Encargar ya para elegir un día.
+                  </span>
+                </label>
+              ) : (
+                <FechaMxInput
+                  label="Fecha de entrega"
+                  value={form.fechaEntrega}
+                  onChange={(v) => setForm((f) => ({ ...f, fechaEntrega: v }))}
+                  hint="Calendario o escribe dd/mm/aaaa"
+                />
+              )}
+              <button
+                type="button"
+                className={`mt-2 w-full rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide ${
+                  esFechaEncargarYa(form.fechaEntrega)
+                    ? 'border-amber-400 bg-amber-100 text-amber-950'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-amber-300 hover:bg-amber-50'
+                }`}
+                onClick={() =>
+                  setForm((f) => ({
+                    ...f,
+                    fechaEntrega: esFechaEncargarYa(f.fechaEntrega) ? '' : FECHA_ENCARGAR_YA,
+                  }))
                 }
-                placeholder="Ej. 31 DE AGOSTO / ENCARGAR YA"
-              />
-            </label>
+              >
+                {esFechaEncargarYa(form.fechaEntrega) ? 'Quitar encargar ya' : 'Encargar ya'}
+              </button>
+            </div>
             <label className="block">
               <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
                 Mes (grupo)

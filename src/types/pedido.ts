@@ -72,6 +72,12 @@ export type MesPedido = (typeof MESES_PEDIDO)[number]
 
 export const ANIO_PEDIDO_DEFAULT = 2026
 
+export const FECHA_ENCARGAR_YA = 'ENCARGAR YA'
+
+export function esFechaEncargarYa(valor: string): boolean {
+  return valor.trim().toLocaleUpperCase('es-MX') === FECHA_ENCARGAR_YA
+}
+
 /** Años disponibles en el selector (actual ± margen). */
 export function aniosPedidoOpciones(anioExtra?: number): number[] {
   const base = [2025, 2026, 2027, 2028, 2029, 2030]
