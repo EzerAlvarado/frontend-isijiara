@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { AlertCircle, Archive, CheckCircle2, RefreshCw } from 'lucide-react'
 import {
   esDevolucionPendiente,
+  fechaLimiteDisplay,
   fechaLimiteDevolucionDisplay,
   fetchDevoluciones,
   updateDevolucion,
@@ -250,6 +251,7 @@ export function DevolucionesPage() {
                   <th className="px-4 py-3">Renta</th>
                   <th className="px-4 py-3">Cliente</th>
                   <th className="px-4 py-3">Prenda</th>
+                  <th className="px-4 py-3">Entrega esperada</th>
                   <th className="px-4 py-3">Fecha salida</th>
                   <th className="px-4 py-3">Fecha límite</th>
                   <th className="px-4 py-3">Estatus</th>
@@ -281,7 +283,12 @@ export function DevolucionesPage() {
                           <span className="ml-1 text-xs text-gray-500">(#{d.prendaId})</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">{d.fechaSalioReal || '—'}</td>
+                      <td className="px-4 py-3">
+                        {d.fechaEntrega ? fechaLimiteDisplay(d.fechaEntrega) : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {d.fechaSalioReal ? fechaLimiteDisplay(d.fechaSalioReal) : '—'}
+                      </td>
                       <td className="px-4 py-3">{fechaLimiteDevolucionDisplay(d)}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={d.estatus} variant="devolucion" />

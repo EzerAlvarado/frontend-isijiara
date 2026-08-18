@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, RefreshCw } from 'lucide-react'
 import {
+  fechaLimiteDisplay,
   fechaLimiteDevolucionDisplay,
   fetchDevoluciones,
 } from '../api/devoluciones'
@@ -253,6 +254,7 @@ export function ArchivoDevolucionesPage() {
                     <th className="px-4 py-3">Renta</th>
                     <th className="px-4 py-3">Cliente</th>
                     <th className="px-4 py-3">Prenda</th>
+                    <th className="px-4 py-3">Entrega esperada</th>
                     <th className="px-4 py-3">Fecha límite</th>
                     <th className="px-4 py-3">Estatus</th>
                     <th className="px-4 py-3">Multa</th>
@@ -271,6 +273,9 @@ export function ArchivoDevolucionesPage() {
                           {d.prendaId && (
                             <span className="ml-1 text-xs text-gray-500">(#{d.prendaId})</span>
                           )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {d.fechaEntrega ? fechaLimiteDisplay(d.fechaEntrega) : '—'}
                         </td>
                         <td className="px-4 py-3">{fechaLimiteDevolucionDisplay(d)}</td>
                         <td className="px-4 py-3">

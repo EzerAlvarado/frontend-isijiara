@@ -21,6 +21,7 @@ function mapDevolucion(raw: DevolucionApi): Devolucion {
     prendaId: raw.prendaId != null ? String(raw.prendaId) : null,
     penalizacion: Number(raw.penalizacion),
     fechaSalioReal: raw.fechaSalioReal ?? null,
+    fechaEntrega: raw.fechaEntrega ?? '',
     multaPerdonada: Boolean(raw.multaPerdonada),
     cargoDanos: raw.cargoDanos != null ? Number(raw.cargoDanos) : 0,
     notaDanos: raw.notaDanos ?? '',
