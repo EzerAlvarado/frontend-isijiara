@@ -222,16 +222,6 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                 {fmtMontoConDlls(calcularResta(doc))}
               </span>
             </div>
-            {(doc.feriaMxn ?? 0) > 0 && (
-              <div className="grid grid-cols-[1fr_1fr] border-t border-black">
-                <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
-                  Feria
-                </span>
-                <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
-                  {fmt(doc.feriaMxn!)}
-                </span>
-              </div>
-            )}
           </div>
 
           <div className="border border-black px-2 py-1 text-center">
