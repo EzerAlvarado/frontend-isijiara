@@ -207,7 +207,7 @@ export interface Devolucion {
   penalizacion: number
   /** Fecha real de recogida (desde la renta), si ya se marcó salió */
   fechaSalioReal?: string | null
-  /** Fecha de entrega esperada (cuándo deben dar la prenda al cliente) */
+  /** Fecha de entrega del formulario de renta (columna Entrega) */
   fechaEntrega?: string
   multaPerdonada?: boolean
   cargoDanos?: number

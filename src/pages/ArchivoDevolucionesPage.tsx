@@ -254,7 +254,7 @@ export function ArchivoDevolucionesPage() {
                     <th className="px-4 py-3">Renta</th>
                     <th className="px-4 py-3">Cliente</th>
                     <th className="px-4 py-3">Prenda</th>
-                    <th className="px-4 py-3">Entrega esperada</th>
+                    <th className="px-4 py-3">Entrega</th>
                     <th className="px-4 py-3">Fecha límite</th>
                     <th className="px-4 py-3">Estatus</th>
                     <th className="px-4 py-3">Multa</th>
