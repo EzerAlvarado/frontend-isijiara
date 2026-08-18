@@ -2,6 +2,7 @@ import type { Renta } from '../../types'
 import { EncabezadoIsijara } from './reciboStyles'
 import { fechaLarga } from '../../utils/documentoRenta'
 import { totalCobrarRenta, restanteRenta } from '../../utils/pagoRenta'
+import { fmtMontoConDlls } from '../../utils/tipoCambio'
 
 interface ReciboAbonoDocumentProps {
   renta: Renta
@@ -141,31 +142,41 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
 
       {/* Resumen */}
       <div className="mt-4 flex justify-end">
-        <div className="w-64 border border-gray-900">
+        <div className="w-72 border border-gray-900">
           <div className="flex border-b border-gray-900">
             <span className="flex-1 border-r border-gray-900 bg-gray-100 px-2 py-1 font-bold">
-              Total a Pagar
+              Total $
             </span>
-            <span className="w-28 px-2 py-1 text-right font-bold">${fmt(totalCobrar)}</span>
+            <span className="w-36 px-2 py-1 text-right text-[10px] font-bold leading-tight">
+              {fmtMontoConDlls(totalCobrar)}
+            </span>
           </div>
           <div className="flex border-b border-gray-900">
             <span className="flex-1 border-r border-gray-900 bg-gray-100 px-2 py-1 font-bold">
               Anticipo
             </span>
-            <span className="w-28 px-2 py-1 text-right">${fmt(anticipo)}</span>
+            <span className="w-36 px-2 py-1 text-right text-[10px] leading-tight">
+              {fmtMontoConDlls(anticipo)}
+            </span>
           </div>
           <div className="flex border-b border-gray-900">
             <span className="flex-1 border-r border-gray-900 bg-gray-100 px-2 py-1 font-bold">
               Total Abonado
             </span>
-            <span className="w-28 px-2 py-1 text-right">${fmt(totalAbonado)}</span>
+            <span className="w-36 px-2 py-1 text-right text-[10px] leading-tight">
+              {fmtMontoConDlls(totalAbonado)}
+            </span>
           </div>
           <div className={`flex ${pagado ? 'bg-green-100' : ''}`}>
             <span className="flex-1 border-r border-gray-900 bg-gray-100 px-2 py-1 font-bold">
-              Saldo Restante
+              Restante
             </span>
-            <span className={`w-28 px-2 py-1 text-right font-bold ${pagado ? 'text-green-700' : 'text-red-700'}`}>
-              {pagado ? 'PAGADO' : `$${fmt(restante)}`}
+            <span
+              className={`w-36 px-2 py-1 text-right text-[10px] font-bold leading-tight ${
+                pagado ? 'text-green-700' : 'text-red-700'
+              }`}
+            >
+              {pagado ? 'PAGADO' : fmtMontoConDlls(restante)}
             </span>
           </div>
         </div>

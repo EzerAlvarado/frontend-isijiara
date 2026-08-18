@@ -30,10 +30,10 @@ export const COLUMNAS_PRENDA_TRAJES: ColumnaRentaPrenda[] = [
 ]
 
 export const COLUMNAS_PRENDA_VESTIDOS: ColumnaRentaPrenda[] = [
-  { kind: 'celda', key: 'color', label: 'Color mero', minW: 'min-w-[100px]' },
-  { kind: 'celda', key: 'chaleco', label: 'Color vestido', minW: 'min-w-[140px]' },
   { kind: 'texto', key: 'marca', label: 'Marca', minW: 'min-w-[100px]' },
   { kind: 'celda', key: 'saco', label: 'Código', minW: 'min-w-[72px]' },
+  { kind: 'celda', key: 'chaleco', label: 'Color vestido', minW: 'min-w-[140px]' },
+  { kind: 'celda', key: 'color', label: 'Color mero', minW: 'min-w-[100px]' },
   { kind: 'celda', key: 'pantalon', label: 'Talla', minW: 'min-w-[56px]' },
   { kind: 'celda', key: 'accesorio', label: 'Accesorios', minW: 'min-w-[140px]' },
 ]

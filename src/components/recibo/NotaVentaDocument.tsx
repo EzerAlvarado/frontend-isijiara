@@ -1,6 +1,7 @@
 import type { DocumentoRenta } from '../../types/documentoRenta'
 import { TERMINOS_RENTA } from '../../types/documentoRenta'
 import { fmtAnticipo, fmtMontoConDlls, getTipoCambioMxUsd } from '../../utils/tipoCambio'
+import { calcularResta } from '../../utils/documentoRenta'
 import type { MetodoPago } from '../../types'
 import { EncabezadoIsijara } from './reciboStyles'
 import { PagareSection } from './PagareSection'
@@ -211,6 +212,14 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                       .filter(Boolean)
                       .join(' + ')
                   : fmtAnticipo(doc.anticipo, metodoPago)}
+              </span>
+            </div>
+            <div className="grid grid-cols-[1fr_1fr] border-t border-black">
+              <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
+                Restante
+              </span>
+              <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
+                {fmtMontoConDlls(calcularResta(doc))}
               </span>
             </div>
             {(doc.feriaMxn ?? 0) > 0 && (
