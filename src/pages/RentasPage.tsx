@@ -35,6 +35,7 @@ import {
 import {
   FILAS_VACIAS_POR_SEMANA,
   MESES_VENTANA_ADELANTE,
+  combinarSemanas,
   esRentaFutura,
   esRentaPasada,
   estaEnVentanaActual,
@@ -108,10 +109,13 @@ export function RentasPage() {
     cargarRentas()
   }, [cargarRentas])
 
+  const buscando = search.trim().length > 0
+
   const rentasFiltradas = useMemo(() => {
-    const q = search.toLowerCase()
+    const q = search.trim().toLowerCase()
     return rentas.filter((r) => {
-      if (!estaEnVentanaActual(r.fechaSalida)) return false
+      // Sin búsqueda: solo la ventana actual. Con búsqueda: archivo + lejanas también.
+      if (!q && !estaEnVentanaActual(r.fechaSalida)) return false
       if (!rentaCoincideTab(r, tabActiva, lineaNegocio)) return false
       if (!q) return true
       const texto = [
@@ -120,6 +124,8 @@ export function RentasPage() {
         r.fechaSalida,
         r.fechaRegreso,
         r.marca,
+        r.ajustes,
+        r.telefono,
         ...camposCelda.map((c) => r[c].valor),
       ]
         .join(' ')
@@ -138,23 +144,30 @@ export function RentasPage() {
     [rentas],
   )
 
+  const semanasBusqueda = useMemo(() => {
+    if (!buscando) return semanas
+    const keys = rentasFiltradas.map(
+      (r) => semanaKeyDesdeFechaSalida(r.fechaSalida) || r.semanaInicio,
+    )
+    return combinarSemanas(semanas, keys)
+  }, [buscando, semanas, rentasFiltradas])
+
   const rentasPorSemana = useMemo(() => {
     const map = new Map<string, Renta[]>()
-    for (const s of semanas) map.set(s.key, [])
+    for (const s of semanasBusqueda) map.set(s.key, [])
     for (const r of rentasFiltradas) {
       const key = semanaKeyDesdeFechaSalida(r.fechaSalida) || r.semanaInicio
       const lista = map.get(key)
       if (lista) lista.push(r)
+      else if (key) map.set(key, [r])
     }
     return map
-  }, [semanas, rentasFiltradas])
-
-  const buscando = search.trim().length > 0
+  }, [semanasBusqueda, rentasFiltradas])
 
   const semanasVisibles = useMemo(() => {
     if (!buscando) return semanas
-    return semanas.filter((s) => (rentasPorSemana.get(s.key)?.length ?? 0) > 0)
-  }, [semanas, rentasPorSemana, buscando])
+    return semanasBusqueda.filter((s) => (rentasPorSemana.get(s.key)?.length ?? 0) > 0)
+  }, [semanas, semanasBusqueda, rentasPorSemana, buscando])
 
   const total = rentasFiltradas.reduce(
     (sum, r) => (r.cancelada ? sum : sum + r.fondo + multaEfectiva(r)),
@@ -502,24 +515,33 @@ export function RentasPage() {
               {subtituloTabRentas(tabActiva)}
               {!cargando && (
                 <span className="ml-2 font-normal text-gray-500">
-                  ({rentasFiltradas.length} en ventana
-                  {rentasArchivadas > 0 && (
+                  {buscando ? (
                     <>
-                      {' · '}
-                      <Link to={rutaArchivo} className="text-brand-600 hover:underline">
-                        {rentasArchivadas} en archivo
-                      </Link>
+                      ({rentasFiltradas.length} coincidencia
+                      {rentasFiltradas.length === 1 ? '' : 's'} · ventana, archivo y fechas lejanas)
+                    </>
+                  ) : (
+                    <>
+                      ({rentasFiltradas.length} en ventana
+                      {rentasArchivadas > 0 && (
+                        <>
+                          {' · '}
+                          <Link to={rutaArchivo} className="text-brand-600 hover:underline">
+                            {rentasArchivadas} en archivo
+                          </Link>
+                        </>
+                      )}
+                      {rentasFuturasCount > 0 && (
+                        <>
+                          {' · '}
+                          <Link to={rutaFuturas} className="text-brand-600 hover:underline">
+                            {rentasFuturasCount} fechas lejanas
+                          </Link>
+                        </>
+                      )}
+                      )
                     </>
                   )}
-                  {rentasFuturasCount > 0 && (
-                    <>
-                      {' · '}
-                      <Link to={rutaFuturas} className="text-brand-600 hover:underline">
-                        {rentasFuturasCount} fechas lejanas
-                      </Link>
-                    </>
-                  )}
-                  )
                 </span>
               )}
             </h3>
@@ -555,9 +577,9 @@ export function RentasPage() {
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
             <p className="text-xs text-gray-500">
               {buscando
-                ? `${rentasFiltradas.length} coincidencias · solo semanas con resultados`
+                ? `${rentasFiltradas.length} coincidencias · incluye archivo y fechas lejanas`
                 : `${semanas.length} semanas en ventana · las vacías muestran ${FILAS_VACIAS_POR_SEMANA} filas en blanco`}
-              {rentasArchivadas > 0 && (
+              {!buscando && rentasArchivadas > 0 && (
                 <>
                   {' · '}
                   <Link to={rutaArchivo} className="text-brand-600 hover:underline">
@@ -565,7 +587,7 @@ export function RentasPage() {
                   </Link>
                 </>
               )}
-              {rentasFuturasCount > 0 && (
+              {!buscando && rentasFuturasCount > 0 && (
                 <>
                   {' · '}
                   <Link to={rutaFuturas} className="text-brand-600 hover:underline">

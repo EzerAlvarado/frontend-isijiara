@@ -98,10 +98,18 @@ export async function fetchRentas(params?: {
   if (params?.semana_inicio) search.set('semana_inicio', params.semana_inicio)
   if (params?.categoria_vestido) search.set('categoria_vestido', params.categoria_vestido)
   const query = search.toString()
-  const data = await apiRequest<PaginatedResponse<RentaApi>>(
-    `/rentas/${query ? `?${query}` : ''}`,
-  )
-  return data.results.map(mapRenta)
+  const todas: Renta[] = []
+  let page = 1
+
+  while (true) {
+    const pageQuery = query ? `${query}&page=${page}` : `page=${page}`
+    const data = await apiRequest<PaginatedResponse<RentaApi>>(`/rentas/?${pageQuery}`)
+    todas.push(...data.results.map(mapRenta))
+    if (!data.next) break
+    page += 1
+  }
+
+  return todas
 }
 
 export async function createRenta(payload: Omit<Renta, 'id'>): Promise<Renta> {
