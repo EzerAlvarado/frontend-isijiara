@@ -46,8 +46,17 @@ export function marcasEquivalentes(a: string, b: string): boolean {
   const y = claveMarca(b)
   if (!x || !y) return false
   if (x === y) return true
-  if (x.includes(y) || y.includes(x)) return true
-  const tope = Math.max(x.length, y.length) >= 6 ? 2 : 1
+
+  // Subcadena solo si el lado corto tiene ≥3 letras (evitar "G" ≈ "GQ")
+  const corta = x.length <= y.length ? x : y
+  const larga = x.length <= y.length ? y : x
+  if (corta.length >= 3 && larga.includes(corta)) return true
+
+  // Marcas cortas (GQ, PQ…): sin fuzzy — distancia 1 convertía "PQ" → "GQ"
+  const maxLen = Math.max(x.length, y.length)
+  if (maxLen <= 3) return false
+
+  const tope = maxLen >= 6 ? 2 : 1
   return distancia(x, y) <= tope
 }
 
