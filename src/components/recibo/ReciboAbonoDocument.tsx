@@ -3,6 +3,7 @@ import { EncabezadoIsijara } from './reciboStyles'
 import { fechaLarga } from '../../utils/documentoRenta'
 import { totalCobrarRenta, restanteRenta } from '../../utils/pagoRenta'
 import { fmtMontoConDlls } from '../../utils/tipoCambio'
+import { esPagoEnUsd } from '../../utils/metodoPago'
 
 interface ReciboAbonoDocumentProps {
   renta: Renta
@@ -30,7 +31,8 @@ function etiquetaMetodoPago(metodo: string): string {
     pesos: 'Pesos',
     dlls: 'Dólares',
     mixto: 'Mixto',
-    tarjeta: 'Tarjeta',
+    bbva: 'BBVA',
+    zelle: 'Zelle',
     transferencia: 'Transferencia',
   }
   return map[metodo] || metodo
@@ -127,7 +129,7 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
                   {etiquetaMetodoPago(abono.metodoPago)}
                 </td>
                 <td className="border-r border-gray-200 px-2 py-1 text-right">
-                  {abono.metodoPago === 'dlls'
+                  {esPagoEnUsd(abono.metodoPago)
                     ? `$${fmt(abono.monto)} USD`
                     : abono.metodoPago === 'mixto'
                       ? `$${fmt(abono.pagoEfectivoMxn ?? 0)} + $${fmt(abono.pagoEfectivoUsd ?? 0)} USD`

@@ -1,6 +1,7 @@
 import type { Renta } from '../types'
 import { multaEfectiva } from './multa'
 import { anticipoEnPesos, getTipoCambioMxUsd } from './tipoCambio'
+import { esPagoEnUsd } from './metodoPago'
 
 export function totalCobrarRenta(renta: Renta): number {
   if (renta.totalCobrar != null) return renta.totalCobrar
@@ -13,7 +14,7 @@ export function totalPagadoRenta(renta: Renta): number {
   const mxn = renta.pagoEfectivoMxn ?? 0
   const usd = renta.pagoEfectivoUsd ?? 0
   if (
-    (renta.metodoPago === 'mixto' || renta.metodoPago === 'dlls') &&
+    (renta.metodoPago === 'mixto' || esPagoEnUsd(renta.metodoPago)) &&
     (mxn > 0 || usd > 0)
   ) {
     const tc = getTipoCambioMxUsd()

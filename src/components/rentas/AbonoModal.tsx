@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { MetodoPago, Renta } from '../../types'
 import { Modal } from '../ui/Modal'
-import { METODOS_PAGO } from '../../utils/metodoPago'
+import { METODOS_PAGO, esPagoEnUsd } from '../../utils/metodoPago'
 import { restanteRenta, totalCobrarRenta } from '../../utils/pagoRenta'
 import {
   calcularPagoEfectivo,
@@ -9,6 +9,7 @@ import {
   fmtMoneyMxn,
   getTipoCambioMxUsd,
   inferirMetodoEfectivo,
+  pesosADolares,
 } from '../../utils/tipoCambio'
 
 interface AbonoModalProps {
@@ -34,6 +35,7 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
   const saldo = renta ? restanteRenta(renta) : 0
   const total = renta ? totalCobrarRenta(renta) : 0
   const esEfectivo = esPagoEfectivo(metodoPago)
+  const abonoEnUsd = esPagoEnUsd(metodoPago)
 
   const pagoCalculado = useMemo(() => {
     if (!esEfectivo) return null
@@ -78,8 +80,13 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
           setError('El monto debe ser mayor a cero.')
           return
         }
-        if (valor > saldo + 0.01) {
-          setError(`El abono no puede exceder el saldo pendiente (${fmtMoneyMxn(saldo)}).`)
+        const limite = abonoEnUsd ? pesosADolares(saldo) : saldo
+        if (valor > limite + 0.01) {
+          setError(
+            abonoEnUsd
+              ? `El abono no puede exceder el saldo pendiente (${pesosADolares(saldo).toFixed(2)} USD).`
+              : `El abono no puede exceder el saldo pendiente (${fmtMoneyMxn(saldo)}).`,
+          )
           return
         }
         await onSubmit({ metodoPago, monto: valor })
@@ -195,18 +202,23 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
         ) : (
           <label className="block">
             <span className="mb-1 block text-xs font-semibold uppercase text-gray-600">
-              Monto $ MXN
+              {abonoEnUsd ? 'Monto $ USD' : 'Monto $ MXN'}
             </span>
             <input
               type="number"
               className="input-field"
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              min={1}
-              max={saldo}
-              step={1}
+              min={0.01}
+              max={abonoEnUsd ? pesosADolares(saldo) : saldo}
+              step={abonoEnUsd ? 0.01 : 1}
               required
             />
+            {abonoEnUsd && (
+              <span className="mt-1 block text-xs text-gray-500">
+                Saldo pendiente: {pesosADolares(saldo).toFixed(2)} USD ({fmtMoneyMxn(saldo)} MXN)
+              </span>
+            )}
           </label>
         )}
 

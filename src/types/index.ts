@@ -42,7 +42,7 @@ export type EstatusInventario =
   | 'en_ajustes'
   | 'listo_para_entregar'
 
-export type MetodoPago = 'pesos' | 'dlls' | 'mixto' | 'bbva' | 'zelle'
+export type MetodoPago = 'pesos' | 'dlls' | 'mixto' | 'bbva' | 'zelle' | 'transferencia'
 
 export type TipoEntrega = 'recoger' | 'premier'
 

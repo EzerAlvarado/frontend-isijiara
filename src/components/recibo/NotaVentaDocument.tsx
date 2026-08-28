@@ -15,15 +15,17 @@ function fmt(n: number) {
   return n.toFixed(2)
 }
 
+function pagoEnUsd(formaPago: string): boolean {
+  const f = formaPago.toUpperCase()
+  return f === 'DLLS' || f === 'ZELLE'
+}
+
 export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDocumentProps) {
   const etiquetaOperacion = doc.etiquetaOperacion || 'Renta'
   const metodoPago = (doc.metodoPago ?? 'pesos') as MetodoPago
   const totalPagos = doc.pagos.reduce(
     (s, p) =>
-      s +
-      (p.formaPago.toUpperCase() === 'DLLS'
-        ? p.monto * getTipoCambioMxUsd()
-        : p.monto),
+      s + (pagoEnUsd(p.formaPago) ? p.monto * getTipoCambioMxUsd() : p.monto),
     0,
   )
 
@@ -98,7 +100,7 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                   {p.fecha}
                 </div>
                 <div className="border-r border-black/30 px-0.5 py-0.5 text-right">
-                  {p.formaPago.toUpperCase() === 'DLLS' ? `${fmt(p.monto)} USD` : fmt(p.monto)}
+                  {pagoEnUsd(p.formaPago) ? `${fmt(p.monto)} USD` : fmt(p.monto)}
                 </div>
                 <div className="px-0.5 py-0.5 text-center">{p.formaPago}</div>
               </div>

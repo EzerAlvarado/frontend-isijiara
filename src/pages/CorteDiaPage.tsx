@@ -148,7 +148,7 @@ export function CorteDiaPage() {
           color: 'text-amber-700 bg-amber-50',
         },
         {
-          label: 'Ingresos BBVA / Zelle',
+          label: 'Ingresos BBVA / Zelle / Transferencia',
           value: resumen.ingresosTarjeta,
           icon: CreditCard,
           color: 'text-blue-600 bg-blue-50',

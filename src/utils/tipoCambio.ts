@@ -1,4 +1,5 @@
 import type { MetodoPago } from '../types'
+import { esPagoEnUsd } from './metodoPago'
 
 export interface CalculoPagoEfectivo {
   totalCobrar: number
@@ -90,7 +91,7 @@ export function dolaresParaCubrirPesos(pesos: number): number {
 
 /** Convierte el anticipo a pesos según cómo se cobró */
 export function anticipoEnPesos(anticipo: number, metodoPago: MetodoPago = 'pesos'): number {
-  if (metodoPago === 'dlls') return dllsAPesos(anticipo)
+  if (esPagoEnUsd(metodoPago)) return dllsAPesos(anticipo)
   return anticipo
 }
 
@@ -133,7 +134,7 @@ export function fmtMoneyMxn(n: number): string {
 /** Muestra anticipo según moneda del método de pago */
 export function fmtAnticipo(anticipo: number, metodoPago: MetodoPago = 'pesos'): string {
   if (!anticipo) return '0'
-  if (metodoPago === 'dlls') {
+  if (esPagoEnUsd(metodoPago)) {
     const usd = Math.round(anticipo * 100) / 100
     const mxn = Math.round(dllsAPesos(anticipo))
     return `${usd} DLLS (${mxn} MXN)`
@@ -145,5 +146,5 @@ export function fmtAnticipo(anticipo: number, metodoPago: MetodoPago = 'pesos'):
 }
 
 export function esAnticipoDlls(metodoPago: MetodoPago | undefined): boolean {
-  return metodoPago === 'dlls'
+  return esPagoEnUsd(metodoPago)
 }

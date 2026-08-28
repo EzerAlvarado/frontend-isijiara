@@ -14,7 +14,7 @@ import { sumarDiasFecha } from '../../utils/semanasRentas'
 import { calcularMultaAutomatica, getMultaPorDia } from '../../utils/multa'
 import { aMayusculas } from '../../utils/mayusculas'
 import { semanaKeyDesdeFechaSalida } from '../../utils/semanasRentas'
-import { METODOS_PAGO } from '../../utils/metodoPago'
+import { METODOS_PAGO, esPagoEnUsd } from '../../utils/metodoPago'
 import type { MetodoPago } from '../../types'
 import {
   calcularPagoEfectivo,
@@ -362,6 +362,7 @@ export function RentaFormModal({
   }, [values.precio, multaAuto])
 
   const esEfectivo = esPagoEfectivo(values.metodoPago)
+  const anticipoEnUsd = esPagoEnUsd(values.metodoPago)
 
   const pagoCalculado = useMemo(() => {
     if (!esEfectivo) return null
@@ -746,10 +747,15 @@ export function RentaFormModal({
             </label>
             {!esEfectivo && (
               <Field
-                label="Anticipo $ MXN"
+                label={anticipoEnUsd ? 'Anticipo $ USD' : 'Anticipo $ MXN'}
                 value={values.anticipo}
                 onChange={set('anticipo')}
                 placeholder="0"
+                hint={
+                  anticipoEnUsd
+                    ? `TC ${getTipoCambioMxUsd()} — se convierte a pesos al calcular el restante`
+                    : undefined
+                }
               />
             )}
             <Field
@@ -759,7 +765,9 @@ export function RentaFormModal({
               hint={
                 esEfectivo
                   ? `Tipo de cambio ${getTipoCambioMxUsd()} MXN/USD`
-                  : 'Precio − anticipo'
+                  : anticipoEnUsd
+                    ? 'Precio en MXN − anticipo en USD (al tipo de cambio)'
+                    : 'Precio − anticipo'
               }
             />
             <Field
