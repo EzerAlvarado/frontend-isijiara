@@ -399,7 +399,7 @@ export function IngresosPage() {
   const subtitulo =
     tab === 'piezas'
       ? 'Cuántos vestidos o trajes salieron cada mes, comparado con el mismo mes del año pasado.'
-      : 'Dinero que ya entró al corte, separado por Trajes, XV, Noche y Novia.'
+      : 'Dinero cobrado en corte (anticipos y abonos reales). No cuenta rentas sin pago ni movimientos anulados.'
 
   return (
     <div>

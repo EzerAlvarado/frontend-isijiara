@@ -442,12 +442,16 @@ export function CorteDiaPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Movimientos del turno {corte.turnoLabel.toLowerCase()}
                 {corte.incluyeManana ? ' (incluye mañana)' : ''}.
+                {turnoActivo === 'manana' &&
+                  corte.turnosDia.find((t) => t.turno === 'tarde')?.existe &&
+                  ' Los abonos de la tarde aparecen en el turno Tarde.'}
               </p>
             </div>
             <div className="overflow-x-auto">
               {corte.transacciones.length === 0 ? (
                 <p className="py-10 text-center text-sm text-gray-500">
-                  Sin movimientos en este turno. Las rentas nuevas aparecen aquí al guardarse.
+                  Sin movimientos en este turno. Las rentas y abonos del día aparecen al guardarse;
+                  si hiciste un abono en la tarde, revísalo en el turno Tarde.
                 </p>
               ) : (
                 <table className="w-full text-sm">
