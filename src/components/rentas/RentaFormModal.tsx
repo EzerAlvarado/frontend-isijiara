@@ -15,6 +15,7 @@ import { calcularMultaAutomatica, getMultaPorDia } from '../../utils/multa'
 import { aMayusculas } from '../../utils/mayusculas'
 import { semanaKeyDesdeFechaSalida } from '../../utils/semanasRentas'
 import { METODOS_PAGO, esPagoEnUsd } from '../../utils/metodoPago'
+import { parseMontoMxn } from '../../utils/parseMonto'
 import type { MetodoPago } from '../../types'
 import {
   calcularPagoEfectivo,
@@ -357,7 +358,7 @@ export function RentaFormModal({
   )
 
   const totalCobrar = useMemo(() => {
-    const precio = Number(values.precio) || 0
+    const precio = parseMontoMxn(values.precio)
     return precio + multaAuto
   }, [values.precio, multaAuto])
 
@@ -368,22 +369,22 @@ export function RentaFormModal({
     if (!esEfectivo) return null
     return calcularPagoEfectivo(
       totalCobrar,
-      Number(values.pagoPesos) || 0,
-      Number(values.pagoDlls) || 0,
+      parseMontoMxn(values.pagoPesos),
+      parseMontoMxn(values.pagoDlls),
     )
   }, [esEfectivo, totalCobrar, values.pagoPesos, values.pagoDlls])
 
   const restante = useMemo(() => {
     if (esEfectivo) {
       return calcularRestanteEfectivo(
-        Number(values.precio) || 0,
+        parseMontoMxn(values.precio),
         multaAuto,
-        Number(values.pagoPesos) || 0,
-        Number(values.pagoDlls) || 0,
+        parseMontoMxn(values.pagoPesos),
+        parseMontoMxn(values.pagoDlls),
       )
     }
-    const precio = Number(values.precio) || 0
-    const anticipo = Number(values.anticipo) || 0
+    const precio = parseMontoMxn(values.precio)
+    const anticipo = parseMontoMxn(values.anticipo)
     return calcularRestante(precio, anticipo, multaAuto, values.metodoPago)
   }, [
     esEfectivo,
@@ -564,7 +565,7 @@ export function RentaFormModal({
       setError('Selecciona un vestido del inventario o ingresa al menos un accesorio.')
       return
     }
-    if (esVestidos && !piezaVestidoVinculada && !tieneAccesorios && !esPatrocinio(values.tipoOperacion) && !(Number(values.precio) > 0)) {
+    if (esVestidos && !piezaVestidoVinculada && !tieneAccesorios && !esPatrocinio(values.tipoOperacion) && !(parseMontoMxn(values.precio) > 0)) {
       setError('Ingresa el precio manualmente para rentas de solo accesorios.')
       return
     }
@@ -750,11 +751,11 @@ export function RentaFormModal({
                 label={anticipoEnUsd ? 'Anticipo $ USD' : 'Anticipo $ MXN'}
                 value={values.anticipo}
                 onChange={set('anticipo')}
-                placeholder="0"
+                placeholder={anticipoEnUsd ? '270.00' : '5000'}
                 hint={
                   anticipoEnUsd
                     ? `TC ${getTipoCambioMxUsd()} — se convierte a pesos al calcular el restante`
-                    : undefined
+                    : 'Cantidad exacta: 5000 o 5,000. Los centavos son opcionales.'
                 }
               />
             )}

@@ -10,6 +10,7 @@ import {
   Printer,
   RefreshCw,
   Trash2,
+  Unlock,
 } from 'lucide-react'
 import { ApiError } from '../api/client'
 import {
@@ -21,6 +22,7 @@ import {
   fechaCorteDisplay,
   fetchCorte,
   hoyISO,
+  reabrirCorte,
   registrarGasto,
   reponerVale,
   type CorteDiaResponse,
@@ -67,6 +69,7 @@ export function CorteDiaPage() {
   const [error, setError] = useState<string | null>(null)
   const [fondoEdit, setFondoEdit] = useState('')
   const [mostrarGasto, setMostrarGasto] = useState(false)
+  const [mostrarReabrir, setMostrarReabrir] = useState(false)
   const [mostrarConteo, setMostrarConteo] = useState(false)
   const [verConteo, setVerConteo] = useState(false)
   const [mostrarFondoConteo, setMostrarFondoConteo] = useState(false)
@@ -236,6 +239,23 @@ export function CorteDiaPage() {
   const handleCierre = () => {
     if (!corte || corte.cerrado) return
     setMostrarConteo(true)
+  }
+
+  const confirmarReabrir = async () => {
+    if (!corte || !corte.cerrado) return
+    setGuardando(true)
+    setError(null)
+    try {
+      const data = await reabrirCorte(fecha, turnoActivo, categoriaBackend)
+      setCorte(data)
+      setFondoEdit(String(data.fondoInicial || ''))
+      setMostrarReabrir(false)
+      setMostrarConteo(true)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo reabrir el corte.')
+    } finally {
+      setGuardando(false)
+    }
   }
 
   const confirmarCierre = async (
@@ -724,6 +744,28 @@ export function CorteDiaPage() {
             </div>
           )}
 
+          {corte.cerrado && (
+            <div className="card mb-6 border border-amber-200 bg-amber-50/60 p-6 print:hidden">
+              <h3 className="mb-2 text-sm font-semibold uppercase text-amber-900">
+                Reabrir corte
+              </h3>
+              <p className="mb-4 text-sm text-amber-950">
+                Si el conteo quedó mal, reabre el turno {corte.turnoLabel.toLowerCase()} para
+                corregirlo y volver a cerrarlo. El desglose anterior se conserva como punto de
+                partida.
+              </p>
+              <button
+                type="button"
+                className="btn-secondary border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+                disabled={guardando}
+                onClick={() => setMostrarReabrir(true)}
+              >
+                <Unlock className="h-4 w-4" />
+                Reabrir para ajustar conteo
+              </button>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 print:hidden">
             <button
               type="button"
@@ -745,6 +787,36 @@ export function CorteDiaPage() {
           </div>
         </>
       ) : null}
+
+      <Modal
+        open={mostrarReabrir}
+        onClose={() => !guardando && setMostrarReabrir(false)}
+        title="Reabrir corte"
+      >
+        <p className="mb-4 text-sm text-gray-600">
+          Se abrirá de nuevo el turno{' '}
+          <strong className="uppercase">{corte?.turnoLabel}</strong> del{' '}
+          {fechaCorteDisplay(fecha)}. Podrás corregir el conteo y cerrarlo otra vez.
+        </p>
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            className="btn-secondary flex-1"
+            disabled={guardando}
+            onClick={() => setMostrarReabrir(false)}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className="btn-primary flex-1"
+            disabled={guardando}
+            onClick={confirmarReabrir}
+          >
+            {guardando ? 'Reabriendo…' : 'Reabrir corte'}
+          </button>
+        </div>
+      </Modal>
 
       <Modal open={mostrarGasto} onClose={() => !guardando && setMostrarGasto(false)} title="Registrar gasto (vale)">
         <p className="mb-4 text-sm text-gray-600">
@@ -808,6 +880,7 @@ export function CorteDiaPage() {
           fondoMxn={resumen.fondoInicial}
           cajaMxn={resumen.cajaDelDia}
           initialConteoFondo={corte.conteoFondo}
+          initialConteoCaja={corte.conteoCaja}
           tipoCambioUsd={corte.totalesConteo?.tipoCambioUsd}
           guardando={guardando}
           pedirNombreEmpleado

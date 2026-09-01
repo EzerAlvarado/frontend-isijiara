@@ -195,6 +195,18 @@ export async function cerrarCorte(
   return mapCorte(data)
 }
 
+export async function reabrirCorte(
+  fecha: string,
+  turno?: TurnoCorte,
+  categoria?: string,
+): Promise<CorteDiaResponse> {
+  const data = await apiRequest<CorteDiaResponse>('/corte/reabrir/', {
+    method: 'POST',
+    body: JSON.stringify(corteBody({ fecha }, turno, categoria)),
+  })
+  return mapCorte(data)
+}
+
 export async function registrarGasto(payload: {
   fecha: string
   cliente: string

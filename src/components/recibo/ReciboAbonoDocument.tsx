@@ -33,6 +33,7 @@ function etiquetaMetodoPago(metodo: string): string {
     mixto: 'Mixto',
     bbva: 'BBVA',
     zelle: 'Zelle',
+    tarjeta: 'Tarjeta',
     transferencia: 'Transferencia',
   }
   return map[metodo] || metodo

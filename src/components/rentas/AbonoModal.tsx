@@ -11,6 +11,7 @@ import {
   inferirMetodoEfectivo,
   pesosADolares,
 } from '../../utils/tipoCambio'
+import { parseMontoMxn } from '../../utils/parseMonto'
 
 interface AbonoModalProps {
   open: boolean
@@ -39,7 +40,7 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
 
   const pagoCalculado = useMemo(() => {
     if (!esEfectivo) return null
-    return calcularPagoEfectivo(saldo, Number(pagoPesos) || 0, Number(pagoDlls) || 0)
+    return calcularPagoEfectivo(saldo, parseMontoMxn(pagoPesos), parseMontoMxn(pagoDlls))
   }, [esEfectivo, saldo, pagoPesos, pagoDlls])
 
   useEffect(() => {
@@ -58,8 +59,8 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
     setError(null)
     try {
       if (esEfectivo) {
-        const pesos = Number(pagoPesos) || 0
-        const dlls = Number(pagoDlls) || 0
+        const pesos = parseMontoMxn(pagoPesos)
+        const dlls = parseMontoMxn(pagoDlls)
         if (pesos <= 0 && dlls <= 0) {
           setError('Indica el efectivo recibido.')
           return
@@ -75,7 +76,7 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
           pagoDlls: dlls,
         })
       } else {
-        const valor = Number(monto)
+        const valor = parseMontoMxn(monto)
         if (!valor || valor <= 0) {
           setError('El monto debe ser mayor a cero.')
           return
@@ -134,12 +135,12 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
                 Pesos recibidos
               </span>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 className="input-field"
                 value={pagoPesos}
                 onChange={(e) => setPagoPesos(e.target.value)}
-                min={0}
-                step={1}
+                placeholder="1000"
               />
             </label>
             <label className="block">
@@ -147,12 +148,12 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
                 Dólares recibidos
               </span>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 className="input-field"
                 value={pagoDlls}
                 onChange={(e) => setPagoDlls(e.target.value)}
-                min={0}
-                step={1}
+                placeholder="40"
               />
               <span className="mt-1 block text-xs text-gray-500">
                 TC {getTipoCambioMxUsd()} — puedes combinar pesos y dólares
@@ -205,20 +206,19 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
               {abonoEnUsd ? 'Monto $ USD' : 'Monto $ MXN'}
             </span>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               className="input-field"
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              min={0.01}
-              max={abonoEnUsd ? pesosADolares(saldo) : saldo}
-              step={abonoEnUsd ? 0.01 : 1}
+              placeholder={abonoEnUsd ? '270.00' : '5000'}
               required
             />
-            {abonoEnUsd && (
-              <span className="mt-1 block text-xs text-gray-500">
-                Saldo pendiente: {pesosADolares(saldo).toFixed(2)} USD ({fmtMoneyMxn(saldo)} MXN)
-              </span>
-            )}
+            <span className="mt-1 block text-xs text-gray-500">
+              {abonoEnUsd
+                ? `Saldo pendiente: ${pesosADolares(saldo).toFixed(2)} USD (${fmtMoneyMxn(saldo)} MXN)`
+                : 'Cantidad exacta: 5000 o 5,000. Los centavos son opcionales.'}
+            </span>
           </label>
         )}
 
