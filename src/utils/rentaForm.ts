@@ -17,8 +17,8 @@ import {
   isoAInputDatetime,
 } from './fechaHoraRegistro'
 import { aMayusculas } from './mayusculas'
-import { parseMontoMxn } from './parseMonto'
 import { reconocerMarca } from './marcasCatalogo'
+import { esPagoEnUsd } from './metodoPago'
 import { calcularMultaAutomatica } from './multa'
 import {
   calcularPagoEfectivo,
@@ -289,19 +289,19 @@ export function formularioAPayload(
       )
   const tipoOperacion = values.tipoOperacion
   const multa = calcularMultaAutomatica(values.fechaSalida)
-  const precio = tipoOperacion === 'patrocinio' ? 0 : parseMontoMxn(values.precio)
+  const precio = tipoOperacion === 'patrocinio' ? 0 : Number(values.precio) || 0
   const totalCobrar = precio + multa
   const estatusAuto = estatusFilaDesdeTipoOperacion(tipoOperacion)
 
   let metodoPago = values.metodoPago
-  let anticipo = parseMontoMxn(values.anticipo)
+  let anticipo = Number(values.anticipo) || 0
   let pagoEfectivoMxn = 0
   let pagoEfectivoUsd = 0
   let feriaMxn = 0
 
   if (esPagoEfectivo(metodoPago)) {
-    const recibidoMxn = parseMontoMxn(values.pagoPesos)
-    const recibidoUsd = parseMontoMxn(values.pagoDlls)
+    const recibidoMxn = Number(values.pagoPesos) || 0
+    const recibidoUsd = Number(values.pagoDlls) || 0
     const pago = calcularPagoEfectivo(totalCobrar, recibidoMxn, recibidoUsd)
     metodoPago =
       metodoPago === 'mixto' ? 'mixto' : inferirMetodoEfectivo(recibidoMxn, recibidoUsd)
@@ -314,6 +314,8 @@ export function formularioAPayload(
     } else {
       anticipo = pago.aplicadoMxn
     }
+  } else if (anticipo <= 0 && precio > 0 && !esPagoEnUsd(metodoPago)) {
+    anticipo = precio
   }
 
   return {

@@ -253,6 +253,20 @@ export async function anularTransaccionCorte(
   return mapCorte(data)
 }
 
+export async function moverTransaccionCorte(
+  txId: string,
+  fecha: string,
+  turnoDestino: TurnoCorte,
+  turno?: TurnoCorte,
+  categoria?: string,
+): Promise<CorteDiaResponse> {
+  const data = await apiRequest<CorteDiaResponse>(`/corte/transacciones/${txId}/mover/`, {
+    method: 'POST',
+    body: JSON.stringify(corteBody({ fecha, turnoDestino }, turno, categoria)),
+  })
+  return mapCorte(data)
+}
+
 export function fechaCorteDisplay(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number)
   const fecha = new Date(y, m - 1, d)

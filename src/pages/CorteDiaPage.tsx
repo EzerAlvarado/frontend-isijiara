@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  ArrowLeftRight,
   Ban,
   Banknote,
   ChevronLeft,
@@ -22,6 +23,7 @@ import {
   fechaCorteDisplay,
   fetchCorte,
   hoyISO,
+  moverTransaccionCorte,
   reabrirCorte,
   registrarGasto,
   reponerVale,
@@ -201,6 +203,32 @@ export function CorteDiaPage() {
       setCorte(data)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo anular el movimiento.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  const moverMovimiento = async (
+    txId: string,
+    referencia: string,
+    cliente: string,
+    monto: number,
+    pago: string,
+  ) => {
+    if (!corte || corte.cerrado) return
+    const destino: TurnoCorte = turnoActivo === 'manana' ? 'tarde' : 'manana'
+    const labelDestino = destino === 'manana' ? 'mañana' : 'tarde'
+    const ok = window.confirm(
+      `¿Pasar ${referencia} (${cliente}, ${formatMontoTransaccion(monto, pago)}) al turno ${labelDestino}?\n\nEl monto se suma al esperado de ese turno. Si ese corte ya está cerrado, reábrelo y vuelve a contar la caja.`,
+    )
+    if (!ok) return
+    setGuardando(true)
+    setError(null)
+    try {
+      const data = await moverTransaccionCorte(txId, fecha, destino, turnoActivo, categoriaBackend)
+      setCorte(data)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo mover el movimiento.')
     } finally {
       setGuardando(false)
     }
@@ -465,6 +493,8 @@ export function CorteDiaPage() {
                 {turnoActivo === 'manana' &&
                   corte.turnosDia.find((t) => t.turno === 'tarde')?.existe &&
                   ' Los abonos de la tarde aparecen en el turno Tarde.'}
+                {!corte.cerrado &&
+                  ' Si cobraste una multa en otro turno, usa «Pasar a…» para moverla.'}
               </p>
             </div>
             <div className="overflow-x-auto">
@@ -521,16 +551,30 @@ export function CorteDiaPage() {
                         </td>
                         {!corte.cerrado && (
                           <td className="px-4 py-3 text-right print:hidden">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-bold uppercase text-red-700 hover:bg-red-100 disabled:opacity-50"
-                              disabled={guardando}
-                              title="Anular movimiento del corte"
-                              onClick={() => anularMovimiento(tx.id, tx.referencia, tx.cliente)}
-                            >
-                              <Ban className="h-3.5 w-3.5" />
-                              Anular
-                            </button>
+                            <div className="flex flex-col items-end gap-1">
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-2 py-1 text-[10px] font-bold uppercase text-sky-800 hover:bg-sky-100 disabled:opacity-50"
+                                disabled={guardando}
+                                title={`Pasar al turno ${turnoActivo === 'manana' ? 'tarde' : 'mañana'}`}
+                                onClick={() =>
+                                  moverMovimiento(tx.id, tx.referencia, tx.cliente, tx.monto, tx.pago)
+                                }
+                              >
+                                <ArrowLeftRight className="h-3.5 w-3.5" />
+                                {turnoActivo === 'manana' ? 'A tarde' : 'A mañana'}
+                              </button>
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-bold uppercase text-red-700 hover:bg-red-100 disabled:opacity-50"
+                                disabled={guardando}
+                                title="Anular movimiento del corte"
+                                onClick={() => anularMovimiento(tx.id, tx.referencia, tx.cliente)}
+                              >
+                                <Ban className="h-3.5 w-3.5" />
+                                Anular
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>

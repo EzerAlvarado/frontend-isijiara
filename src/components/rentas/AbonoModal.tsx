@@ -11,7 +11,6 @@ import {
   inferirMetodoEfectivo,
   pesosADolares,
 } from '../../utils/tipoCambio'
-import { parseMontoMxn } from '../../utils/parseMonto'
 
 interface AbonoModalProps {
   open: boolean
@@ -40,7 +39,7 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
 
   const pagoCalculado = useMemo(() => {
     if (!esEfectivo) return null
-    return calcularPagoEfectivo(saldo, parseMontoMxn(pagoPesos), parseMontoMxn(pagoDlls))
+    return calcularPagoEfectivo(saldo, Number(pagoPesos) || 0, Number(pagoDlls) || 0)
   }, [esEfectivo, saldo, pagoPesos, pagoDlls])
 
   useEffect(() => {
@@ -59,8 +58,8 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
     setError(null)
     try {
       if (esEfectivo) {
-        const pesos = parseMontoMxn(pagoPesos)
-        const dlls = parseMontoMxn(pagoDlls)
+        const pesos = Number(pagoPesos) || 0
+        const dlls = Number(pagoDlls) || 0
         if (pesos <= 0 && dlls <= 0) {
           setError('Indica el efectivo recibido.')
           return
@@ -76,7 +75,7 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
           pagoDlls: dlls,
         })
       } else {
-        const valor = parseMontoMxn(monto)
+        const valor = Number(monto) || 0
         if (!valor || valor <= 0) {
           setError('El monto debe ser mayor a cero.')
           return
@@ -211,13 +210,13 @@ export function AbonoModal({ open, renta, onClose, onSubmit }: AbonoModalProps) 
               className="input-field"
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              placeholder={abonoEnUsd ? '270.00' : '5000'}
+              placeholder="0"
               required
             />
             <span className="mt-1 block text-xs text-gray-500">
               {abonoEnUsd
                 ? `Saldo pendiente: ${pesosADolares(saldo).toFixed(2)} USD (${fmtMoneyMxn(saldo)} MXN)`
-                : 'Cantidad exacta: 5000 o 5,000. Los centavos son opcionales.'}
+                : 'Puedes poner 1400 sin decimales.'}
             </span>
           </label>
         )}
