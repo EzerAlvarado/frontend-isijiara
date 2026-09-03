@@ -52,7 +52,7 @@ function formatMoney(amount: number) {
 
 function formatMontoTransaccion(monto: number, pago: string) {
   const abs = Math.abs(monto)
-  if (pago === 'dlls') {
+  if (pago === 'dlls' || pago === 'zelle') {
     const usd = abs.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
     const mxn = formatMoney(dllsAPesos(abs))
     return `${usd} (${mxn})`
@@ -153,7 +153,7 @@ export function CorteDiaPage() {
           color: 'text-amber-700 bg-amber-50',
         },
         {
-          label: 'Ingresos BBVA / Zelle / Transferencia',
+          label: 'Ingresos BBVA / Zelle / Transferencia / Tarjeta',
           value: resumen.ingresosTarjeta,
           icon: CreditCard,
           color: 'text-blue-600 bg-blue-50',
