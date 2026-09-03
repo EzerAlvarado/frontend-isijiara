@@ -483,6 +483,9 @@ export function RentaFormModal({
         next.saco = ''
         next.pantalon = ''
       }
+      if (key === 'metodoPago' && !esPagoEfectivo(valor as MetodoPago) && !next.anticipo.trim()) {
+        next.anticipo = next.precio.trim() || next.pagoPesos.trim()
+      }
       return next
     })
   }
@@ -750,11 +753,11 @@ export function RentaFormModal({
                 label={anticipoEnUsd ? 'Anticipo $ USD' : 'Anticipo $ MXN'}
                 value={values.anticipo}
                 onChange={set('anticipo')}
-                placeholder="0"
+                placeholder={anticipoEnUsd ? '0' : '0'}
                 hint={
                   anticipoEnUsd
                     ? `TC ${getTipoCambioMxUsd()} — se convierte a pesos al calcular el restante`
-                    : undefined
+                    : 'Si lo dejas vacío se usa el precio. Puedes poner 1400 sin decimales.'
                 }
               />
             )}

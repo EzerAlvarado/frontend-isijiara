@@ -7,6 +7,7 @@ export const METODOS_PAGO: { value: MetodoPago; label: string }[] = [
   { value: 'bbva', label: 'BBVA' },
   { value: 'zelle', label: 'Zelle' },
   { value: 'transferencia', label: 'Transferencia' },
+  { value: 'tarjeta', label: 'Tarjeta' },
 ]
 
 export const ETIQUETA_METODO_PAGO: Record<MetodoPago, string> = {
@@ -16,6 +17,13 @@ export const ETIQUETA_METODO_PAGO: Record<MetodoPago, string> = {
   bbva: 'BBVA',
   zelle: 'Zelle',
   transferencia: 'Transferencia',
+  tarjeta: 'Tarjeta',
+}
+
+const PAGOS_DIGITALES: readonly MetodoPago[] = ['bbva', 'zelle', 'transferencia', 'tarjeta']
+
+export function esPagoDigital(metodo: MetodoPago | string | undefined): boolean {
+  return PAGOS_DIGITALES.includes((metodo || '') as MetodoPago)
 }
 
 /** Zelle y DLLS guardan el anticipo en dólares. */
