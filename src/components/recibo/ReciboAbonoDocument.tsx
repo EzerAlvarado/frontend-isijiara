@@ -1,7 +1,7 @@
 import type { Renta } from '../../types'
 import { EncabezadoIsijara } from './reciboStyles'
-import { fechaLarga } from '../../utils/documentoRenta'
-import { totalCobrarRenta, restanteRenta } from '../../utils/pagoRenta'
+import { fechaLarga, fechaHoraLargaDesdeIso } from '../../utils/documentoRenta'
+import { totalCobrarRenta, restanteRenta, totalPagadoRenta } from '../../utils/pagoRenta'
 import { fmtMontoConDlls } from '../../utils/tipoCambio'
 import { esPagoEnUsd } from '../../utils/metodoPago'
 
@@ -41,10 +41,11 @@ function etiquetaMetodoPago(metodo: string): string {
 export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: ReciboAbonoDocumentProps) {
   const abonos = renta.abonos ?? []
   const totalCobrar = totalCobrarRenta(renta)
-  const totalAbonado = abonos.reduce((sum, a) => sum + a.montoMxn, 0)
   const anticipo = renta.anticipo ?? 0
+  const saldoAbonado = totalPagadoRenta(renta)
   const restante = restanteRenta(renta)
   const pagado = restante <= 0
+  const fechaFactura = fechaHoraLargaDesdeIso(renta.creadoEn)
 
   return (
     <div
@@ -73,6 +74,10 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
           </div>
         </div>
         <div className="space-y-1">
+          <div className="border border-gray-900 px-2 py-1">
+            <span className="font-bold">Fecha factura: </span>
+            <span className="normal-case">{fechaFactura || '—'}</span>
+          </div>
           <div className="border border-gray-900 px-2 py-1">
             <span className="font-bold">Fecha Entrega: </span>
             <span className="normal-case">{fechaLarga(renta.fechaSalida)}</span>
@@ -112,7 +117,9 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
             {anticipo > 0 && (
               <tr className="border-b border-gray-200">
                 <td className="border-r border-gray-200 px-2 py-1">—</td>
-                <td className="border-r border-gray-200 px-2 py-1">Anticipo inicial</td>
+                <td className="border-r border-gray-200 px-2 py-1 normal-case">
+                  {fechaFactura || 'Anticipo inicial'}
+                </td>
                 <td className="border-r border-gray-200 px-2 py-1">
                   {etiquetaMetodoPago(renta.metodoPago ?? 'pesos')}
                 </td>
@@ -163,10 +170,10 @@ export function ReciboAbonoDocument({ renta, id = 'recibo-abono-print' }: Recibo
           </div>
           <div className="flex border-b border-gray-900">
             <span className="flex-1 border-r border-gray-900 bg-gray-100 px-2 py-1 font-bold">
-              Total Abonado
+              Saldo abonado
             </span>
             <span className="w-36 px-2 py-1 text-right text-[10px] leading-tight">
-              {fmtMontoConDlls(totalAbonado)}
+              {fmtMontoConDlls(saldoAbonado)}
             </span>
           </div>
           <div className={`flex ${pagado ? 'bg-green-100' : ''}`}>

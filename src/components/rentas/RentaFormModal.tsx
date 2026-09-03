@@ -686,7 +686,7 @@ export function RentaFormModal({
               type="datetime-local"
               value={values.creadoEn}
               onChange={set('creadoEn')}
-              hint="Cuándo se agregó la renta (no aparece en el recibo)"
+              hint="Cuándo se registró la factura. Sale en el recibo como fecha de factura."
             />
             <Field label="Ajustes" value={values.ajustes} onChange={set('ajustes')} placeholder="Ej. subir mangas, ensanchar cintura" />
             <Field label="Detalles" value={values.detalles} onChange={set('detalles')} />

@@ -20,7 +20,9 @@ export interface PagoRenta {
 
 export interface DocumentoRenta {
   folio: string
+  /** Fecha/hora en que se registró la factura (columna Registrada) */
   fechaRenta: string
+  fechaFactura?: string
   /** Renta, venta, premier, etc. — para encabezados del recibo */
   etiquetaOperacion?: string
   cliente: {
@@ -47,6 +49,10 @@ export interface DocumentoRenta {
   garantia: number
   total: number
   anticipo: number
+  /** Anticipo + abonos posteriores, en MXN */
+  totalPagado?: number
+  /** Solo abonos posteriores (sin anticipo), en MXN */
+  totalAbonado?: number
   /** Moneda en que se registró el anticipo (pesos, dlls o mixto) */
   metodoPago?: MetodoPago
   pagoEfectivoMxn?: number

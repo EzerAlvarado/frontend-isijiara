@@ -44,8 +44,8 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
             {doc.folio}
           </div>
           <div className="border border-black px-1.5 py-0.5">
-            <span className="font-black">Fecha {etiquetaOperacion}: </span>
-            <span className="normal-case">{doc.fechaRenta}</span>
+            <span className="font-black">Fecha factura: </span>
+            <span className="normal-case">{doc.fechaFactura || doc.fechaRenta}</span>
           </div>
           <div className="border border-black px-1.5 py-0.5">
             <span className="font-black">Cliente: </span>
@@ -216,6 +216,16 @@ export function NotaVentaDocument({ doc, id = 'nota-venta-print' }: NotaVentaDoc
                   : fmtAnticipo(doc.anticipo, metodoPago)}
               </span>
             </div>
+            {(doc.totalAbonado ?? 0) > 0 && (
+              <div className="grid grid-cols-[1fr_1fr] border-t border-black">
+                <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
+                  Saldo abonado
+                </span>
+                <span className="px-1 py-0.5 text-right text-[8.5px] font-black leading-tight">
+                  {fmtMontoConDlls(doc.totalPagado ?? doc.totalAbonado ?? 0)}
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-[1fr_1fr] border-t border-black">
               <span className="border-r border-black bg-gray-100 px-1 py-0.5 text-right font-black">
                 Restante

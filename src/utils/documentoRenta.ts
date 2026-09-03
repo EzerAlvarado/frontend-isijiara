@@ -5,7 +5,7 @@ import { formatearHorario } from './horario'
 import { aMayusculas } from './mayusculas'
 import { etiquetaMetodoPago } from './metodoPago'
 import { multaEfectiva } from './multa'
-import { rentaEstaPagada } from './pagoRenta'
+import { rentaEstaPagada, totalPagadoRenta } from './pagoRenta'
 import { anticipoEnPesos } from './tipoCambio'
 import { parseFechaDDMMYYYY } from './semanasRentas'
 import {
@@ -14,10 +14,14 @@ import {
 } from './precioVestido'
 
 export function calcularResta(
-  doc: Pick<DocumentoRenta, 'total' | 'anticipo' | 'metodoPago' | 'pagado'>,
+  doc: Pick<DocumentoRenta, 'total' | 'anticipo' | 'metodoPago' | 'pagado' | 'totalPagado'>,
 ): number {
   if (doc.pagado) return 0
-  return Math.max(0, doc.total - anticipoEnPesos(doc.anticipo, doc.metodoPago ?? 'pesos'))
+  const pagado =
+    doc.totalPagado != null
+      ? doc.totalPagado
+      : anticipoEnPesos(doc.anticipo, doc.metodoPago ?? 'pesos')
+  return Math.max(0, doc.total - pagado)
 }
 
 const UNIDADES = [
@@ -131,6 +135,20 @@ export function fechaLarga(fecha: string): string {
   return `${dia} de ${mes} del ${d.getFullYear()}`
 }
 
+/** Fecha y hora local desde ISO: "19 de agosto del 2026 2:08 p.m." */
+export function fechaHoraLargaDesdeIso(iso: string | undefined | null): string {
+  if (!iso?.trim()) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return fechaLarga(iso)
+  const dia = String(d.getDate()).padStart(2, '0')
+  const mes = MESES_LARGO[d.getMonth()]
+  let h = d.getHours()
+  const m = String(d.getMinutes()).padStart(2, '0')
+  const periodo = h >= 12 ? 'p.m.' : 'a.m.'
+  h = h % 12 || 12
+  return `${dia} de ${mes} del ${d.getFullYear()} ${h}:${m} ${periodo}`
+}
+
 /** Ej: "lunes 08 de agosto" */
 export function fechaConDiaSemana(fecha: string): string {
   if (!fecha?.trim()) return ''
@@ -211,9 +229,12 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   const pagoUsd = renta.pagoEfectivoUsd ?? 0
   const feria = renta.feriaMxn ?? 0
   const pagado = rentaEstaPagada(renta)
+  const totalPagado = totalPagadoRenta(renta)
+  const totalAbonado = (renta.abonos ?? []).reduce((s, a) => s + a.montoMxn, 0)
+  const fechaFactura = fechaHoraLargaDesdeIso(renta.creadoEn)
   const hora = formatearHorario(renta.horario.valor)
   const fechaEntregaLarga = fechaLarga(renta.fechaSalida)
-  const fechaRenta = hora ? `${fechaEntregaLarga} ${hora}` : fechaEntregaLarga
+  const fechaRenta = fechaFactura || (hora ? `${fechaEntregaLarga} ${hora}` : fechaEntregaLarga)
   const detalleExtra = celdaValor(renta.detalles)
   const esVestidos = Boolean(renta.categoriaVestido)
   const tipoOperacion = tipoOperacionDesdeRenta(renta, esVestidos)
@@ -225,6 +246,7 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
   return {
     folio: renta.id,
     fechaRenta,
+    fechaFactura,
     etiquetaOperacion,
     cliente: {
       nombre: aMayusculas(renta.cliente.valor),
@@ -245,19 +267,19 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
     },
     pagos: (() => {
       const filas: { fecha: string; monto: number; formaPago: string }[] = []
-      const f = fechaLarga(renta.fechaSalida)
+      const fAnticipo = fechaFactura || fechaLarga(renta.fechaSalida)
       if (metodo === 'mixto' && (pagoMxn > 0 || pagoUsd > 0)) {
-        if (pagoMxn > 0) filas.push({ fecha: f, monto: pagoMxn, formaPago: 'Pesos' })
-        if (pagoUsd > 0) filas.push({ fecha: f, monto: pagoUsd, formaPago: 'DLLS' })
+        if (pagoMxn > 0) filas.push({ fecha: fAnticipo, monto: pagoMxn, formaPago: 'Pesos' })
+        if (pagoUsd > 0) filas.push({ fecha: fAnticipo, monto: pagoUsd, formaPago: 'DLLS' })
       } else if (anticipo > 0) {
         filas.push({
-          fecha: f,
+          fecha: fAnticipo,
           monto: anticipo,
           formaPago: etiquetaMetodoPago(renta.metodoPago ?? 'pesos'),
         })
       }
       for (const abono of renta.abonos ?? []) {
-        const fechaAbono = fechaLarga(abono.creadoEn)
+        const fechaAbono = fechaHoraLargaDesdeIso(abono.creadoEn) || fechaLarga(abono.creadoEn)
         if (abono.metodoPago === 'mixto' && (abono.pagoEfectivoMxn || abono.pagoEfectivoUsd)) {
           if (abono.pagoEfectivoMxn) {
             filas.push({ fecha: fechaAbono, monto: abono.pagoEfectivoMxn, formaPago: 'Pesos' })
@@ -297,6 +319,8 @@ export function rentaADocumento(renta: Renta): DocumentoRenta {
     garantia: 0,
     total,
     anticipo,
+    totalPagado,
+    totalAbonado,
     metodoPago: metodo,
     pagoEfectivoMxn: pagoMxn,
     pagoEfectivoUsd: pagoUsd,
