@@ -60,7 +60,7 @@ export function filaSesionDesdePremium(renta: Renta): Renta | null {
     totalPagado: 0,
     totalCobrar: 0,
     restante: 0,
-    pagadoCompleto: true,
+    pagado: true,
     abonos: [],
     excluirCorte: true,
   }
