@@ -33,6 +33,11 @@ import {
   rentaEnMes,
 } from '../utils/archivoRentas'
 import { MESES_VENTANA_ADELANTE, esRentaFutura } from '../utils/semanasRentas'
+import {
+  expandirSesionesDesdePremium,
+  idRentaOrigen,
+  rentaRealDesdeLista,
+} from '../utils/sesionFotosDesdePremium'
 import { exportarRentasTab, etiquetaExportTab } from '../utils/exportRentas'
 import { exportarRentasReportePdf } from '../utils/exportRentasPdf'
 
@@ -45,9 +50,11 @@ function filtrarPorBusqueda(
   const busqueda = q.toLowerCase()
   return rentas.filter((r) => {
     const texto = [
-      r.id,
+      idRentaOrigen(r.id),
       r.fechaSalida,
       r.fechaRegreso,
+      r.fechaEvento,
+      r.fechaCita?.valor,
       r.marca,
       ...camposCelda.map((c) => r[c].valor),
     ]
@@ -116,7 +123,8 @@ export function RentasFuturasPage() {
   }, [mesParam, tabActiva])
 
   const rentasFuturas = useMemo(
-    () => rentas.filter((r) => esRentaFutura(r.fechaSalida)),
+    () =>
+      expandirSesionesDesdePremium(rentas).filter((r) => esRentaFutura(r.fechaSalida)),
     [rentas],
   )
 
@@ -196,41 +204,45 @@ export function RentasFuturasPage() {
 
   const abrirEditar = (renta: Renta) => {
     if (renta.cancelada) return
-    setRentaEditando(renta)
+    const real = rentaRealDesdeLista(rentas, renta) ?? renta
+    setRentaEditando(real)
     setMostrarFormulario(true)
   }
 
   const handleActualizarRenta = async (payload: Omit<Renta, 'id'>) => {
     if (!rentaEditando) return
-    const actualizada = await updateRenta(rentaEditando.id, payload)
-    setRentas((prev) => prev.map((r) => (r.id === rentaEditando.id ? actualizada : r)))
+    const realId = idRentaOrigen(rentaEditando.id)
+    const actualizada = await updateRenta(realId, payload)
+    setRentas((prev) => prev.map((r) => (r.id === realId ? actualizada : r)))
   }
 
   const cancelarRentaHandler = async (renta: Renta) => {
-    if (renta.cancelada) return
-    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const real = rentaRealDesdeLista(rentas, renta)
+    if (!real || real.cancelada) return
+    const cliente = real.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Cancelar la renta #${renta.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.\n\nEl dinero cobrado se queda en el corte (no hay devolución). Si hace falta quitar un movimiento, hazlo desde el corte.`,
+      `¿Cancelar la renta #${real.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.\n\nEl dinero cobrado se queda en el corte (no hay devolución). Si hace falta quitar un movimiento, hazlo desde el corte.`,
     )
     if (!ok) return
     try {
-      const actualizada = await cancelRenta(renta.id)
-      setRentas((prev) => prev.map((r) => (r.id === renta.id ? actualizada : r)))
+      const actualizada = await cancelRenta(real.id)
+      setRentas((prev) => prev.map((r) => (r.id === real.id ? actualizada : r)))
     } catch (err) {
       window.alert(err instanceof Error ? err.message : 'No se pudo cancelar la renta.')
     }
   }
 
   const quitarCanceladaHandler = async (renta: Renta) => {
-    if (!renta.cancelada) return
-    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const real = rentaRealDesdeLista(rentas, renta)
+    if (!real || !real.cancelada) return
+    const cliente = real.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Quitar el registro cancelado #${renta.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
+      `¿Quitar el registro cancelado #${real.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
     )
     if (!ok) return
     try {
-      await deleteRentaCancelada(renta.id)
-      setRentas((prev) => prev.filter((r) => r.id !== renta.id))
+      await deleteRentaCancelada(real.id)
+      setRentas((prev) => prev.filter((r) => r.id !== real.id))
     } catch (err) {
       window.alert(err instanceof Error ? err.message : 'No se pudo quitar el registro cancelado.')
     }
@@ -239,8 +251,10 @@ export function RentasFuturasPage() {
   const filaProps = {
     esVestidos,
     variant: 'activa' as const,
-    onImprimir: (renta: Renta) => setDocImpresion(rentaADocumento(renta)),
-    onReciboAbono: (renta: Renta) => setRentaReciboAbono(renta),
+    onImprimir: (renta: Renta) =>
+      setDocImpresion(rentaADocumento(rentaRealDesdeLista(rentas, renta) ?? renta)),
+    onReciboAbono: (renta: Renta) =>
+      setRentaReciboAbono(rentaRealDesdeLista(rentas, renta) ?? renta),
     onEditar: abrirEditar,
     onCancelar: cancelarRentaHandler,
     onQuitarCancelada: quitarCanceladaHandler,

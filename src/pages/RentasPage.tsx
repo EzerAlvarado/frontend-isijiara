@@ -44,6 +44,11 @@ import {
 } from '../utils/semanasRentas'
 import { exportarRentasTab, etiquetaExportTab } from '../utils/exportRentas'
 import { exportarRentasReportePdf } from '../utils/exportRentasPdf'
+import {
+  expandirSesionesDesdePremium,
+  idRentaOrigen,
+  rentaRealDesdeLista,
+} from '../utils/sesionFotosDesdePremium'
 
 export function RentasPage() {
   const { usuario } = useAuth()
@@ -111,18 +116,25 @@ export function RentasPage() {
 
   const buscando = search.trim().length > 0
 
+  const rentasConSesiones = useMemo(
+    () => expandirSesionesDesdePremium(rentas),
+    [rentas],
+  )
+
   const rentasFiltradas = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return rentas.filter((r) => {
+    return rentasConSesiones.filter((r) => {
       // Sin búsqueda: solo la ventana actual. Con búsqueda: archivo + lejanas también.
       if (!q && !estaEnVentanaActual(r.fechaSalida)) return false
       if (!rentaCoincideTab(r, tabActiva, lineaNegocio)) return false
       if (!q) return true
       const texto = [
-        r.id,
+        idRentaOrigen(r.id),
         r.tipoEntrega,
         r.fechaSalida,
         r.fechaRegreso,
+        r.fechaEvento,
+        r.fechaCita?.valor,
         r.marca,
         r.ajustes,
         r.telefono,
@@ -132,16 +144,16 @@ export function RentasPage() {
         .toLowerCase()
       return texto.includes(q)
     })
-  }, [rentas, search, camposCelda, tabActiva, lineaNegocio])
+  }, [rentasConSesiones, search, camposCelda, tabActiva, lineaNegocio])
 
   const rentasArchivadas = useMemo(
-    () => rentas.filter((r) => esRentaPasada(r.fechaSalida)).length,
-    [rentas],
+    () => rentasConSesiones.filter((r) => esRentaPasada(r.fechaSalida)).length,
+    [rentasConSesiones],
   )
 
   const rentasFuturasCount = useMemo(
-    () => rentas.filter((r) => esRentaFutura(r.fechaSalida)).length,
-    [rentas],
+    () => rentasConSesiones.filter((r) => esRentaFutura(r.fechaSalida)).length,
+    [rentasConSesiones],
   )
 
   const semanasBusqueda = useMemo(() => {
@@ -204,7 +216,8 @@ export function RentasPage() {
   }
 
   const actualizarCelda = async (rentaId: string, campo: CampoRentaCelda, estatus: EstatusCelda) => {
-    const renta = rentas.find((r) => r.id === rentaId)
+    const realId = idRentaOrigen(rentaId)
+    const renta = rentas.find((r) => r.id === realId)
     if (!renta || renta.cancelada) return
 
     let nota: string | undefined
@@ -218,12 +231,13 @@ export function RentasPage() {
     const anterior = renta
     const nuevaCelda = aplicarEstatusACelda(renta[campo], estatus, nota)
     const actualizada = { ...renta, [campo]: nuevaCelda }
-    setRentas((prev) => prev.map((r) => (r.id === rentaId ? actualizada : r)))
-    sincronizar(rentaId, { [campo]: nuevaCelda }, anterior)
+    setRentas((prev) => prev.map((r) => (r.id === realId ? actualizada : r)))
+    sincronizar(realId, { [campo]: nuevaCelda }, anterior)
   }
 
   const pintarFila = async (rentaId: string, estatus: EstatusCelda) => {
-    const renta = rentas.find((r) => r.id === rentaId)
+    const realId = idRentaOrigen(rentaId)
+    const renta = rentas.find((r) => r.id === realId)
     if (!renta || renta.cancelada) return
 
     let notaFila: string | undefined
@@ -240,7 +254,7 @@ export function RentasPage() {
     for (const campo of camposCelda) {
       actualizada[campo] = aplicarEstatusACelda(renta[campo], estatus, notaFila)
     }
-    setRentas((prev) => prev.map((r) => (r.id === rentaId ? actualizada : r)))
+    setRentas((prev) => prev.map((r) => (r.id === realId ? actualizada : r)))
 
     const cambios: Partial<Renta> = {
       estatusFila: actualizada.estatusFila ?? ('' as Renta['estatusFila']),
@@ -248,7 +262,7 @@ export function RentasPage() {
     for (const campo of camposCelda) {
       cambios[campo] = actualizada[campo]
     }
-    sincronizar(rentaId, cambios, anterior)
+    sincronizar(realId, cambios, anterior)
   }
 
   const handleCrearRenta = async (payload: Omit<Renta, 'id'>) => {
@@ -258,8 +272,9 @@ export function RentasPage() {
 
   const handleActualizarRenta = async (payload: Omit<Renta, 'id'>) => {
     if (!rentaEditando) return
-    const actualizada = await updateRenta(rentaEditando.id, payload)
-    setRentas((prev) => prev.map((r) => (r.id === rentaEditando.id ? actualizada : r)))
+    const realId = idRentaOrigen(rentaEditando.id)
+    const actualizada = await updateRenta(realId, payload)
+    setRentas((prev) => prev.map((r) => (r.id === realId ? actualizada : r)))
   }
 
   const abrirNueva = () => {
@@ -276,8 +291,9 @@ export function RentasPage() {
 
   const abrirEditar = (renta: Renta) => {
     if (renta.cancelada) return
-    setRentaEditando(renta)
-    setModoSinCorte(Boolean(renta.excluirCorte))
+    const real = rentaRealDesdeLista(rentas, renta) ?? renta
+    setRentaEditando(real)
+    setModoSinCorte(Boolean(real.excluirCorte))
     setMostrarFormulario(true)
   }
 
@@ -288,45 +304,50 @@ export function RentasPage() {
   }
 
   const cancelarRentaHandler = async (renta: Renta) => {
-    if (renta.cancelada) return
-    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const real = rentaRealDesdeLista(rentas, renta)
+    if (!real || real.cancelada) return
+    const cliente = real.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Cancelar la renta #${renta.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.\n\nEl dinero cobrado se queda en el corte (no hay devolución). Si hace falta quitar un movimiento, hazlo desde el corte.`,
+      `¿Cancelar la renta #${real.id} (${cliente})?\n\nEl registro se conservará y las piezas volverán a disponible en inventario.\n\nEl dinero cobrado se queda en el corte (no hay devolución). Si hace falta quitar un movimiento, hazlo desde el corte.`,
     )
     if (!ok) return
     try {
-      const actualizada = await cancelRenta(renta.id)
-      setRentas((prev) => prev.map((r) => (r.id === renta.id ? actualizada : r)))
+      const actualizada = await cancelRenta(real.id)
+      setRentas((prev) => prev.map((r) => (r.id === real.id ? actualizada : r)))
     } catch {
       setErrorCarga('No se pudo cancelar la renta. Verifica la conexión con el servidor.')
     }
   }
 
   const quitarCanceladaHandler = async (renta: Renta) => {
-    if (!renta.cancelada) return
-    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const real = rentaRealDesdeLista(rentas, renta)
+    if (!real || !real.cancelada) return
+    const cliente = real.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Quitar el registro cancelado #${renta.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
+      `¿Quitar el registro cancelado #${real.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
     )
     if (!ok) return
     try {
-      await deleteRentaCancelada(renta.id)
-      setRentas((prev) => prev.filter((r) => r.id !== renta.id))
+      await deleteRentaCancelada(real.id)
+      setRentas((prev) => prev.filter((r) => r.id !== real.id))
     } catch {
       setErrorCarga('No se pudo quitar el registro cancelado. Verifica la conexión con el servidor.')
     }
   }
 
   const abrirImprimir = (renta: Renta) => {
-    setDocImpresion(rentaADocumento(renta))
+    const real = rentaRealDesdeLista(rentas, renta) ?? renta
+    setDocImpresion(rentaADocumento(real))
   }
 
   const abrirReciboAbono = (renta: Renta) => {
-    setRentaReciboAbono(renta)
+    const real = rentaRealDesdeLista(rentas, renta) ?? renta
+    setRentaReciboAbono(real)
   }
 
   const abrirAbono = (renta: Renta) => {
-    setRentaAbono(renta)
+    const real = rentaRealDesdeLista(rentas, renta) ?? renta
+    setRentaAbono(real)
   }
 
   const guardarAbono = async (payload: Parameters<typeof registrarAbono>[1]) => {
@@ -379,7 +400,7 @@ export function RentasPage() {
     onActualizarCelda: actualizarCelda,
     onEditar: abrirEditar,
     onAbono: abrirAbono,
-    onMulta: (renta: Renta) => setRentaMulta(renta),
+    onMulta: (renta: Renta) => setRentaMulta(rentaRealDesdeLista(rentas, renta) ?? renta),
     onImprimir: abrirImprimir,
     onReciboAbono: abrirReciboAbono,
     onCancelar: cancelarRentaHandler,

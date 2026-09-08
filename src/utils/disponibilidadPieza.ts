@@ -2,6 +2,7 @@ import type { Renta } from '../types'
 import type { Pieza } from '../types/pieza'
 import type { RentaFormValues } from './rentaForm'
 import { resolverPiezasDesdeFormulario } from './inventarioSugerencias'
+import { fechaSesionPremium } from './sesionFotosDesdePremium'
 import {
   DIAS_RENTA_DEFAULT,
   formatFechaMX,
@@ -59,6 +60,21 @@ function fechasSeSolapan(
   return a0 <= b1 && b0 <= a1
 }
 
+/** Periodos que bloquean inventario: entrega y, en XV premium, también la sesión. */
+function ocupacionesCalendarioRenta(renta: Renta): { salida: string; regreso: string }[] {
+  const periodos: { salida: string; regreso: string }[] = [
+    { salida: renta.fechaSalida, regreso: renta.fechaRegreso },
+  ]
+  const cita = fechaSesionPremium(renta)
+  if (cita) {
+    periodos.push({
+      salida: cita,
+      regreso: sumarDiasFecha(cita, DIAS_RENTA_DEFAULT) || cita,
+    })
+  }
+  return periodos
+}
+
 /** Conflicto de una pieza respecto a la fecha de salida de una renta nueva (o hoy en inventario). */
 export function conflictoPieza(
   piezaId: string,
@@ -81,7 +97,7 @@ export function conflictoPieza(
     if (excluirRentaId && r.id === excluirRentaId) continue
     if (!idsPiezasEnRenta(r).includes(piezaId)) continue
 
-    const semR = semanaKeyDesdeFechaSalida(r.fechaSalida) || r.semanaInicio
+    const ocupaciones = ocupacionesCalendarioRenta(r)
     const cliente = r.cliente?.valor ?? ''
     const base = {
       rentaId: r.id,
@@ -90,19 +106,32 @@ export function conflictoPieza(
       cliente,
     }
 
-    const solapan = fechasSeSolapan(
-      r.fechaSalida,
-      r.fechaRegreso,
-      fechaReferencia,
-      regresoNuevo,
-    )
+    for (const oc of ocupaciones) {
+      const semR = semanaKeyDesdeFechaSalida(oc.salida) || r.semanaInicio
+      const solapan = fechasSeSolapan(
+        oc.salida,
+        oc.regreso,
+        fechaReferencia,
+        regresoNuevo,
+      )
 
-    if (solapan || semR === semanaRef) {
-      return { ...base, estado: 'ocupada_misma_semana' }
-    }
+      if (solapan || semR === semanaRef) {
+        return {
+          ...base,
+          fechaSalida: oc.salida,
+          fechaRegreso: oc.regreso,
+          estado: 'ocupada_misma_semana',
+        }
+      }
 
-    if (semR === semanaSig && !avisoSiguiente) {
-      avisoSiguiente = { ...base, estado: 'reservada_semana_siguiente' }
+      if (semR === semanaSig && !avisoSiguiente) {
+        avisoSiguiente = {
+          ...base,
+          fechaSalida: oc.salida,
+          fechaRegreso: oc.regreso,
+          estado: 'reservada_semana_siguiente',
+        }
+      }
     }
   }
 

@@ -727,7 +727,7 @@ export function CorteDiaPage() {
             <div className="card mb-6 p-6">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-semibold uppercase text-gray-700">
-                  Conteo físico al cierre
+                  Conteo de fondo al cierre
                 </h3>
                 <button
                   type="button"
@@ -768,7 +768,7 @@ export function CorteDiaPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Diferencia</p>
+                  <p className="text-xs text-gray-500">Diferencia fondo</p>
                   <p
                     className={`font-bold ${
                       corte.totalesConteo.diferenciaMxn != null &&
@@ -924,19 +924,18 @@ export function CorteDiaPage() {
           fondoMxn={resumen.fondoInicial}
           cajaMxn={resumen.cajaDelDia}
           initialConteoFondo={corte.conteoFondo}
-          initialConteoCaja={corte.conteoCaja}
           tipoCambioUsd={corte.totalesConteo?.tipoCambioUsd}
           guardando={guardando}
           pedirNombreEmpleado
           modoSeparado
           valesPendientes={corte.valesPendientes}
           valesEsperadosFondo={resumen.valesEsperadosFondo}
-          descripcion={`Cierre del turno ${corte.turnoLabel.toLowerCase()}. Cuenta fondo de feria y caja por separado. Indica quién hace el corte (obligatorio).`}
+          descripcion={`Cierre del turno ${corte.turnoLabel.toLowerCase()}. Solo cuentas el fondo de feria. La caja del turno sale del sistema. Indica quién hace el corte (obligatorio).`}
           titulo={`Cierre de caja — turno ${corte.turnoLabel.toLowerCase()}`}
         />
       )}
 
-      {corte?.cerrado && (corte.conteoCaja || corte.conteoFisico) && (
+      {corte?.cerrado && (corte.conteoCaja || corte.conteoFisico || corte.conteoFondo) && (
         <ConteoCajaModal
           open={verConteo}
           onClose={() => setVerConteo(false)}
@@ -947,17 +946,16 @@ export function CorteDiaPage() {
           cajaMxn={resumen?.cajaDelDia}
           tipoCambioUsd={corte.totalesConteo?.tipoCambioUsd}
           initialConteoFondo={corte.conteoFondo}
-          initialConteoCaja={corte.conteoCaja}
           readOnly
-          modoSeparado={Boolean(corte.conteoCaja)}
+          modoSeparado
           initialConteo={corte.conteoFisico}
-          mostrarVales={!corte.conteoCaja}
+          mostrarVales
           valesPendientes={corte.valesPendientes}
           valesEsperadosFondo={resumen?.valesEsperadosFondo}
           descripcion={
             corte.empleadoCorte
-              ? `Corte realizado por ${corte.empleadoCorte}. Conteo físico al cerrar (fondo + caja).`
-              : 'Conteo físico al cerrar: fondo de feria y caja del turno.'
+              ? `Corte realizado por ${corte.empleadoCorte}. Conteo de fondo al cerrar.`
+              : 'Conteo de fondo de feria al cerrar el turno.'
           }
         />
       )}

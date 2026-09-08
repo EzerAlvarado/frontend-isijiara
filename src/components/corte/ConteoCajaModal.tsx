@@ -217,8 +217,6 @@ function FormularioConteo({
   )
 }
 
-type TabConteo = 'caja' | 'fondo'
-
 interface ConteoCajaModalProps {
   open: boolean
   onClose: () => void
@@ -232,7 +230,6 @@ interface ConteoCajaModalProps {
   tipoCambioUsd?: number
   initialConteo?: ConteoFisico | null
   initialConteoFondo?: ConteoFisico | null
-  initialConteoCaja?: ConteoFisico | null
   readOnly?: boolean
   guardando?: boolean
   titulo?: string
@@ -258,11 +255,6 @@ function diferenciaClass(diferencia: number) {
   return 'text-red-700'
 }
 
-function conteoTieneDatos(conteo: ConteoFisico): boolean {
-  const totales = calcularTotalesConteo(conteo)
-  return totales.mxnTotal > 0 || totales.usdTotal > 0
-}
-
 function valesEsperadosEnFondo(conteo: ConteoFisico, valesPendientesTotal: number): number {
   return Math.max(valesPendientesTotal, conteo.valesMxn ?? 0)
 }
@@ -271,16 +263,6 @@ function prefijarValesFondo(conteo: ConteoFisico, valesPendientesTotal: number):
   const objetivo = valesEsperadosEnFondo(conteo, valesPendientesTotal)
   if (objetivo <= 0) return conteo
   return { ...conteo, valesMxn: objetivo }
-}
-
-function tabsInicialesVisitadas(
-  conteoFondo: ConteoFisico,
-  conteoCaja: ConteoFisico,
-): Set<TabConteo> {
-  const visitadas = new Set<TabConteo>(['caja'])
-  if (conteoTieneDatos(conteoFondo)) visitadas.add('fondo')
-  if (conteoTieneDatos(conteoCaja)) visitadas.add('caja')
-  return visitadas
 }
 
 export function ConteoCajaModal({
@@ -292,7 +274,6 @@ export function ConteoCajaModal({
   tipoCambioUsd,
   initialConteo,
   initialConteoFondo,
-  initialConteoCaja,
   readOnly = false,
   guardando = false,
   titulo,
@@ -321,12 +302,7 @@ export function ConteoCajaModal({
   const [conteoFondo, setConteoFondo] = useState<ConteoFisico>(() =>
     normalizarConteo(initialConteoFondo ?? initialConteo),
   )
-  const [conteoCaja, setConteoCaja] = useState<ConteoFisico>(() =>
-    normalizarConteo(initialConteoCaja ?? conteoVacio()),
-  )
   const [empleado, setEmpleado] = useState(empleadoInicial)
-  const [tabActiva, setTabActiva] = useState<TabConteo>('caja')
-  const [tabsVisitadas, setTabsVisitadas] = useState<Set<TabConteo>>(() => new Set(['caja']))
   const estabaAbierto = useRef(false)
 
   useEffect(() => {
@@ -335,15 +311,12 @@ export function ConteoCajaModal({
     if (!abriendo) return
 
     if (modoSeparado) {
-      const fondoBase = prefijarValesFondo(
-        normalizarConteo(initialConteoFondo ?? conteoVacio()),
-        valesEsperadosFondo ?? totalValesPendientes,
+      setConteoFondo(
+        prefijarValesFondo(
+          normalizarConteo(initialConteoFondo ?? conteoVacio()),
+          valesEsperadosFondo ?? totalValesPendientes,
+        ),
       )
-      const cajaBase = normalizarConteo(initialConteoCaja ?? conteoVacio())
-      setConteoFondo(fondoBase)
-      setConteoCaja(cajaBase)
-      setTabActiva('caja')
-      setTabsVisitadas(tabsInicialesVisitadas(fondoBase, cajaBase))
     } else {
       const base = normalizarConteo(initialConteo ?? conteoVacio())
       if (mostrarVales || modoFondo) {
@@ -358,7 +331,6 @@ export function ConteoCajaModal({
     open,
     initialConteo,
     initialConteoFondo,
-    initialConteoCaja,
     mostrarVales,
     modoSeparado,
     totalValesPendientes,
@@ -367,7 +339,6 @@ export function ConteoCajaModal({
   ])
 
   const empleadoValido = !pedirNombreEmpleado || empleado.trim().length > 0
-  const tabsCompletas = tabsVisitadas.has('caja') && tabsVisitadas.has('fondo')
 
   const tc = tipoCambioUsd && tipoCambioUsd > 0 ? tipoCambioUsd : getTipoCambioMxUsd()
 
@@ -376,11 +347,6 @@ export function ConteoCajaModal({
       ? valesPendientes.map((v) => `${v.concepto} (${formatMxn(v.montoMxn)})`).join(' · ')
       : undefined
 
-  const cambiarTab = (tab: TabConteo) => {
-    setTabActiva(tab)
-    setTabsVisitadas((prev) => new Set([...prev, tab]))
-  }
-
   const totales = useMemo(() => calcularTotalesConteo(conteo), [conteo])
   const equivalenteMxnTotal = totales.mxnTotal + totales.usdTotal * tc
 
@@ -388,32 +354,26 @@ export function ConteoCajaModal({
     const esperadoFondoTotal = expectedFondoMxn ?? fondoMxn ?? 0
     const esperadoCaja = expectedCajaMxn ?? cajaMxn ?? 0
     const valesEnConteoFondo = conteoFondo.valesMxn ?? 0
-    const esperadoTotal = esperadoFondoTotal + esperadoCaja
 
     const contadoFondo = equivalenteMxn(conteoFondo, tc)
-    const contadoCaja = equivalenteMxn(conteoCaja, tc)
-    const contadoTotal = contadoFondo + contadoCaja
-    const diferenciaTotal = contadoTotal - esperadoTotal
     const diferenciaFondo = contadoFondo - esperadoFondoTotal
-    const diferenciaCaja = contadoCaja - esperadoCaja
 
     const totalesFondo = calcularTotalesConteo(conteoFondo)
-    const totalesCajaTab = calcularTotalesConteo(conteoCaja)
 
     return (
       <Modal
         open={open}
         onClose={() => !guardando && onClose()}
-        title={titulo ?? (readOnly ? 'Conteo físico de caja' : 'Cierre de caja — conteo físico')}
+        title={titulo ?? (readOnly ? 'Conteo de fondo' : 'Cierre de caja — conteo de fondo')}
         size="xl"
       >
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
             {descripcion ??
-              'Cuenta el fondo de feria y la caja del turno por separado. Indica quién hace el corte.'}
+              'Cuenta solo el fondo de feria (billetes y monedas). La caja del turno se toma del sistema.'}
           </p>
 
-          <div className="grid gap-3 rounded-lg border border-brand-100 bg-brand-50/40 p-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-3 rounded-lg border border-brand-100 bg-brand-50/40 p-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-xs uppercase text-gray-500">Esperado fondo</p>
               <p className="text-base font-bold text-gray-900">{formatMxn(esperadoFondoTotal)}</p>
@@ -424,22 +384,19 @@ export function ConteoCajaModal({
               )}
             </div>
             <div>
-              <p className="text-xs uppercase text-gray-500">Esperado caja</p>
+              <p className="text-xs uppercase text-gray-500">Caja del turno (sistema)</p>
               <p className="text-base font-bold text-gray-900">{formatMxn(esperadoCaja)}</p>
+              <p className="mt-0.5 text-[10px] text-gray-500">No se cuenta billete por billete</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-gray-500">Total esperado</p>
-              <p className="text-base font-bold text-gray-900">{formatMxn(esperadoTotal)}</p>
+              <p className="text-xs uppercase text-gray-500">Contado fondo</p>
+              <p className="text-base font-bold text-brand-700">{formatMxn(contadoFondo)}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-gray-500">Contado total</p>
-              <p className="text-base font-bold text-brand-700">{formatMxn(contadoTotal)}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase text-gray-500">Diferencia</p>
-              <p className={`text-base font-bold ${diferenciaClass(diferenciaTotal)}`}>
-                {diferenciaTotal >= 0 ? '+' : ''}
-                {formatMxn(diferenciaTotal)}
+              <p className="text-xs uppercase text-gray-500">Diferencia fondo</p>
+              <p className={`text-base font-bold ${diferenciaClass(diferenciaFondo)}`}>
+                {diferenciaFondo >= 0 ? '+' : ''}
+                {formatMxn(diferenciaFondo)}
               </p>
             </div>
           </div>
@@ -461,97 +418,19 @@ export function ConteoCajaModal({
             </label>
           )}
 
-          <div className="flex gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
-            {(['caja', 'fondo'] as const).map((tab) => {
-              const activa = tabActiva === tab
-              const visitada = tabsVisitadas.has(tab)
-              const diff = tab === 'caja' ? diferenciaCaja : diferenciaFondo
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => cambiarTab(tab)}
-                  className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-                    activa
-                      ? 'bg-white text-brand-700 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {tab === 'caja' ? 'Caja' : 'Fondo'}
-                  {!readOnly && !visitada && (
-                    <span className="ml-1 text-[10px] font-normal text-amber-600">pendiente</span>
-                  )}
-                  {visitada && Math.abs(diff) >= 0.01 && (
-                    <span className={`ml-1 text-[10px] font-normal ${diferenciaClass(diff)}`}>
-                      {diff >= 0 ? '+' : ''}
-                      {formatMxn(diff)}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-
-          {tabActiva === 'caja' ? (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-2 rounded-lg border border-emerald-100 bg-emerald-50/40 px-3 py-2">
-                <div>
-                  <p className="text-xs uppercase text-gray-500">Esperado caja del turno</p>
-                  <p className="text-lg font-bold text-gray-900">{formatMxn(esperadoCaja)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-gray-500">Contado caja</p>
-                  <p className="text-lg font-bold text-brand-700">{formatMxn(contadoCaja)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-gray-500">Diferencia caja</p>
-                  <p className={`text-lg font-bold ${diferenciaClass(diferenciaCaja)}`}>
-                    {diferenciaCaja >= 0 ? '+' : ''}
-                    {formatMxn(diferenciaCaja)}
-                  </p>
-                </div>
-              </div>
-              <FormularioConteo conteo={conteoCaja} onChange={setConteoCaja} readOnly={readOnly} />
-              {totalesCajaTab.usdTotal > 0 && (
-                <p className="text-xs text-gray-500">
-                  USD en caja: {formatUsd(totalesCajaTab.usdTotal)}
-                  {tc > 0 && ` · TC ${tc.toFixed(2)}`}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-2 rounded-lg border border-amber-100 bg-amber-50/40 px-3 py-2">
-                <div>
-                  <p className="text-xs uppercase text-gray-500">Esperado fondo</p>
-                  <p className="text-lg font-bold text-gray-900">{formatMxn(esperadoFondoTotal)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-gray-500">Contado fondo</p>
-                  <p className="text-lg font-bold text-brand-700">{formatMxn(contadoFondo)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-gray-500">Diferencia fondo</p>
-                  <p className={`text-lg font-bold ${diferenciaClass(diferenciaFondo)}`}>
-                    {diferenciaFondo >= 0 ? '+' : ''}
-                    {formatMxn(diferenciaFondo)}
-                  </p>
-                </div>
-              </div>
-              <FormularioConteo
-                conteo={conteoFondo}
-                onChange={setConteoFondo}
-                readOnly={readOnly}
-                mostrarVales
-                valesHint={valesHint}
-              />
-              {totalesFondo.usdTotal > 0 && (
-                <p className="text-xs text-gray-500">
-                  USD en fondo: {formatUsd(totalesFondo.usdTotal)}
-                  {tc > 0 && ` · TC ${tc.toFixed(2)}`}
-                </p>
-              )}
-            </div>
+          <FormularioConteo
+            conteo={conteoFondo}
+            onChange={setConteoFondo}
+            readOnly={readOnly}
+            mostrarVales
+            valesHint={valesHint}
+            modoFondo
+          />
+          {totalesFondo.usdTotal > 0 && (
+            <p className="text-xs text-gray-500">
+              USD en fondo: {formatUsd(totalesFondo.usdTotal)}
+              {tc > 0 && ` · TC ${tc.toFixed(2)}`}
+            </p>
           )}
 
           <div className="flex gap-2 border-t border-gray-100 pt-4">
@@ -567,12 +446,11 @@ export function ConteoCajaModal({
               <button
                 type="button"
                 className="btn-primary flex-1"
-                disabled={guardando || !empleadoValido || !tabsCompletas}
-                title={!tabsCompletas ? 'Revisa ambas pestañas: Caja y Fondo' : undefined}
+                disabled={guardando || !empleadoValido}
                 onClick={() =>
                   onConfirmSeparado(
                     normalizarConteo(conteoFondo),
-                    normalizarConteo(conteoCaja),
+                    conteoVacio(),
                     pedirNombreEmpleado ? empleado.trim() : undefined,
                   )
                 }

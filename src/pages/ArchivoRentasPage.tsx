@@ -33,6 +33,7 @@ import {
   rentaEnMes,
 } from '../utils/archivoRentas'
 import { esRentaPasada } from '../utils/semanasRentas'
+import { expandirSesionesDesdePremium, idRentaOrigen, rentaRealDesdeLista } from '../utils/sesionFotosDesdePremium'
 import { exportarRentasTab, etiquetaExportTab } from '../utils/exportRentas'
 import { exportarRentasReportePdf } from '../utils/exportRentasPdf'
 
@@ -45,9 +46,11 @@ function filtrarPorBusqueda(
   const busqueda = q.toLowerCase()
   return rentas.filter((r) => {
     const texto = [
-      r.id,
+      idRentaOrigen(r.id),
       r.fechaSalida,
       r.fechaRegreso,
+      r.fechaEvento,
+      r.fechaCita?.valor,
       r.marca,
       ...camposCelda.map((c) => r[c].valor),
     ]
@@ -115,7 +118,7 @@ export function ArchivoRentasPage() {
   }, [mesParam, tabActiva])
 
   const rentasPasadas = useMemo(
-    () => rentas.filter((r) => esRentaPasada(r.fechaSalida)),
+    () => expandirSesionesDesdePremium(rentas).filter((r) => esRentaPasada(r.fechaSalida)),
     [rentas],
   )
 
@@ -194,15 +197,16 @@ export function ArchivoRentasPage() {
   }
 
   const quitarCanceladaHandler = async (renta: Renta) => {
-    if (!renta.cancelada) return
-    const cliente = renta.cliente?.valor?.trim() || 'sin cliente'
+    const real = rentaRealDesdeLista(rentas, renta)
+    if (!real || !real.cancelada) return
+    const cliente = real.cliente?.valor?.trim() || 'sin cliente'
     const ok = window.confirm(
-      `¿Quitar el registro cancelado #${renta.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
+      `¿Quitar el registro cancelado #${real.id} (${cliente})?\n\nSe eliminará de la lista. El dinero del corte no se modifica.`,
     )
     if (!ok) return
     try {
-      await deleteRentaCancelada(renta.id)
-      setRentas((prev) => prev.filter((r) => r.id !== renta.id))
+      await deleteRentaCancelada(real.id)
+      setRentas((prev) => prev.filter((r) => r.id !== real.id))
     } catch (err) {
       window.alert(err instanceof Error ? err.message : 'No se pudo quitar el registro cancelado.')
     }
@@ -211,9 +215,11 @@ export function ArchivoRentasPage() {
   const filaProps = {
     esVestidos,
     variant: 'archivo' as const,
-    onImprimir: (renta: Renta) => setDocImpresion(rentaADocumento(renta)),
-    onReciboAbono: (renta: Renta) => setRentaReciboAbono(renta),
-    onMulta: (renta: Renta) => setRentaMulta(renta),
+    onImprimir: (renta: Renta) =>
+      setDocImpresion(rentaADocumento(rentaRealDesdeLista(rentas, renta) ?? renta)),
+    onReciboAbono: (renta: Renta) =>
+      setRentaReciboAbono(rentaRealDesdeLista(rentas, renta) ?? renta),
+    onMulta: (renta: Renta) => setRentaMulta(rentaRealDesdeLista(rentas, renta) ?? renta),
     onQuitarCancelada: quitarCanceladaHandler,
   }
 

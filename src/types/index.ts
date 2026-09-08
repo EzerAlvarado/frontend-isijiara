@@ -128,6 +128,11 @@ export interface Renta {
   excluirCorte?: boolean
   /** Renta, venta o premier */
   tipoOperacion?: string
+  /**
+   * Solo filas virtuales de “Sesión de fotos” derivadas de un Paquete Premium (XV).
+   * Apunta al id de la renta real; no se persiste en API.
+   */
+  origenSesionRentaId?: string
   /** Total a cobrar (fondo + multa) en MXN */
   totalCobrar?: number
   /** Total pagado (anticipo + abonos) en MXN */
