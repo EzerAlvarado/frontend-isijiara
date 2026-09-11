@@ -44,6 +44,7 @@ import {
 } from '../utils/semanasRentas'
 import { exportarRentasTab, etiquetaExportTab } from '../utils/exportRentas'
 import { exportarRentasReportePdf } from '../utils/exportRentasPdf'
+import { ordenarRentasPorFechaAsc } from '../utils/archivoRentas'
 import {
   expandirSesionesDesdePremium,
   idRentaOrigen,
@@ -172,6 +173,9 @@ export function RentasPage() {
       const lista = map.get(key)
       if (lista) lista.push(r)
       else if (key) map.set(key, [r])
+    }
+    for (const [key, lista] of map) {
+      map.set(key, ordenarRentasPorFechaAsc(lista))
     }
     return map
   }, [semanasBusqueda, rentasFiltradas])
