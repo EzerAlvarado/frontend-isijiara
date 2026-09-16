@@ -491,6 +491,10 @@ export function RentasPage() {
           open={!!rentaReciboAbono}
           onClose={() => setRentaReciboAbono(null)}
           renta={rentaReciboAbono}
+          onRentaActualizada={(actualizada) => {
+            setRentas((prev) => prev.map((r) => (r.id === actualizada.id ? actualizada : r)))
+            setRentaReciboAbono(actualizada)
+          }}
         />
       )}
 

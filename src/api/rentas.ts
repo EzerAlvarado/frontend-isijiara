@@ -161,6 +161,13 @@ export async function registrarAbono(
   return mapRenta(data.renta)
 }
 
+export async function eliminarAbono(rentaId: string, abonoId: string): Promise<Renta> {
+  const data = await apiRequest<RentaApi>(`/rentas/${rentaId}/abono/${abonoId}/`, {
+    method: 'DELETE',
+  })
+  return mapRenta(data)
+}
+
 export async function agregarMultaRenta(
   id: string,
   payload: { cargoDanos: number; notaDanos?: string; quitar?: boolean },
