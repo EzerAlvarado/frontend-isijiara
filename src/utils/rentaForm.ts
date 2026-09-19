@@ -293,14 +293,14 @@ export function formularioAPayload(
   const estatusAuto = estatusFilaDesdeTipoOperacion(tipoOperacion)
 
   let metodoPago = values.metodoPago
-  let anticipo = Number(values.anticipo) || 0
+  let anticipo = Number(String(values.anticipo).replace(',', '.')) || 0
   let pagoEfectivoMxn = 0
   let pagoEfectivoUsd = 0
   let feriaMxn = 0
 
   if (esPagoEfectivo(metodoPago)) {
-    const recibidoMxn = Number(values.pagoPesos) || 0
-    const recibidoUsd = Number(values.pagoDlls) || 0
+    const recibidoMxn = Number(String(values.pagoPesos).replace(',', '.')) || 0
+    const recibidoUsd = Number(String(values.pagoDlls).replace(',', '.')) || 0
     const pago = calcularPagoEfectivo(totalCobrar, recibidoMxn, recibidoUsd)
     metodoPago =
       metodoPago === 'mixto' ? 'mixto' : inferirMetodoEfectivo(recibidoMxn, recibidoUsd)

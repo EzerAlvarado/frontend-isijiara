@@ -757,7 +757,7 @@ export function RentaFormModal({
                 hint={
                   anticipoEnUsd
                     ? `TC ${getTipoCambioMxUsd()} — se convierte a pesos al calcular el restante`
-                    : 'Si lo dejas vacío se usa el precio. Puedes poner 1400 sin decimales.'
+                    : 'Monto cobrado hoy. Si lo dejas en 0, el anticipo no entra al corte.'
                 }
               />
             )}
