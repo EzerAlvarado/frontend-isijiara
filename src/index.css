@@ -78,16 +78,34 @@
     border: none !important;
     box-shadow: none !important;
     background: white !important;
-    color: #000 !important;
+    color: var(--tinta-recibo, #000) !important;
     font-weight: 600;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   #nota-venta-print *,
-  #recibo-abono-print * {
-    color: #000 !important;
+  #recibo-abono-print *,
+  #corte-imprimible * {
+    color: var(--tinta-recibo, #000) !important;
+    border-color: var(--tinta-recibo, #000) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+}
+
+:root {
+  --tinta-recibo: #000000;
+}
+
+html[data-tinta-impresion='azul'] {
+  --tinta-recibo: #0a2f6b;
+}
+
+html[data-tinta-impresion='azul'] #nota-venta-preview,
+html[data-tinta-impresion='azul'] #nota-venta-preview *,
+html[data-tinta-impresion='azul'] #recibo-abono-preview,
+html[data-tinta-impresion='azul'] #recibo-abono-preview * {
+  color: var(--tinta-recibo) !important;
+  border-color: var(--tinta-recibo) !important;
 }
