@@ -7,6 +7,7 @@ import {
   DIAS_RENTA_DEFAULT,
   crearFormularioVacio,
   formularioAPayload,
+  hoyMX,
   rentaAFormulario,
   type RentaFormValues,
 } from '../../utils/rentaForm'
@@ -14,6 +15,7 @@ import { sumarDiasFecha } from '../../utils/semanasRentas'
 import { calcularMultaAutomatica, getMultaPorDia } from '../../utils/multa'
 import { aMayusculas } from '../../utils/mayusculas'
 import { semanaKeyDesdeFechaSalida } from '../../utils/semanasRentas'
+import { isoAFechaMx } from '../../utils/fechaInput'
 import { METODOS_PAGO, esPagoEnUsd } from '../../utils/metodoPago'
 import type { MetodoPago } from '../../types'
 import {
@@ -486,6 +488,24 @@ export function RentaFormModal({
       if (key === 'metodoPago' && !esPagoEfectivo(valor as MetodoPago) && !next.anticipo.trim()) {
         next.anticipo = next.precio.trim() || next.pagoPesos.trim()
       }
+      if (
+        key === 'creadoEn' &&
+        (modoSinCorte || renta?.excluirCorte) &&
+        (!prev.fechaSalida || prev.fechaSalida === hoyMX())
+      ) {
+        const diaIso = valor.trim().slice(0, 10)
+        const mx = isoAFechaMx(diaIso)
+        if (mx) {
+          next.fechaSalida = mx
+          const semana = semanaKeyDesdeFechaSalida(mx)
+          if (semana) next.semanaInicio = semana
+          const nuevaFechaRegreso = sumarDiasFecha(mx, DIAS_RENTA_DEFAULT)
+          if (nuevaFechaRegreso) next.fechaRegreso = nuevaFechaRegreso
+          if (!prev.fechaEvento || prev.fechaEvento === prev.fechaSalida) {
+            next.fechaEvento = mx
+          }
+        }
+      }
       return next
     })
   }
@@ -641,8 +661,8 @@ export function RentaFormModal({
             <p className="font-semibold">No afecta el corte de hoy</p>
             <p className="mt-0.5 text-xs">
               Usa esto para rentas en papel cuyo anticipo ya se cobró antes. El anticipo
-              se guarda en la renta, pero no entra al corte. Los abonos nuevos sí contarán
-              normalmente.
+              se guarda en la renta, pero no entra al corte. Si cambias la fecha de registro,
+              la entrega (archivo y reporte) se acomoda a esa fecha.
             </p>
           </div>
         )}

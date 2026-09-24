@@ -39,13 +39,15 @@ import {
   esRentaFutura,
   esRentaPasada,
   estaEnVentanaActual,
-  semanaKeyDesdeFechaSalida,
+  fechaCalendarioRenta,
+  semanaKeyDesdeRenta,
   semanasVentanaActual,
 } from '../utils/semanasRentas'
 import { exportarRentasTab, etiquetaExportTab } from '../utils/exportRentas'
 import { exportarRentasReportePdf } from '../utils/exportRentasPdf'
-import { ordenarRentasPorFechaAsc } from '../utils/archivoRentas'
+import { mesKeyDesdeRenta, ordenarRentasPorFechaAsc } from '../utils/archivoRentas'
 import {
+  esFilaSesionVirtual,
   expandirSesionesDesdePremium,
   idRentaOrigen,
   rentaRealDesdeLista,
@@ -126,7 +128,7 @@ export function RentasPage() {
     const q = search.trim().toLowerCase()
     return rentasConSesiones.filter((r) => {
       // Sin búsqueda: solo la ventana actual. Con búsqueda: archivo + lejanas también.
-      if (!q && !estaEnVentanaActual(r.fechaSalida)) return false
+      if (!q && !estaEnVentanaActual(fechaCalendarioRenta(r))) return false
       if (!rentaCoincideTab(r, tabActiva, lineaNegocio)) return false
       if (!q) return true
       const texto = [
@@ -148,20 +150,18 @@ export function RentasPage() {
   }, [rentasConSesiones, search, camposCelda, tabActiva, lineaNegocio])
 
   const rentasArchivadas = useMemo(
-    () => rentasConSesiones.filter((r) => esRentaPasada(r.fechaSalida)).length,
+    () => rentasConSesiones.filter((r) => esRentaPasada(fechaCalendarioRenta(r))).length,
     [rentasConSesiones],
   )
 
   const rentasFuturasCount = useMemo(
-    () => rentasConSesiones.filter((r) => esRentaFutura(r.fechaSalida)).length,
+    () => rentasConSesiones.filter((r) => esRentaFutura(fechaCalendarioRenta(r))).length,
     [rentasConSesiones],
   )
 
   const semanasBusqueda = useMemo(() => {
     if (!buscando) return semanas
-    const keys = rentasFiltradas.map(
-      (r) => semanaKeyDesdeFechaSalida(r.fechaSalida) || r.semanaInicio,
-    )
+    const keys = rentasFiltradas.map((r) => semanaKeyDesdeRenta(r))
     return combinarSemanas(semanas, keys)
   }, [buscando, semanas, rentasFiltradas])
 
@@ -169,7 +169,7 @@ export function RentasPage() {
     const map = new Map<string, Renta[]>()
     for (const s of semanasBusqueda) map.set(s.key, [])
     for (const r of rentasFiltradas) {
-      const key = semanaKeyDesdeFechaSalida(r.fechaSalida) || r.semanaInicio
+      const key = semanaKeyDesdeRenta(r)
       const lista = map.get(key)
       if (lista) lista.push(r)
       else if (key) map.set(key, [r])
@@ -368,22 +368,33 @@ export function RentasPage() {
 
   const etiquetaTab = etiquetaExportTab(tabActiva, lineaNegocio)
 
+  const rentasReporteMes = useMemo(() => {
+    const mesKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+    return rentas.filter(
+      (r) =>
+        rentaCoincideTab(r, tabActiva, lineaNegocio) &&
+        !esFilaSesionVirtual(r) &&
+        mesKeyDesdeRenta(r) === mesKey,
+    )
+  }, [rentas, tabActiva, lineaNegocio])
+
   const exportarExcel = () => {
-    const { filas } = exportarRentasTab(rentasFiltradas, tabActiva, lineaNegocio)
+    const { filas } = exportarRentasTab(rentasReporteMes, tabActiva, lineaNegocio)
     if (filas === 0) {
       window.alert(`No hay rentas de ${etiquetaTab} para exportar.`)
     }
   }
 
   const exportarPdf = async () => {
-    if (rentasFiltradas.length === 0) {
+    if (rentasReporteMes.length === 0) {
       window.alert(`No hay rentas de ${etiquetaTab} para exportar.`)
       return
     }
-    const mesKey = new Date().toISOString().slice(0, 7)
-    const mesLabel = `Ventana actual · ${new Date().toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}`
+    const ahora = new Date()
+    const mesKey = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`
+    const mesLabel = ahora.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
     try {
-      await exportarRentasReportePdf(rentasFiltradas, tabActiva, lineaNegocio, {
+      await exportarRentasReportePdf(rentasReporteMes, tabActiva, lineaNegocio, {
         mesKey,
         mesLabel,
       })
