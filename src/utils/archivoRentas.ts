@@ -1,4 +1,10 @@
-import { parseFechaDDMMYYYY, semanaDesdeISO, semanaKeyDesdeFechaSalida, type SemanaRenta } from './semanasRentas'
+import {
+  parseFechaDDMMYYYY,
+  semanaDesdeISO,
+  fechaCalendarioRenta,
+  semanaKeyDesdeRenta,
+  type SemanaRenta,
+} from './semanasRentas'
 
 const MESES = [
   'ENERO',
@@ -31,6 +37,15 @@ export function mesKeyDesdeFechaSalida(fechaSalida: string): string {
   return `${y}-${m}`
 }
 
+export function mesKeyDesdeRenta(renta: {
+  fechaSalida?: string
+  semanaInicio?: string
+  creadoEn?: string
+  excluirCorte?: boolean
+}): string {
+  return mesKeyDesdeFechaSalida(fechaCalendarioRenta(renta))
+}
+
 export function etiquetaMesArchivo(key: string): string {
   const [anio, mes] = key.split('-')
   const idx = Number(mes) - 1
@@ -49,11 +64,11 @@ export function parseMesArchivo(key: string): MesArchivo | null {
 
 /** Meses con rentas archivadas, de más reciente a más antiguo */
 export function mesesArchivo(
-  rentas: { fechaSalida: string }[],
+  rentas: { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean }[],
 ): MesArchivo[] {
   const keys = new Set<string>()
   for (const r of rentas) {
-    const k = mesKeyDesdeFechaSalida(r.fechaSalida)
+    const k = mesKeyDesdeRenta(r)
     if (k) keys.add(k)
   }
   return [...keys]
@@ -63,11 +78,11 @@ export function mesesArchivo(
 
 /** Meses con rentas futuras, del más cercano al más lejano */
 export function mesesFuturos(
-  rentas: { fechaSalida: string }[],
+  rentas: { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean }[],
 ): MesArchivo[] {
   const keys = new Set<string>()
   for (const r of rentas) {
-    const k = mesKeyDesdeFechaSalida(r.fechaSalida)
+    const k = mesKeyDesdeRenta(r)
     if (k) keys.add(k)
   }
   return [...keys]
@@ -76,48 +91,55 @@ export function mesesFuturos(
 }
 
 export function conteoRentasPorMes(
-  rentas: { fechaSalida: string }[],
+  rentas: { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean }[],
 ): Map<string, number> {
   const map = new Map<string, number>()
   for (const r of rentas) {
-    const k = mesKeyDesdeFechaSalida(r.fechaSalida)
+    const k = mesKeyDesdeRenta(r)
     if (!k) continue
     map.set(k, (map.get(k) ?? 0) + 1)
   }
   return map
 }
 
-export function rentaEnMes(renta: { fechaSalida: string }, mesKey: string): boolean {
-  return mesKeyDesdeFechaSalida(renta.fechaSalida) === mesKey
+export function rentaEnMes(
+  renta: { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean },
+  mesKey: string,
+): boolean {
+  return mesKeyDesdeRenta(renta) === mesKey
 }
 
 /** Ordena rentas por fecha de salida descendente */
-export function ordenarRentasPorFechaDesc<T extends { fechaSalida: string }>(rentas: T[]): T[] {
+export function ordenarRentasPorFechaDesc<T extends { fechaSalida: string; creadoEn?: string; excluirCorte?: boolean }>(
+  rentas: T[],
+): T[] {
   return [...rentas].sort((a, b) => {
-    const fa = parseFechaDDMMYYYY(a.fechaSalida)
-    const fb = parseFechaDDMMYYYY(b.fechaSalida)
+    const fa = parseFechaDDMMYYYY(fechaCalendarioRenta(a))
+    const fb = parseFechaDDMMYYYY(fechaCalendarioRenta(b))
     if (!fa || !fb) return 0
     return fb.getTime() - fa.getTime()
   })
 }
 
 /** Ordena rentas por fecha de salida ascendente (próximas primero) */
-export function ordenarRentasPorFechaAsc<T extends { fechaSalida: string }>(rentas: T[]): T[] {
+export function ordenarRentasPorFechaAsc<T extends { fechaSalida: string; creadoEn?: string; excluirCorte?: boolean }>(
+  rentas: T[],
+): T[] {
   return [...rentas].sort((a, b) => {
-    const fa = parseFechaDDMMYYYY(a.fechaSalida)
-    const fb = parseFechaDDMMYYYY(b.fechaSalida)
+    const fa = parseFechaDDMMYYYY(fechaCalendarioRenta(a))
+    const fb = parseFechaDDMMYYYY(fechaCalendarioRenta(b))
     if (!fa || !fb) return 0
     return fa.getTime() - fb.getTime()
   })
 }
 
 /** Agrupa rentas por semana (lunes–domingo), de la más reciente a la más antigua */
-export function agruparRentasPorSemana<T extends { fechaSalida: string }>(
-  rentas: T[],
-): { semana: SemanaRenta; rentas: T[] }[] {
+export function agruparRentasPorSemana<
+  T extends { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean },
+>(rentas: T[]): { semana: SemanaRenta; rentas: T[] }[] {
   const porSemana = new Map<string, T[]>()
   for (const r of rentas) {
-    const k = semanaKeyDesdeFechaSalida(r.fechaSalida)
+    const k = semanaKeyDesdeRenta(r)
     if (!k) continue
     const lista = porSemana.get(k)
     if (lista) lista.push(r)
@@ -132,12 +154,12 @@ export function agruparRentasPorSemana<T extends { fechaSalida: string }>(
 }
 
 /** Agrupa por semana de más cercana a más lejana (rentas futuras) */
-export function agruparRentasPorSemanaAsc<T extends { fechaSalida: string }>(
-  rentas: T[],
-): { semana: SemanaRenta; rentas: T[] }[] {
+export function agruparRentasPorSemanaAsc<
+  T extends { fechaSalida: string; semanaInicio?: string; creadoEn?: string; excluirCorte?: boolean },
+>(rentas: T[]): { semana: SemanaRenta; rentas: T[] }[] {
   const porSemana = new Map<string, T[]>()
   for (const r of rentas) {
-    const k = semanaKeyDesdeFechaSalida(r.fechaSalida)
+    const k = semanaKeyDesdeRenta(r)
     if (!k) continue
     const lista = porSemana.get(k)
     if (lista) lista.push(r)

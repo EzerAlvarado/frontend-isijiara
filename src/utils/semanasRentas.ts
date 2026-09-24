@@ -89,6 +89,53 @@ export function parseFechaDDMMYYYY(str: string): Date | null {
   return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 12, 0, 0)
 }
 
+function fechaDesdeIsoLocal(iso: string | undefined | null): Date | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
+}
+
+/**
+ * Fecha que manda semana, archivo y reporte.
+ * En rentas “sin corte (papel)” si la entrega quedó en la ventana actual
+ * pero la fecha de registro es de una semana pasada, se usa el registro
+ * (captura histórica de libretas).
+ */
+export function fechaCalendarioRenta(renta: {
+  fechaSalida?: string
+  semanaInicio?: string
+  creadoEn?: string
+  excluirCorte?: boolean
+}): string {
+  const salidaStr = (renta.fechaSalida || '').trim()
+  const salida = parseFechaDDMMYYYY(salidaStr)
+  const registro = fechaDesdeIsoLocal(renta.creadoEn)
+
+  if (renta.excluirCorte && salida && registro) {
+    const enVentana = estaEnVentanaActual(salidaStr)
+    const registroPasado = registro < inicioDeSemana(new Date())
+    if (enVentana && registroPasado) return formatFechaMX(registro)
+  }
+
+  if (salida) return salidaStr
+  if (registro) return formatFechaMX(registro)
+  if (renta.semanaInicio) {
+    const d = new Date(`${renta.semanaInicio}T12:00:00`)
+    if (!Number.isNaN(d.getTime())) return formatFechaMX(d)
+  }
+  return salidaStr
+}
+
+export function semanaKeyDesdeRenta(renta: {
+  fechaSalida?: string
+  semanaInicio?: string
+  creadoEn?: string
+  excluirCorte?: boolean
+}): string {
+  return semanaKeyDesdeFechaSalida(fechaCalendarioRenta(renta)) || renta.semanaInicio || ''
+}
+
 export function formatFechaMX(fecha: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${pad(fecha.getDate())}/${pad(fecha.getMonth() + 1)}/${fecha.getFullYear()}`

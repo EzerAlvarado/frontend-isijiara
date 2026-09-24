@@ -26,13 +26,13 @@ import {
 import {
   agruparRentasPorSemanaAsc,
   etiquetaMesArchivo,
-  mesKeyDesdeFechaSalida,
+  mesKeyDesdeRenta,
   mesesFuturos,
   ordenarRentasPorFechaAsc,
   parseMesArchivo,
   rentaEnMes,
 } from '../utils/archivoRentas'
-import { MESES_VENTANA_ADELANTE, esRentaFutura } from '../utils/semanasRentas'
+import { MESES_VENTANA_ADELANTE, esRentaFutura, fechaCalendarioRenta } from '../utils/semanasRentas'
 import {
   expandirSesionesDesdePremium,
   idRentaOrigen,
@@ -124,7 +124,9 @@ export function RentasFuturasPage() {
 
   const rentasFuturas = useMemo(
     () =>
-      expandirSesionesDesdePremium(rentas).filter((r) => esRentaFutura(r.fechaSalida)),
+      expandirSesionesDesdePremium(rentas).filter((r) =>
+        esRentaFutura(fechaCalendarioRenta(r)),
+      ),
     [rentas],
   )
 
@@ -144,7 +146,7 @@ export function RentasFuturasPage() {
     const map = new Map<string, number>()
     for (const r of rentasFuturas) {
       if (!rentaCoincideTab(r, tabActiva, lineaNegocio)) continue
-      const k = mesKeyDesdeFechaSalida(r.fechaSalida)
+      const k = mesKeyDesdeRenta(r)
       if (k) map.set(k, (map.get(k) ?? 0) + 1)
     }
     return map
