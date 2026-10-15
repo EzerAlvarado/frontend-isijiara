@@ -98,24 +98,29 @@
   --tinta-recibo: #000000;
 }
 
-@keyframes ticker-scroll {
+.ticker-wrap {
+  container-type: inline-size;
+}
+
+@keyframes ticker-ltr {
   0% {
-    transform: translateX(0);
+    transform: translate(-100%, -50%);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate(100cqw, -50%);
   }
 }
 
 .ticker-track {
-  display: flex;
+  left: 0;
   width: max-content;
-  animation: ticker-scroll 28s linear infinite;
+  will-change: transform;
+  animation: ticker-ltr 10s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ticker-track {
-    animation: none;
+    animation-duration: 28s;
   }
 }
 
