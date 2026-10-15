@@ -1,6 +1,6 @@
 import { AlertTriangle } from 'lucide-react'
 
-const MENSAJE_DEFAULT = 'Atraso en liquidación de uso de sistema'
+const MENSAJE_DEFAULT = 'Atraso en liquidación del sistema!'
 
 type Props = {
   mensaje?: string
