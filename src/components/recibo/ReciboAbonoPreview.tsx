@@ -4,6 +4,7 @@ import { eliminarAbono } from '../../api/rentas'
 import { etiquetaMetodoPago, esPagoEnUsd } from '../../utils/metodoPago'
 import type { Renta } from '../../types'
 import { ReciboAbonoDocument } from './ReciboAbonoDocument'
+import { SelectorTintaImpresion } from './SelectorTintaImpresion'
 
 interface ReciboAbonoPreviewProps {
   open: boolean
@@ -65,6 +66,7 @@ export function ReciboAbonoPreview({
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <SelectorTintaImpresion />
               <button type="button" onClick={handlePrint} className="btn-primary" disabled={guardando}>
                 <Printer className="h-4 w-4" />
                 Imprimir

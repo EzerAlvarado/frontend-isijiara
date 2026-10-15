@@ -30,6 +30,7 @@ import {
   type CorteDiaResponse,
 } from '../api/corte'
 import { ConteoCajaModal } from '../components/corte/ConteoCajaModal'
+import { SelectorTintaImpresion } from '../components/recibo/SelectorTintaImpresion'
 import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../context/AuthContext'
 import { useFinanzas } from '../context/FinanzasContext'
@@ -810,6 +811,9 @@ export function CorteDiaPage() {
             </div>
           )}
 
+          <div className="mb-3 flex justify-end print:hidden">
+            <SelectorTintaImpresion />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 print:hidden">
             <button
               type="button"

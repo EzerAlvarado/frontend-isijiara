@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { prefetchInventarioRenta } from '../../utils/inventarioRentaCache'
+import { aplicarTintaImpresion, leerTintaImpresion } from '../../utils/tintaImpresion'
 
 /** Precarga inventario y rentas al entrar al sistema (evita bug en la 1.ª renta). */
 export function AppBootstrap() {
   const { autenticado, cargando } = useAuth()
+
+  useEffect(() => {
+    aplicarTintaImpresion(leerTintaImpresion())
+  }, [])
 
   useEffect(() => {
     if (cargando || !autenticado) return

@@ -1,5 +1,6 @@
 import { Printer, X } from 'lucide-react'
 import { NotaVentaDocument } from './NotaVentaDocument'
+import { SelectorTintaImpresion } from './SelectorTintaImpresion'
 import type { DocumentoRenta } from '../../types/documentoRenta'
 
 interface NotaVentaPreviewProps {
@@ -28,6 +29,7 @@ export function NotaVentaPreview({ open, onClose, doc }: NotaVentaPreviewProps) 
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <SelectorTintaImpresion />
               <button type="button" onClick={handlePrint} className="btn-primary">
                 <Printer className="h-4 w-4" />
                 Imprimir
