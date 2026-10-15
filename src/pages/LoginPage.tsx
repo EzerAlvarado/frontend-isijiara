@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { LogIn } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { GlobalTicker } from '../components/layout/GlobalTicker'
 import { LINEA_LABELS } from '../types/auth'
 import { PERFIL_VESTIDO_DEFAULT, rutaVestidos } from '../utils/perfilVestido'
 
@@ -49,8 +50,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-brand-900 to-slate-800 p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-brand-900 to-slate-800 p-4">
+      <GlobalTicker />
+      <div className="w-full max-w-md pt-8">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-xl font-bold text-brand-700 shadow-lg">
             V
