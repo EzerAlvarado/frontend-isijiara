@@ -1,12 +1,15 @@
 import { AlertTriangle } from 'lucide-react'
 
 const MENSAJE_DEFAULT = 'Atraso en liquidación del sistema!'
+const TICKER_ACTIVO = false
 
 type Props = {
   mensaje?: string
 }
 
 export function GlobalTicker({ mensaje = MENSAJE_DEFAULT }: Props) {
+  if (!TICKER_ACTIVO) return null
+
   return (
     <div
       role="status"
